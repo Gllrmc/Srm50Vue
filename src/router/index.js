@@ -4,7 +4,9 @@ import store from '../store'
 import Home from '../views/Home.vue'
 import Login from '../components/Login.vue'
 import Rol from '../components/Rol.vue'
+import Skill from '../components/Skill.vue'
 import Usuario from '../components/Usuario.vue'
+import Artist from '../components/Artist.vue'
 
 
 Vue.use(VueRouter)
@@ -29,6 +31,32 @@ const routes = [
     component: Login,
     meta:{
       libre: true
+    }
+  },
+  {
+    path: '/artists',
+    name: 'artists',
+    component: Artist,
+    meta: {
+      administrador: true,
+      jefeadministracion: true,
+      liderproyecto:true, 
+      consultor: true,
+      asistadministracion: true,
+      dataentry: true
+    }
+  },
+  {
+    path: '/skills',
+    name: 'skills',
+    component: Skill,
+    meta: {
+      administrador: true,
+      jefeadministracion: true,
+      liderproyecto:true, 
+      consultor: true,
+      asistadministracion: true,
+      dataentry: true
     }
   },
   {

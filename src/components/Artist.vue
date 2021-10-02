@@ -39,7 +39,7 @@
                         <div class="ma-2">
                             <v-btn small @click="crearPDF()"><v-icon>mdi-printer</v-icon></v-btn>
                         </div>
-                        <v-toolbar-title>Team</v-toolbar-title>
+                        <v-toolbar-title>Artists</v-toolbar-title>
                         <v-divider
                             class="mx-4"
                             inset

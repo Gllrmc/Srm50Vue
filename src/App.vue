@@ -11,157 +11,86 @@
         <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
           <v-list-item :to="{name:'home'}">
             <v-list-item-action>
-              <v-icon>mdi-home</v-icon>
+              <v-icon color="secondary">mdi-home</v-icon>
             </v-list-item-action>
             <v-list-item-title>
-              Inicio
+              Home
             </v-list-item-title>
           </v-list-item>
         </template>
         <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
-          <v-list-group>
-            <v-list-item slot="activator">
-              <v-list-item-content>
-                <v-list-item-title>
-                  Registracion
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item :to="{ name: 'actividades'}">
-              <v-list-item-action>
-                <v-icon color="primary">mdi-timelapse</v-icon>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title>
-                  Diaria
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item :to="{ name: 'timesheets'}">
-              <v-list-item-action>
-                <v-icon color="primary">mdi-calendar-today</v-icon>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title>
-                  Semanal
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item :to="{ name: 'gastos'}">
-              <v-list-item-action>
-                <v-icon color="primary">mdi-receipt</v-icon>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title>
-                  Gasto
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list-group>
+          <v-list-item :to="{ name: 'actividades'}">
+            <v-list-item-action>
+              <v-icon color="primary">mdi-movie-open-star</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title >
+                Dashboard
+              </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
         </template>
         <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
-          <v-list-group>
-            <v-list-item slot="activator">
-              <v-list-item-content>
-                <v-list-item-title>
-                  Analisis
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item :to="{ name: 'dashboard'}">
-              <v-list-item-action>
-                <v-icon color="primary">mdi-view-dashboard</v-icon>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title>
-                  Dashboard
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item :to="{ name: 'pivotal'}">
-              <v-list-item-action>
-                <v-icon color="primary">mdi-cube</v-icon>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title>
-                  Pivot Tables
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list-group>
+          <v-list-item :to="{ name: 'artists'}">
+            <v-list-item-action>
+              <v-icon color="primary">mdi-video-vintage</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>
+                Artists
+              </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
         </template>
         <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
-          <v-list-group>
-            <v-list-item slot="activator">
-              <v-list-item-content>
-                <v-list-item-title>
-                  Administracion
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item :to="{ name: 'proyectos'}">
-              <v-list-item-action>
-                <v-icon color="primary">mdi-sprout</v-icon>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title>
-                  Proyectos
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item :to="{ name: 'clientes'}">
-              <v-list-item-action>
-                <v-icon color="primary">mdi-account-cash</v-icon>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title>
-                  Clientes
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item :to="{ name: 'tareas'}">
-              <v-list-item-action>
-                <v-icon color="primary">mdi-file-tree</v-icon>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title>
-                  Tareas
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item :to="{ name: 'conceptos'}">
-              <v-list-item-action>
-                <v-icon color="primary">mdi-food-fork-drink</v-icon>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title>
-                  Conceptos Gasto
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item :to="{ name: 'etiquetas'}">
-              <v-list-item-action>
-                <v-icon color="primary">mdi-tag</v-icon>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title>
-                  Etiquetas
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item :to="{ name: 'empresas'}">
-              <v-list-item-action>
-                <v-icon color="primary">mdi-folder-table</v-icon>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title>
-                  Unidad de Negocio
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list-group>
+          <v-list-item :to="{ name: 'actividades'}">
+            <v-list-item-action>
+              <v-icon color="primary">mdi-pin</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>
+                Selections
+              </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
         </template>
-        <template v-if="esAdministrador || esJefeAdministracion">
+        <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
+          <v-list-item :to="{ name: 'skills'}">
+            <v-list-item-action>
+              <v-icon color="primary">mdi-shape-outline</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>
+                Skills
+              </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </template>
+        <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
+          <v-list-item :to="{ name: 'usuarios'}">
+            <v-list-item-action>
+              <v-icon color="primary">mdi-account-multiple-outline</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>
+                Team
+              </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </template>
+        <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
+          <v-list-item :to="{ name: 'roles'}">
+            <v-list-item-action>
+              <v-icon color="primary">mdi-passport</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>
+                Access
+              </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </template>
+        <!-- <template v-if="esAdministrador || esJefeAdministracion">
           <v-list-group>
             <v-list-item slot="activator">
               <v-list-item-content>
@@ -176,7 +105,7 @@
               </v-list-item-action>
               <v-list-item-content>
                 <v-list-item-title>
-                  Personas
+                  Usuarios
                 </v-list-item-title>
               </v-list-item-content>
             </v-list-item>
@@ -211,7 +140,7 @@
               </v-list-item-content>
             </v-list-item>
           </v-list-group>
-        </template>
+        </template> -->
         <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion">
           <!-- <v-list-group>
             <v-list-item slot="activator">
@@ -246,8 +175,7 @@
       </v-list>
     </v-navigation-drawer>
     <v-app-bar
-    color="blue darken-4
-    "
+    color="primary"
     dark
     app
     :clipped-left="$vuetify.breakpoint.mdAndUp"
@@ -258,7 +186,7 @@
         style="width: 500px"
         class="ml-0 pl-4"
       >
-        <span class="hidden-sm-and-down">SRM - Agenda de Artistas</span>
+        <span class="hidden-sm-and-down">MAnA - Multimedia Artists and Animators</span>
       </v-toolbar-title>
       <v-spacer />
       <div class="mr-10" v-if="logueado">
@@ -277,7 +205,7 @@
         </div>
       </div>
       <v-btn @click="salir" v-if="logueado">
-        <v-icon>mdi-logout</v-icon> Salir
+        <v-icon>mdi-logout</v-icon> Exit
       </v-btn>
       <v-btn v-else :to="{name: 'login'}">
         <v-icon>mdi-apps</v-icon> Login
@@ -285,6 +213,7 @@
     </v-app-bar>
     <v-main>
       <v-container
+        class="grey lighten-5"
         fluid
       >
         <v-slide-y-transition mode="out-in">
@@ -299,12 +228,11 @@
       dense
     >
       <v-col 
-      color="primary"
       class="text-center"
       col="12">
-        <v-card flat tile color="blue darken-4">
-          <v-card-text class="white--text">
-            <strong>&copy;2021 Akiel Consultoría en Gestión de Negocios. Todos los Derechos Reservados</strong>
+        <v-card flat tile color="primary">
+          <v-card-text class="white--text font-weight-bold">
+            &copy;2021 Akiel Consultoría en Gestión de Negocios. Todos los Derechos Reservados<br>Version 1.0 
           </v-card-text>
         </v-card>
       </v-col>
@@ -365,7 +293,7 @@ export default {
             this.$store.dispatch("guardarUserinfo", data)
         })
         .catch(function(error){
-            me.snacktext = 'Se detectó un error. Código: '+ error.response.status;
+            me.snacktext = 'An error was detected. Code: '+ error.response.status;
             me.snackcolor = 'error'
             me.snackbar = true;
             console.log(error);
@@ -374,3 +302,8 @@ export default {
   }
 };
 </script>
+<style scoped>
+#app {
+  font-family: Quicksand, sans-serif; /* this was it */
+}
+</style>

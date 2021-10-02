@@ -1,6 +1,7 @@
 <template>
     <v-main>
         <v-container
+        class="grey lighten-5"
         fluid
         >
         <v-row
@@ -21,20 +22,20 @@
                     <v-toolbar-title>Acceso al Sistema</v-toolbar-title>
                     <v-spacer />
                 </v-toolbar>
-                <v-card-text>
+                <v-card-text class="elevation-12">
                     <v-form>
                         <v-text-field v-model="email" color="accent" label="Email" prepend-icon="mdi-account" required>
                         </v-text-field>
                         <v-text-field v-model="password" type="password" color="accent" label="Password" prepend-icon="mdi-lock" required>
                         </v-text-field>
                     </v-form>
-                    <v-row class="red--text" v-if="error">
+                    <v-row class="red--text" v-if="error"> 
                         {{error}}
                     </v-row>
                 </v-card-text>
-                <v-card-actions class="px-3 pb-3">
+                <v-card-actions class="elevation-12">
                 <v-spacer />
-                <v-btn @click="ingresar" color="primary">Ingresar</v-btn>
+                <v-btn @click="ingresar" color="primary">Enter</v-btn>
                 </v-card-actions>
             </v-card>
             </v-col>
@@ -95,7 +96,7 @@ export default {
                 this.$store.dispatch("guardarUserinfo", data)
             })
             .catch(function(error){
-                me.snacktext = 'Se detectó un error. Código: '+ error.response.status;
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
                 me.snackcolor = 'error'
                 me.snackbar = true;
                 console.log(error);
