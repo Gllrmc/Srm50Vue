@@ -186,7 +186,7 @@
         style="width: 500px"
         class="ml-0 pl-4"
       >
-        <span class="hidden-sm-and-down">MAnA - Multimedia Artists and Animators</span>
+        <span class="hidden-sm-and-down">MAnA - Multimedia Artists & Animators</span>
       </v-toolbar-title>
       <v-spacer />
       <div class="mr-10" v-if="logueado">

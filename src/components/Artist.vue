@@ -27,10 +27,12 @@
         </template>
         <v-col cols="12" md="12" sm="12">
             <v-data-table
+            v-model="selected"
             dense
-            :headers="headersusuarios"
-            :items="usuarios"
-            :search="searchu"
+            :headers="headerartists"
+            :items="artists"
+            :search="searcha"
+            show-select
             class="elevation-1 blue-grey lighten-5"
             no-data-text="Nothing to show"
             >
@@ -46,7 +48,7 @@
                             vertical
                         ></v-divider>
                         <v-spacer></v-spacer>
-                        <v-text-field dense label="Search" outlined v-model="searchu" clearable append-icon="mdi-magnify" single-line hide-details></v-text-field>
+                        <v-text-field dense label="Search" outlined v-model="searcha" clearable append-icon="mdi-magnify" single-line hide-details></v-text-field>
                         <v-spacer></v-spacer>
                         <v-dialog v-model="dialog" max-width="600px">
                             <template v-slot:activator="{ on }">
@@ -57,89 +59,91 @@
                                 <span class="headline">{{ formTitle }}</span>
                             </v-card-title>
                             <v-card-text>
-                                <v-container
-                                    class="grey lighten-5"
-                                    grid-list-md>
-                                    <v-row dense>
-                                        <v-col cols="12" sm="6" md="6">
-                                            <v-text-field dense v-model="nombre" label="First Name" counter="100">
-                                            </v-text-field>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="6">
-                                            <v-text-field dense v-model="apellido" label="Last Name" counter="100">
-                                            </v-text-field>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="6">
-                                            <v-text-field dense v-model="iniciales" v-mask="up3" label="Initials" counter="3"></v-text-field>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="6">
-                                            <v-select dense v-model="rolid"
-                                            :items="roles" label="Role">
-                                            </v-select>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="6">
-                                            <v-text-field dense v-model="email" label="Email" counter="50">
-                                            </v-text-field>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="6">
-                                            <v-text-field dense type="password" v-model="password" label="Password">
-                                            </v-text-field>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="6">
-                                            <v-text-field dense v-model="telefono" label="Mobile" counter="20">
-                                            </v-text-field>
-                                        </v-col>
-                                        <v-col cols=12 sm=6 md=6>
-                                            <v-select dense v-model="lineaspag" :items="lineaspags" label="# rows per page"></v-select>
-                                        </v-col>
-                                        <v-col cols=12 sm=6 md=6>
-                                            <v-select dense v-model="coltexto" :items="textos" label="Text color"></v-select>
-                                        </v-col>
-                                        <v-col cols=12 sm=6 md=6>
-                                            <v-select dense v-model="colfondo" :items="colores" label="Back color"></v-select>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="6">
-                                            <v-avatar class="ml-2" v-if="coltexto=='black'" :color="colfondo" size=40>
-                                                <span style="color:black">{{ iniciales }}</span>
-                                            </v-avatar>
-                                            <v-avatar class="ml-2" v-else :color="colfondo" size=40>
-                                                <span style="color:white">{{ iniciales }}</span>
-                                            </v-avatar>
-                                        </v-col>
-                                        <v-col cols="12" sm="2" md="2">
-                                            <v-layout column>
-                                                <v-avatar class="ml-2" size=40>
-                                                    <v-img :src="imageUrl" aspect-ratio="2" contain></v-img>
-                                                </v-avatar>
-                                                <input v-show="false" ref="inputUpload1" type="file" @change="onFilePicked" >
-                                            </v-layout>
-                                        </v-col>
-                                        <v-col cols="12" sm="4" md="4">
-                                            <v-btn class="mx-2" small fab color="primary" @click="$refs.inputUpload1.click()">
-                                                <v-icon dense dark>
-                                                    mdi-plus
-                                                </v-icon>    
-                                            </v-btn>
-                                            <v-btn class="mx-2" small fab color="primary" @click="clearImagen">
-                                                <v-icon dense dark>
-                                                    mdi-delete
-                                                </v-icon>    
-                                            </v-btn>
-                                        </v-col>
-                                        <v-col cols="12" sm="12" md="6">
-                                            <v-switch  dense v-model="pxch" class="mx-2" label="Change password"></v-switch>
-                                        </v-col>
-                                        <v-col cols="12" sm="12" md="12" v-show="valida">
-                                            <div class="red--text" v-for="v in validaMensaje" :key="v" v-text="v">
-                                            </div>
-                                        </v-col>
-                                    </v-row>
-                                </v-container>
+                                <v-form
+                                    ref="form"
+                                    v-model="validForm"
+                                >
+                                    <v-container
+                                        class="grey lighten-5"
+                                        grid-list-md>
+                                        <v-row dense>
+                                            <v-col cols="12" sm="12" md="12">
+                                                <v-text-field 
+                                                    dense 
+                                                    v-model="fullname" 
+                                                    label="Full Name" 
+                                                    :rules="fullnameRules"
+                                                    counter="64"
+                                                />
+                                            </v-col>
+                                            <v-col cols="12" sm="12" md="12">
+                                                <v-text-field 
+                                                    dense
+                                                    v-model="projectsworked"
+                                                    label="Projects Worked"
+                                                    counter="64"
+                                                />
+                                            </v-col>
+                                            <v-col cols="12" sm="12" md="12">
+                                                <v-text-field 
+                                                    dense 
+                                                    v-model="cost"
+                                                    label="Cost"
+                                                    counter="128"
+                                                />
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="6">
+                                                <v-text-field
+                                                    dense
+                                                    v-model="phone"
+                                                    label="Phone"
+                                                    counter="32"
+                                                />
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="6">
+                                                <v-text-field
+                                                    dense
+                                                    v-model="mobile"
+                                                    label="Mobile"
+                                                    counter="32"
+                                                />
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="6">
+                                                <v-text-field
+                                                    dense
+                                                    v-model="email"
+                                                    label="Email"
+                                                    counter="64"
+                                                />
+                                            </v-col>
+                                            <v-col cols="12" sm="2" md="2">
+                                                <v-layout column>
+                                                    <v-avatar class="ml-2" size=40>
+                                                        <v-img :src="imageUrl" aspect-ratio="2" contain></v-img>
+                                                    </v-avatar>
+                                                    <input v-show="false" ref="inputUpload1" type="file" @change="onFilePicked" >
+                                                </v-layout>
+                                            </v-col>
+                                            <v-col cols="12" sm="4" md="4">
+                                                <v-btn class="mx-2" small fab color="primary" @click="$refs.inputUpload1.click()">
+                                                    <v-icon dense dark>
+                                                        mdi-plus
+                                                    </v-icon>    
+                                                </v-btn>
+                                                <v-btn class="mx-2" small fab color="primary" @click="clearImagen">
+                                                    <v-icon dense dark>
+                                                        mdi-delete
+                                                    </v-icon>    
+                                                </v-btn>
+                                            </v-col>
+                                        </v-row>
+                                    </v-container>
+                                </v-form>
                             </v-card-text>
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn color="primary" text @click="close">Cancelar</v-btn>
-                                <v-btn color="primary" text @click="guardar">Guardar</v-btn>
+                                <v-btn color="primary" text @click="close">CANCEL</v-btn>
+                                <v-btn color="secondary" dark :disabled="!validForm" text @click="guardar">SAVE</v-btn>
                             </v-card-actions>
                             </v-card>
                         </v-dialog>
@@ -151,7 +155,7 @@
                                     You are about to
                                     <span v-if="adAccion==1">Activate </span>
                                     <span v-if="adAccion==2">Inactivate </span>
-                                    the team member: {{ adNombre }}
+                                    the Artist: {{ adNombre }}
                                 </v-card-text>
                                 <v-card-actions>
                                     <v-spacer/>
@@ -292,19 +296,40 @@
                         </div>
                     </td>
                 </template>
-                <template v-slot:[`item.imgusuario`]="{ item }">
+                <template v-slot:[`item._mainroleartisttxs`]="{ item }">
                     <td>
-                        <div v-if="item.imgusuario">
+                        <v-icon small @click="tratarMainrole" >mdi-plus</v-icon>
+                    </td>
+                    <td>
+                        {{ item._mainroleartisttxs }}
+                    </td>
+                </template>
+                <template v-slot:[`item._skillartisttxs`]="{ item }">
+                    <td>
+                        <v-icon small @click="tratarSkill">mdi-plus</v-icon>
+                    </td>
+                    <td>
+                        {{ item._skillartisttxs }}
+                    </td>
+                </template>
+                <template v-slot:[`item._notes`]="{ item }">
+                    <td>
+                        <v-icon small @click="tratarNote">mdi-plus</v-icon>
+                    </td>
+                    <td>
+                        {{ item._notes }}
+                    </td>
+                </template>
+                <template v-slot:[`item.imgartist`]="{ item }">
+                    <td>
+                        <div v-if="item.imgartist">
                             <v-avatar size=40>
-                                <v-img :src="item.imgusuario" aspect-ratio="2" contain></v-img>
+                                <v-img :src="item.imgartist" aspect-ratio="2" contain></v-img>
                             </v-avatar>
                         </div>
                         <div v-else>
-                            <v-avatar v-if="item.coltexto=='black'" :color="item.colfondo" size=40>
-                                <span style="color:black">{{ item.iniciales }}</span>
-                            </v-avatar>
-                            <v-avatar v-else :color="item.colfondo" size=40>
-                                <span style="color:white">{{ item.iniciales }}</span>
+                            <v-avatar size=40>
+                                <v-img :src="`https://ui-avatars.com/api/${item.fullname}`"  aspect-ratio="2" contain></v-img>
                             </v-avatar>
                         </div>
                     </td>
@@ -502,10 +527,11 @@
   import jsPDF from 'jspdf'
   export default {
     data: () => ({
-        rules: {
-            counter: value => value.length >= 3 && value.length <= 50  || 'Min 3 Max 50 characters'
-        },
-        up3:'AAA',
+        validForm: false,
+        fullnameRules: [
+        v => !!v || 'Full Name is required',
+        v => (v && v.length <= 64) || 'Name must be less than 64 characters',
+        ],
         colores: [
             {value: '#F44336', text: 'Rojo'},
             {value: '#E91E63', text: 'Rosa'},
@@ -539,62 +565,79 @@
             {value: 15, text: "15"},
             {value: -1, text: "All"},
         ],
-        primerahoras: [
-            {value: 300, text: "05:00"},
-            {value: 360, text: "06:00"},
-            {value: 420, text: "07:00"},
-            {value: 480, text: "08:00"},
-            {value: 540, text: "09:00"},
-            {value: 600, text: "10:00"},
-            {value: 660, text: "11:00"},
-            {value: 720, text: "12:00"},
-        ],
         snackbar: false,
         snackcolor: '',
         snacktext: '',
         timeout: 4000,
         recordInfo:0,
+        selected: [],
+        artists: [],
+        schedules: [],
+        skills: [],
+        _skillartistids: [],
+        _skillartisttxs: [],
+        mainroleartists: [],
+        _mainroleartistids: [],
+        _mainroleartisttxs: [],
+        notes: [],
+        _notes: '',
+        skillartists: [],
+        ratings: [],
+        portfolios: [],
+        selections: [],
+        selectedartists: [],
         usuarios: [],
+        id: '',
+        fullname: '',
+        projectsworked: '',
+        cost: '',
+        costingdate: new Date(),
+        costinguserid: '',
+        email: '',
+        phone: '',
+        mobile: '',
+        imgartist: '',
+        proveeodrid: '',
+        iduseralta:'',
+        fecalta:'',
+        iduserumod:'',
+        fecumod:'',
+        activo:false,
+        imageUrl:'',
+        dialog: false,
+        editedIndex: -1,
+
+
+
+
+
         roles:[],
         grupos:[],
         proyectos:[],
         grupousuarios:[],
         proyectousuarios:[],
         workuserId:'',
-        imageUrl:'',
         groupheader: '',
         proyheader: '',
-        dialog: false,
         groupdialog: false,
         proydialog: false,
         searchg: '',
-        searchu: '',
+        searcha: '',
         searchp: '',
-        editedIndex: -1,
-        id: '',
         rolid:'',
         iniciales:'',
         nombre:'',
         apellido:'',
         telefono: '',
-        email: '',
         password:'',
         colfondo:'#000000',
         coltexto:'black',
-        imgusuario:'',
         lineaspag: 0,
         pxch:false,
-        iduseralta:'',
-        fecalta:'',
-        iduserumod:'',
-        fecumod:'',
-        activo:false,
         addgroup: '',
         addproy: '',
         actPassword:false,
         passwordAnt:'',
-        valida: 0,
-        validaMensaje:[],
         adModal: 0,
         adAccion: 0,
         adNombre: '',
@@ -602,16 +645,20 @@
     }),
 
     computed: {
-        headersusuarios(){
+        headerartists(){
             return [
-                { text: 'Avatar', value: 'imgusuario', align: 'center', sortable: false },
+                { text: 'Avatar', value: 'imgartist', align: 'center', sortable: false },
+                { text: 'Full Name', value: 'fullname', align: 'start', sortable: true },
+                //{ text: 'Main Role Ids', value: '_mainroleartistids', align: 'start', sortable: true },
+                { text: 'Main Role Txt', value: '_mainroleartisttxs', align: 'start', sortable: true },
+                //{ text: 'Skills Ids', value: '_skillartistids', align: 'start', sortable: true },
+                { text: 'Skills Txt', value: '_skillartisttxs', align: 'start', sortable: true },
+                { text: 'Project Worked', value: 'projectsworked', align: 'start', sortable: true },
+                { text: 'Notes', value: '_notes', align: 'start', sortable: true },
+                { text: 'Cost', value: 'cost', align: 'start', sortable: true },
                 { text: 'eMail', value: 'email', align: 'start', sortable: true },
-                { text: 'First Name', value: 'nombre', align: 'start', sortable: true },
-                { text: 'Last Name', value: 'apellido', align: 'start', sortable: true },
-                { text: 'Initials', value: 'iniciales', align: 'start', sortable: true },
-                { text: 'Rol', value: 'rol', align: 'start', sortable: true },
-                { text: 'Row/Pag', value: 'lineaspag', align: 'start', sortable: true },
-                { text: 'Phone', value: 'telefono', align: 'start', sortable: true },
+                { text: 'Phone', value: 'phone', align: 'start', sortable: true },
+                { text: 'Mobile', value: 'mobile', align: 'start', sortable: true },
                 { text: 'Status', value: 'activo', align: 'start', sortable: true  },
                 { text: '[Options]', value: 'actions', align: 'center', sortable: false },
             ]
@@ -632,7 +679,7 @@
             ]
         },
         formTitle () {
-            return this.editedIndex === -1 ? 'New team member' : 'Update team member'
+            return this.editedIndex === -1 ? 'New Artist' : 'Update Artist'
         },
     },
 
@@ -642,9 +689,10 @@
         },
     },
 
-    created () {
-        this.select();
-        this.listar()
+    async mounted () {
+        this.artists = []
+        await this.select()
+        await this.listar()
     },
 
     methods: {
@@ -667,7 +715,7 @@
                 fr.addEventListener('load', () => {
                     this.imageUrl = fr.result
                     this.imageFile = files[0] // this is an image file that can be sent to server...
-                    this.imgusuario = this.imageUrl;
+                    this.imgartist = this.imageUrl;
                 })
             } else {
                 this.imageName = ''
@@ -677,22 +725,22 @@
         },
         clearImagen(){
             this.imageUrl = ''
-            this.imgusuario = ''
+            this.imgartist = ''
         },
         crearPDF(){
             var columns = [
-                    {title: "Initials", dataKey: "iniciales"},
-                    {title: "First Name", dataKey: "nombre"},
-                    {title: "Last Name", dataKey: "apellido"},
-                    {title: "Rol", dataKey: "rol"},
+                    {title: "Fullname", dataKey: "fullname"},
+                    {title: "Projects Worked", dataKey: "projectsworked"},
+                    {title: "Cost", dataKey: "cost"},
                     {title: "eMail", dataKey: "email"},
-                    {title: "Phone", dataKey: "telefono"},
+                    {title: "Phone", dataKey: "phone"},
+                    {title: "Mobile", dataKey: "mobile"},
                     {title: "Active", dataKey: "activo"}
             ];
             var rows = [];
 
-            this.usuarios.map(function(x){
-                    rows.push({iniciales:x.iniciales,nombre:x.nombre,apellido:x.apellido,rol:x.rol,telefono:x.telefono,activo:x.activo});
+            this.artists.map(function(x){
+                    rows.push({fullname:x.fullname,projectsworked:x.projectsworked,cost:x.cost,email:x.email,phone:x.phone,mobile:x.mobile,activo:x.activo});
             });
 
             // Only pt supported (not mm or in)
@@ -700,49 +748,94 @@
             doc.autoTable(columns, rows, {
                 margin: {top: 60},
                 addPageContent: () => {
-                    doc.text("Team List", 40, 30);
+                    doc.text("Artist List", 40, 30);
                 }
             });
-            doc.save('Team.pdf');
+            doc.save('Artist.pdf');
         },
         listar(){
             let me=this;
             let header={"Authorization" : "Bearer " + this.$store.state.token};
             let configuracion= {headers : header};
-            axios.get('api/Usuarios/Listar',configuracion).then(function(response){
+            axios.get('api/Artists/Listar',configuracion).then(function(response){
                 //console.log(response);
-                me.usuarios=response.data;
+                me.artists=response.data
+                setTimeout(() => {
+                    me.fillSnowflake(me.artists)
+                    let trick = me.artists[0]
+                    me.artists.splice( 0, 1, trick)
+                }, 0)
             }).catch(function(error){
                 me.snacktext = 'An error was detected. Code: '+ error.response.status;
                 me.snackcolor = "error";
                 me.snackbar = true;
                 console.log(error);
             });
+        },
+        fillSnowflake(items){
+            let me = this
+            var filtered = []
+            var lor = ""
+            var los = ""
+            var sor = ""
+            var sos = ""
+            var index = ""
+            var nots = ""
+            for ( var i = 0; i < items.length ; i++) {
+                //busca MainRole
+                filtered = me.mainroleartists.filter( function(e) {
+                    return e.artistid === items[i].id
+                })
+                for (var mr = 0 ; mr < filtered.length; mr++ ){
+                    lor += filtered[mr].skillid.toString()+', '
+                    index = this.skills.findIndex(x => x.value === filtered[mr].skillid)
+                    sor += me.skills[index].text+', '
+                }
+                // eslint-disable-next-line
+                //debugger
+                items[i]._mainroleartistids= lor.substring(0, lor.length - 2)
+                items[i]._mainroleartisttxs= sor.substring(0, sor.length - 2)
+                lor = ''
+                sor = ''
+                //busca Skills
+                filtered = me.skillartists.filter( function(e) {
+                    return e.artistid === items[i].id
+                })
+                for (var ms = 0 ; ms < filtered.length; ms++ ){
+                    los += filtered[ms].skillid.toString()+', '
+                    index = this.skills.findIndex(x => x.value === filtered[ms].skillid)
+                    sos += me.skills[index].text+', '
+                }
+                items[i]._skillartistids= los.substring(0, los.length - 2)
+                items[i]._skillartisttxs= sos.substring(0, sos.length - 2)
+                los = ''
+                sos = ''
+                //busca Notas
+                filtered = me.notes.filter( function(e) {
+                    return e.artistid === items[i].id
+                })
+                for (var no = 0 ; no < filtered.length; no++ ){
+                    nots += filtered[no].fecumod.substr(0,10)+': '+filtered[no].text+', '
+                }
+                items[i]._notes = nots.length>512?nots.substr(0,512):nots.substring(0, nots.length - 2)
+                nots = ''
+            }
         },
         select(){
             let me=this;
-            var rolesArray=[];
-            var gruposArray=[];
-            var proyectosArray=[];
-            var grupousuariosArray=[];
-            var proyectousuariosArray=[];
+            let usuariosArray = []
+            let skillsArray = []
+            let mainroleartistsArray = []
+            let skillartistsArray = []
+            let notesArray = []
             let header={"Authorization" : "Bearer " + this.$store.state.token};
             let configuracion= {headers : header};
-            axios.get('api/Roles/Select',configuracion).then(function(response){
-                rolesArray=response.data;
-                rolesArray.map(function(x){
-                    me.roles.push({text: x.nombre,value:x.id});
-                });
-            }).catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackcolor = "error";
-                me.snackbar = true;
-                console.log(error);
-            });
-            axios.get('api/Grupos/Listar',configuracion).then(function(response){
-                gruposArray=response.data;
-                gruposArray.map(function(x){
-                    me.grupos.push({selected: false, nombre: x.nombre, value:x.id});
+            axios.get('api/Usuarios/Listar',configuracion).then(function(response){
+                usuariosArray=response.data;
+                usuariosArray.map(function(x){
+                    me.usuarios.push({iduseralta: x.iduseralta, iduserumod: x.iduserumod,
+                    imgusuario: x.imgusuario, colfondo: x.colfondo, coltexto: x.coltexto, 
+                    email: x.email, iniciales: x.iniciales, nombre: x.nombre, apellido: x.apellido, value:x.id});
                 });
             }).catch(function(error){
                 me.snacktext = 'An error was detected. Code: '+ error.response.status;
@@ -750,10 +843,10 @@
                 me.snackbar = true;
                 console.log(error);
             });
-            axios.get('api/Grupousuarios/Listar',configuracion).then(function(response){
-                grupousuariosArray=response.data;
-                grupousuariosArray.map(function(x){
-                    me.grupousuarios.push({grupoid: x.grupoid, usuarioid: x.usuarioid, value:x.id});
+            axios.get('api/Skills/Select',configuracion).then(function(response){
+                skillsArray=response.data;
+                skillsArray.map(function(x){
+                    me.skills.push({selected: false, value:x.id, text: x.skill, ismainrole: x.ismainrole });
                 });
             }).catch(function(error){
                 me.snacktext = 'An error was detected. Code: '+ error.response.status;
@@ -761,10 +854,11 @@
                 me.snackbar = true;
                 console.log(error);
             });
-            axios.get('api/Proyectos/Listar',configuracion).then(function(response){
-                proyectosArray=response.data;
-                proyectosArray.map(function(x){
-                    me.proyectos.push({selected: false, value:x.id, nombre: x.nombre, relid: 0, tarifaproyectousuario: 0, costoproyectousuario: 0, notas: ''});
+            axios.get('api/Skillartists/Listar',configuracion).then(function(response){
+                skillartistsArray=response.data;
+                skillartistsArray.map(function(x){
+                    me.skillartists.push({selected: false, value: x.id, skillid: x.skillid, artistid: x.artistid, iduseralta: x.iduseralta,
+                        fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
                 });
             }).catch(function(error){
                 me.snacktext = 'An error was detected. Code: '+ error.response.status;
@@ -772,11 +866,23 @@
                 me.snackbar = true;
                 console.log(error);
             });
-            axios.get('api/Proyectousuarios/Listar',configuracion).then(function(response){
-                proyectousuariosArray=response.data;
-                proyectousuariosArray.map(function(x){
-                    me.proyectousuarios.push({proyectoid: x.proyectoid, usuarioid: x.usuarioid, 
-                    tarifaproyectousuario: x.tarifaproyectousuario, costoproyectousuario: x.costoproyectousuario, value:x.id});
+            axios.get('api/Mainroleartists/Listar',configuracion).then(function(response){
+                mainroleartistsArray=response.data;
+                mainroleartistsArray.map(function(x){
+                    me.mainroleartists.push({selected: false, value:x.id, skillid: x.skillid, artistid: x.artistid, iduseralta: x.iduseralta,
+                        fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
+                });
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = 'error'
+                me.snackbar = true;
+                console.log(error);
+            });
+            axios.get('api/Notes/Listar',configuracion).then(function(response){
+                notesArray=response.data;
+                notesArray.map(function(x){
+                    me.notes.push({selected: false, value:x.id, artistid: x.artistid, text: x.note, iduseralta: x.iduseralta,
+                        fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
                 });
             }).catch(function(error){
                 me.snacktext = 'An error was detected. Code: '+ error.response.status;
@@ -785,27 +891,48 @@
                 console.log(error);
             });
         },
+        lovskillstxs (lov) {
+            let me = this;
+            var aux = ''
+            if ( me.skills.length > 0) {
+                var index = 0
+                if (lov.length > 0){
+                    for (var i = 0; i < lov.length-1; i++){
+                        index = this.skills.findIndex(x => x.value == lov[i])
+                        aux += this.skills[index].text+', '
+                    }
+                    index = this.skills.findIndex(x => x.value == lov[lov.length-1])
+                    aux += this.skills[index].text
+                }
+            }
+            return aux
+        },
         editItem (item) {
             this.id=item.id;
-            this.rolid=item.rolid;
-            this.iniciales=item.iniciales;
-            this.nombre=item.nombre;
-            this.apellido=item.apellido;
-            this.telefono=item.telefono;
+            this.fullname=item.fullname;
+            // this._skillartistids=item._skillartistids;
+            // this._skillartisttxs=item._skillartisttxs;
+            // this._mainroleartistids=item._mainroleartistids;
+            // this._mainroleartisttxs=item._mainroleartisttxs;
+            this.projectsworked=item.projectsworked;
+            this.cost=item.cost;
+            this.costingdate=item.costingdate;
+            this.costinguserid=item.costinguserid;
             this.email=item.email;
-            this.password=item.password_hash;
-            this.passwordAnt=item.password_hash;
-            this.colfondo=item.colfondo;
-            this.coltexto=item.coltexto;
-            this.imgusuario=item.imgusuario;
-            this.imageUrl=item.imgusuario;
-            this.lineaspag=item.lineaspag;
-            this.pxch=item.pxch;
+            this.phone=item.phone;
+            this.mobile=item.mobile;
+            this.imgartist=item.imgartist;
+            this.imageUrl=item.imgartist;
+            this.proveedorid=item.proveedorid;
             this.iduseralta=item.iduseralta;
             this.fecalta=item.fecalta;
             this.iduserumod=item.iduserumod;
             this.fecumod=item.fecumod;
             this.activo=item.activo;
+
+
+            this.colfondo=item.colfondo;
+            this.coltexto=item.coltexto;
             this.editedIndex = 1;
             this.groupdialog = false;
             this.proydialog = false;
@@ -817,7 +944,7 @@
             if (resulta) {
                 let header={"Authorization" : "Bearer " + me.$store.state.token};
                 let configuracion= {headers : header};
-                axios.delete('api/Usuarios/Eliminar/'+item.id,configuracion).then( () => {
+                axios.delete('api/Artists/Eliminar/'+item.id,configuracion).then( () => {
                     me.snacktext = 'Eliminated';
                     me.snackcolor = "success";
                     me.snackbar = true;
@@ -850,8 +977,156 @@
             this.dialog = false
             this.limpiar();
         },
-        tratarGrupos(item){
+        editProyecto(item){
             var me=this;
+            let index=0;
+            index = me.proyectousuarios.findIndex(elemento => elemento.value === item.relid );
+            let header={"Authorization" : "Bearer " + this.$store.state.token};
+            let configuracion= {headers : header};
+
+            axios.put('api/Proyectousuarios/Actualizar',{
+                'id':item.relid,
+                'usuarioid':this.workuserId,
+                'proyectoid':item.value,
+                'tarifaproyectousuario':item.tarifaproyectousuario,
+                'costoproyectousuario':item.costoproyectousuario,
+                'notas':item.notas,
+                'iduseralta': me.$store.state.usuario.idusuario                      
+            },configuracion).then( () => {
+                me.proyectousuarios[index].tarifaproyectousuario = (Number(item.tarifaproyectousuario)).toFixed(2);
+                me.proyectousuarios[index].costoproyectousuario = Number(item.costoproyectousuario);
+                me.proyectousuarios[index].notas          = item.notas;
+                //me.proyectos[me.proyectos.findIndex(elemento => elemento.value === me.proyectousuarios[index].proyectoid )].estimadotarifa = me.proyectotareas[index].estimadotarifa;
+                me.snacktext = 'Updated';
+                me.snackcolor = "success";
+                me.snackbar = true;
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackbar = true;
+                me.snackcolor = 'error'
+                console.log(error);
+            });
+        },
+        limpiar(){
+                this.id = ""
+                this.fullname = ""
+                this.projectworked = ""
+                this.cost = ""
+                this.costingdate = new Date();
+                this.email = ""
+                this.phone = ""
+                this.mobile = ""
+                this.imgusario = ""
+                this.imageUrl = ""
+                this.proveedorid = ""
+                this.iduseralta = "";
+                this.fecalta = "";
+                this.iduserumod = "";
+                this.fecumod = "";
+                this.activo = false;          
+
+                this.groupdialog = false;
+                this.editedIndex=-1;
+        },
+        guardar () {
+            let me = this;
+            let header={"Authorization" : "Bearer " + this.$store.state.token};
+            let configuracion= {headers : header};
+            if (this.editedIndex > -1) {
+                //Código para editar
+                //Código para guardar
+                axios.put('api/Artists/Actualizar',{
+                    'id': me.id,
+                    'fullname': me.fullname,
+                    'projectsworked': me.projectsworked,
+                    'cost': me.cost,
+                    'costingdate': me.costingdate,
+                    'costinguserid': me.costinguserid,
+                    'email':me.email,
+                    'phone': me.phone,
+                    'mobile':me.mobile,
+                    'imgartist':me.imgartist,
+                    'proveedorid':me.proveedorid,
+                    'iduserumod': me.$store.state.usuario.idusuario,
+                },configuracion).then( () => {
+                    me.buscarUserinfo();
+                    me.snacktext = 'Updated';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                    me.close();
+                    me.listar();
+                    me.limpiar();
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackcolor = "error";
+                    me.snackbar = true;
+                    console.log(error);
+                });
+            } else {
+                //Código para guardar
+                let me=this;
+                axios.post('api/Artists/Crear',{
+                    'fullname': me.fullname,
+                    'projectsworked': me.projectsworked,
+                    'cost': me.cost,
+                    'costingdate': me.costingdate,
+                    'costinguserid': me.costinguserid,
+                    'email':me.email,
+                    'phone': me.phone,
+                    'mobile':me.mobile,
+                    'imgartist':me.imgartist,
+                    'proveedorid':me.proveedorid,
+                    'iduseralta': me.$store.state.usuario.idusuario                      
+                },configuracion)
+                .then(function(){
+                    //console.log(response);
+                    me.buscarUserinfo();
+                    me.snacktext = 'Created';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                    me.close();
+                    me.listar();
+                    me.limpiar();
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackcolor = "error";
+                    me.snackbar = true;
+                    console.log(error);
+                });
+            }
+        },
+        buscarUserinfo(){
+            let me=this;
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
+            let configuracion= {headers : header};
+            axios.get('api/Artists/Traer/'+me.$store.state.usuario.idusuario,configuracion)
+            .then(respuesta => {
+                return respuesta.data
+            })
+            .then(data => {
+                this.$store.dispatch("guardarUserinfo", data)
+            })
+            .catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = 'error'
+                me.snackbar = true;
+                console.log(error);
+            });
+        },
+        tratarMainrole(item){
+            let me = this
+            console.log(me, item)
+        },
+        tratarSkill(item){
+            let me = this
+            console.log(me, item)
+        },
+        tratarNote(item){
+            let me = this
+            console.log(me, item)
+        },
+        tratarGrupos(item){
+            let me=this;
             let index = 0;
             for (var l = 0; l < me.grupos.length; l++){
                 me.grupos[l].selected = false;
@@ -979,194 +1254,7 @@
                 });
             }
         },
-        editProyecto(item){
-            var me=this;
-            let index=0;
-            index = me.proyectousuarios.findIndex(elemento => elemento.value === item.relid );
-            let header={"Authorization" : "Bearer " + this.$store.state.token};
-            let configuracion= {headers : header};
 
-            axios.put('api/Proyectousuarios/Actualizar',{
-                'id':item.relid,
-                'usuarioid':this.workuserId,
-                'proyectoid':item.value,
-                'tarifaproyectousuario':item.tarifaproyectousuario,
-                'costoproyectousuario':item.costoproyectousuario,
-                'notas':item.notas,
-                'iduseralta': me.$store.state.usuario.idusuario                      
-            },configuracion).then( () => {
-                me.proyectousuarios[index].tarifaproyectousuario = (Number(item.tarifaproyectousuario)).toFixed(2);
-                me.proyectousuarios[index].costoproyectousuario = Number(item.costoproyectousuario);
-                me.proyectousuarios[index].notas          = item.notas;
-                //me.proyectos[me.proyectos.findIndex(elemento => elemento.value === me.proyectousuarios[index].proyectoid )].estimadotarifa = me.proyectotareas[index].estimadotarifa;
-                me.snacktext = 'Updated';
-                me.snackcolor = "success";
-                me.snackbar = true;
-            }).catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackbar = true;
-                me.snackcolor = 'error'
-                console.log(error);
-            });
-        },
-        limpiar(){
-                this.id="";
-                this.rolid="";
-                this.email="";
-                this.nombre="";
-                this.apellido="";
-                this.iniciales=null;
-                this.telefono="";
-                this.password="";
-                this.passwordAnt="";
-                this.colfondo="#000000";
-                this.coltexto="white";
-                this.imgusario="";
-                this.imageUrl="";
-                this.lineaspag=0;
-                this.pxch=false;
-                this.iduseralta = "";
-                this.fecalta = "";
-                this.iduserumod = "";
-                this.fecumod = "";
-                this.activo = false;          
-                this.actPassword = false;
-                this.groupdialog = false;
-                this.editedIndex=-1;
-        },
-        guardar () {
-            if (this.validar()){
-                return;
-            }
-            var date = new Date();                
-            let header={"Authorization" : "Bearer " + this.$store.state.token};
-            let configuracion= {headers : header};
-            if (this.editedIndex > -1) {
-                //Código para editar
-                //Código para guardar
-                let me=this;
-                if (me.password!=me.passwordAnt){
-                    me.actPassword=true;
-                }
-                axios.put('api/Usuarios/Actualizar',{
-                    'id':me.id,
-                    'rolid':me.rolid,
-                    'email':me.email,
-                    'nombre':me.nombre,
-                    'apellido':me.apellido,
-                    'iniciales':me.iniciales,
-                    'telefono': me.telefono,
-                    'password':me.password,
-                    'act_password':me.actPassword,
-                    'colfondo':me.colfondo,
-                    'coltexto':me.coltexto,
-                    'imgusuario':me.imgusuario,
-                    'lineaspag':me.lineaspag,
-                    'pxch':me.pxch,
-                    'iduseralta': me.iduseralta,
-                    'fecalta': me.fecalta,
-                    'iduserumod': me.$store.state.usuario.idusuario,
-                    'fecumod': new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString()                                            
-                },configuracion).then( () => {
-                    me.buscarUserinfo();
-                    me.snacktext = 'Updated';
-                    me.snackcolor = "success";
-                    me.snackbar = true;
-                    me.close();
-                    me.listar();
-                    me.limpiar();
-                }).catch(function(error){
-                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                    me.snackcolor = "error";
-                    me.snackbar = true;
-                    console.log(error);
-                });
-            } else {
-                //Código para guardar
-                let me=this;
-                axios.post('api/Usuarios/Crear',{
-                    'rolid':me.rolid,
-                    'email':me.email,
-                    'nombre':me.nombre,
-                    'apellido':me.apellido,
-                    'iniciales':me.iniciales,
-                    'telefono': me.telefono,
-                    'password':me.password,
-                    'colfondo':me.colfondo,
-                    'coltexto':me.coltexto,
-                    'imgusuario':me.imgusuario,
-                    'lineaspag':me.lineaspag,
-                    'pxch':me.pxch,
-                    'iduseralta': me.$store.state.usuario.idusuario                      
-                },configuracion)
-                .then(function(){
-                    //console.log(response);
-                    me.buscarUserinfo();
-                    me.snacktext = 'Created';
-                    me.snackcolor = "success";
-                    me.snackbar = true;
-                    me.close();
-                    me.listar();
-                    me.limpiar();
-                }).catch(function(error){
-                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                    me.snackcolor = "error";
-                    me.snackbar = true;
-                    console.log(error);
-                });
-            }
-        },
-        buscarUserinfo(){
-            let me=this;
-            let header={"Authorization" : "Bearer " + me.$store.state.token};
-            let configuracion= {headers : header};
-            axios.get('api/Usuarios/Traer/'+me.$store.state.usuario.idusuario,configuracion)
-            .then(respuesta => {
-                return respuesta.data
-            })
-            .then(data => {
-                this.$store.dispatch("guardarUserinfo", data)
-            })
-            .catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackcolor = 'error'
-                me.snackbar = true;
-                console.log(error);
-            });
-        },
-        validar(){
-            this.valida=0;
-            this.validaMensaje=[];
-
-            if (this.nombre.length<1 || this.nombre.length>100){
-                this.validaMensaje.push("El nombre es obligatorio y debe tener menos de 100 caracteres.");
-            }
-            if (this.apellido.length<1 || this.apellido.length>100){
-                this.validaMensaje.push("El apellido es obligatorio y debe tener menos de 100 caracteres.");
-            }
-            if (!this.rolid){
-                this.validaMensaje.push("Seleccione un rol.");
-            }
-            if (!this.email){
-                this.validaMensaje.push("Ingrese el email del usuario.");
-            }
-            if (!this.password){
-                this.validaMensaje.push("Ingrese el password del usuario.");
-            }
-            if (this.iniciales.length<1 || this.iniciales.length>3){
-                this.validaMensaje.push("Las iniciales deben tener al menos 1 caracter y no mas de 3 caracteres.");
-            }
-            if (!this.coltexto){
-                this.validaMensaje.push("Seleccione un color de texto.");
-            }
-            if (!this.colfondo){
-                this.validaMensaje.push("Seleccione un color de fondo.");
-            }
-            if (this.validaMensaje.length){
-                this.valida=1;
-            }
-            return this.valida;
-        },
         agregarGrupo(addgroup){
             let me=this;
             if(addgroup.length >= 3 && addgroup.length <= 50 ){
@@ -1212,7 +1300,7 @@
             let me=this;
             let header={"Authorization" : "Bearer " + this.$store.state.token};
             let configuracion= {headers : header};
-            axios.put('api/Usuarios/Activar/'+this.adId,{},configuracion).then( () => {
+            axios.put('api/Artists/Activar/'+this.adId,{},configuracion).then( () => {
                 me.snacktext = 'Activated';
                 me.snackcolor = "success";
                 me.snackbar = true;
@@ -1233,7 +1321,7 @@
             let header={"Authorization" : "Bearer " + this.$store.state.token};
             let configuracion= {headers : header};
 
-            axios.put('api/Usuarios/Desactivar/'+this.adId,{},configuracion).then( () => {
+            axios.put('api/Artists/Desactivar/'+this.adId,{},configuracion).then( () => {
                 me.snacktext = 'Inactivated';
                 me.snackcolor = "success";
                 me.snackbar = true;

@@ -19,7 +19,7 @@
                 dark
                 flat
                 >
-                    <v-toolbar-title>Acceso al Sistema</v-toolbar-title>
+                    <v-toolbar-title>Log In</v-toolbar-title>
                     <v-spacer />
                 </v-toolbar>
                 <v-card-text class="elevation-12">
@@ -75,11 +75,11 @@ export default {
             .catch(err => {
                 console.log(err.response);
                 if (err.response.status==400){
-                    this.error="No es un email válido o rol restringido para acceso";
+                    this.error="Invalid email or role without permission";
                 } else if (err.response.status==404){
-                    this.error="No existe el usuario o sus datos son incorrectos";
+                    this.error="Wrong credentials";
                 }else{
-                    this.error="Ocurrió un error";
+                    this.error="An error occurred";
                 }
                 console.log(err)
             })

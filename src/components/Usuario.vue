@@ -1021,7 +1021,7 @@
                 this.passwordAnt="";
                 this.colfondo="#000000";
                 this.coltexto="white";
-                this.imgusario="";
+                this.imgusuario="";
                 this.imageUrl="";
                 this.lineaspag=0;
                 this.pxch=false;
