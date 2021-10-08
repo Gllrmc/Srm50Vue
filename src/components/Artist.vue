@@ -1,5 +1,5 @@
 <template>
-    <v-row align="start">
+    <v-row align="start" style="overflow: auto">
         <template>
             <v-snackbar
                 v-model="snackbar"
@@ -142,7 +142,7 @@
                             </v-card-text>
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn color="primary" text @click="close">CANCEL</v-btn>
+                                <v-btn color="primary" text @click="closedialog">CANCEL</v-btn>
                                 <v-btn color="secondary" dark :disabled="!validForm" text @click="guardar">SAVE</v-btn>
                             </v-card-actions>
                             </v-card>
@@ -171,10 +171,11 @@
                                 </v-card-actions>
                             </v-card>
                         </v-dialog>
-                        <v-dialog v-model="recordInfo" max-width="400">
+                        <v-dialog v-model="recordInfo" max-width="500">
                             <v-card>
-                                <v-card-title class="headline">Item info</v-card-title>
+                                <v-card-title class="headline">Item info: {{ adNombre}}</v-card-title>
                                 <v-card-text>
+                                    <p>{{fullname}}</p>
                                     <p><b>Created by:</b></p>
                                     {{iduseralta}}<br>
                                     {{fecalta}}
@@ -191,6 +192,76 @@
                                 </v-card-actions>
                             </v-card>
                         </v-dialog>
+                        <v-dialog v-model="roledialog" max-width=500>
+                            <v-data-table
+                                :headers="headermainroles"
+                                :items="roles"
+                                :search="searchr"
+                                class="elevation-1"
+                                items-per-page="5"
+                                no-data-text="Nothing to Show"
+                            >
+                                <template v-slot:top>
+                                    <v-card flat color="white">
+                                        <v-card-title>{{roleheader}}</v-card-title>
+                                        <v-card-actions>
+                                                <v-text-field label="Search" class="ma-2" 
+                                                outlined 
+                                                dense 
+                                                v-model="searchr" 
+                                                append-icon="mdi-magnify" 
+                                                single-line 
+                                                hide-details
+                                                clearable 
+                                                ></v-text-field>
+                                            <v-btn color="primary" dense dark class="ma-2" @click.native="roledialog=false">Exit</v-btn>
+                                        </v-card-actions>
+                                    </v-card>
+                                </template>
+                                <template v-slot:[`item.selected`]="{ item }">
+                                    <v-simple-checkbox
+                                        v-model="item.selected"
+                                        :ripple="false"
+                                        @click="accionRole(item)"
+                                    ></v-simple-checkbox>
+                                </template>
+                            </v-data-table>
+                        </v-dialog>
+                        <v-dialog v-model="skilldialog" max-width=500>
+                            <v-data-table
+                                :headers="headerskills"
+                                :items="skills"
+                                :search="searchs"
+                                class="elevation-1"
+                                items-per-page="5"
+                                no-data-text="Nothing to Show"
+                            >
+                                <template v-slot:top>
+                                    <v-card flat color="white">
+                                        <v-card-title>{{skillheader}}</v-card-title>
+                                        <v-card-actions>
+                                                <v-text-field label="Search" class="ma-2" 
+                                                outlined 
+                                                dense 
+                                                v-model="searchs" 
+                                                append-icon="mdi-magnify" 
+                                                single-line 
+                                                hide-details
+                                                clearable 
+                                                ></v-text-field>
+                                            <v-btn color="primary" dense dark class="ma-2" @click.native="skilldialog=false">Exit</v-btn>
+                                        </v-card-actions>
+                                    </v-card>
+                                </template>
+                                <template v-slot:[`item.selected`]="{ item }">
+                                    <v-simple-checkbox
+                                        v-model="item.selected"
+                                        :ripple="false"
+                                        @click="accionSkill(item)"
+                                    ></v-simple-checkbox>
+                                </template>
+                            </v-data-table>
+                        </v-dialog>                        
                     </v-toolbar>
                 </template>
                 <template v-slot:[`item.actions`]="{ item }">
@@ -198,7 +269,8 @@
                         bottom>
                         <template v-slot:activator="{ on, attrs }">
                             <v-icon
-                            class="mr-2"
+                            dense
+                            class="mr-1"
                             v-bind="attrs"
                             v-on="on"
                             @click="editItem(item)"
@@ -211,33 +283,8 @@
                     <v-tooltip bottom>
                         <template v-slot:activator="{ on, attrs }">
                             <v-icon
-                            class="mr-2"
-                            v-bind="attrs"
-                            v-on="on"
-                            @click="tratarGrupos(item)"
-                            >
-                            mdi-account-group
-                            </v-icon>
-                        </template>
-                        <span>Grupos</span>
-                    </v-tooltip>
-                    <v-tooltip bottom>
-                        <template v-slot:activator="{ on, attrs }">
-                            <v-icon
-                            class="mr-2"
-                            v-bind="attrs"
-                            v-on="on"
-                            @click="tratarProyectos(item)"
-                            >
-                            mdi-sprout
-                            </v-icon>
-                        </template>
-                        <span>Proyectos</span>
-                    </v-tooltip>
-                    <v-tooltip bottom>
-                        <template v-slot:activator="{ on, attrs }">
-                            <v-icon
-                            class="mr-2"
+                            dense
+                            class="mr-1"
                             v-bind="attrs"
                             v-on="on"
                             @click="deleteItem(item)"
@@ -251,7 +298,8 @@
                         <template v-slot:activator="{ on, attrs }">
                             <template v-if="item.activo">
                                 <v-icon
-                                class="mr-2"
+                                dense
+                                class="mr-1"
                                 v-bind="attrs"
                                 v-on="on"
                                 @click="activarDesactivarMostrar(2,item)"
@@ -261,7 +309,8 @@
                             </template>
                             <template v-else>
                                 <v-icon
-                                class="mr-2"
+                                dense
+                                class="mr-1"
                                 v-bind="attrs"
                                 v-on="on"
                                 @click="activarDesactivarMostrar(1,item)"
@@ -275,7 +324,8 @@
                     <v-tooltip bottom>
                         <template v-slot:activator="{ on, attrs }">
                             <v-icon
-                            class="mr-2"
+                            dense
+                            class="mr-1"
                             v-bind="attrs"
                             v-on="on"
                             @click="infoItem(item)"
@@ -298,7 +348,20 @@
                 </template>
                 <template v-slot:[`item._mainroleartisttxs`]="{ item }">
                     <td>
-                        <v-icon small @click="tratarMainrole" >mdi-plus</v-icon>
+                        <v-tooltip bottom>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-icon
+                                x-small
+                                class="mr-1"
+                                v-bind="attrs"
+                                v-on="on"
+                                @click="tratarRoles(item)"
+                                >
+                                mdi-details
+                                </v-icon>
+                            </template>
+                            <span>Manage Main Role</span>
+                        </v-tooltip>
                     </td>
                     <td>
                         {{ item._mainroleartisttxs }}
@@ -306,7 +369,20 @@
                 </template>
                 <template v-slot:[`item._skillartisttxs`]="{ item }">
                     <td>
-                        <v-icon small @click="tratarSkill">mdi-plus</v-icon>
+                        <v-tooltip bottom>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-icon
+                                x-small
+                                class="mr-1"
+                                v-bind="attrs"
+                                v-on="on"
+                                @click="tratarSkill(item)"
+                                >
+                                mdi-details
+                                </v-icon>
+                            </template>
+                            <span>Manage Skills</span>
+                        </v-tooltip>
                     </td>
                     <td>
                         {{ item._skillartisttxs }}
@@ -314,10 +390,93 @@
                 </template>
                 <template v-slot:[`item._notes`]="{ item }">
                     <td>
-                        <v-icon small @click="tratarNote">mdi-plus</v-icon>
+                        <v-tooltip bottom>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-icon
+                                x-small
+                                class="mr-1"
+                                v-bind="attrs"
+                                v-on="on"
+                                @click="tratarNote(item)"
+                                >
+                                mdi-details
+                                </v-icon>
+                            </template>
+                            <span>Manage Notes</span>
+                        </v-tooltip>
                     </td>
                     <td>
                         {{ item._notes }}
+                    </td>
+                </template>
+                <template v-slot:[`item._portfolios`]="{ item }">
+                    <td>
+                        <v-tooltip bottom>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-icon
+                                x-small
+                                class="mr-1"
+                                v-bind="attrs"
+                                v-on="on"
+                                @click="tratarPortfolio(item)"
+                                >
+                                mdi-details
+                                </v-icon>
+                            </template>
+                            <span>Manage Portfolio</span>
+                        </v-tooltip>
+                    </td>
+                    <td>
+                        {{ item._portfolios }}
+                    </td>
+                </template>
+                <template v-slot:[`item._schedules`]="{ item }">
+                    <td>
+                        <v-tooltip bottom>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-icon
+                                x-small
+                                class="mr-1"
+                                v-bind="attrs"
+                                v-on="on"
+                                @click="tratarSchedule(item)"
+                                >
+                                mdi-details
+                                </v-icon>
+                            </template>
+                            <span>Manage Portfolio</span>
+                        </v-tooltip>
+                    </td>
+                    <td>
+                        {{ item._schedules }}
+                    </td>
+                </template>
+                <template v-slot:[`item._rating`]="{ item }">
+                    <td>
+                        <v-tooltip bottom>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-icon
+                                x-small
+                                class="mr-1"
+                                v-bind="attrs"
+                                v-on="on"
+                                @click="tratarRating(item)"
+                                >
+                                mdi-details
+                                </v-icon>
+                            </template>
+                            <span>Manage Ratings</span>
+                        </v-tooltip>
+                    </td>
+                    <td>
+                        <v-rating
+                            v-model="item._rating"
+                            color="yellow darken-3"
+                            background-color="grey darken-1"
+                            readonly
+                            x-small
+                            dense
+                        ></v-rating>
                     </td>
                 </template>
                 <template v-slot:[`item.imgartist`]="{ item }">
@@ -526,10 +685,10 @@
   import axios from 'axios'
   import jsPDF from 'jspdf'
   export default {
-    data: () => ({
-        validForm: false,
+      data: () => ({
+          validForm: false,
         fullnameRules: [
-        v => !!v || 'Full Name is required',
+            v => !!v || 'Full Name is required',
         v => (v && v.length <= 64) || 'Name must be less than 64 characters',
         ],
         colores: [
@@ -565,6 +724,9 @@
             {value: 15, text: "15"},
             {value: -1, text: "All"},
         ],
+        searcha: '',
+        searchr: '',
+        searchs: '',
         snackbar: false,
         snackcolor: '',
         snacktext: '',
@@ -573,17 +735,21 @@
         selected: [],
         artists: [],
         schedules: [],
+        _shcedules: '',
         skills: [],
+        roles: [],
         _skillartistids: [],
         _skillartisttxs: [],
         mainroleartists: [],
         _mainroleartistids: [],
         _mainroleartisttxs: [],
+        portfolios: [],
         notes: [],
         _notes: '',
+        _portfolios: '',
         skillartists: [],
         ratings: [],
-        portfolios: [],
+        _rating: [],
         selections: [],
         selectedartists: [],
         usuarios: [],
@@ -604,14 +770,30 @@
         fecumod:'',
         activo:false,
         imageUrl:'',
-        dialog: false,
         editedIndex: -1,
+        dialog: false,
+        workedartistid: '',
+        roledialog: false,
+        roleheader: '',
+        skilldialog: false,
+        skillheader: '',
+        portfoliodialog: false,
+        portfolioheader: '',
+        notedialog: false,
+        noteheader: '',
+        scheduledialog: false,
+        scheduleheader: '',
+        ratingdialog: false,
+        ratingheader: '',
+        adModal: 0,
+        adAccion: 0,
+        adNombre: '',
+        adId: '',
 
 
 
 
 
-        roles:[],
         grupos:[],
         proyectos:[],
         grupousuarios:[],
@@ -622,7 +804,6 @@
         groupdialog: false,
         proydialog: false,
         searchg: '',
-        searcha: '',
         searchp: '',
         rolid:'',
         iniciales:'',
@@ -637,30 +818,40 @@
         addgroup: '',
         addproy: '',
         actPassword:false,
-        passwordAnt:'',
-        adModal: 0,
-        adAccion: 0,
-        adNombre: '',
-        adId: ''             
     }),
 
     computed: {
         headerartists(){
             return [
                 { text: 'Avatar', value: 'imgartist', align: 'center', sortable: false },
-                { text: 'Full Name', value: 'fullname', align: 'start', sortable: true },
+                { text: 'Full Name', value: 'fullname', align: 'start', sortable: true, width: 250 },
                 //{ text: 'Main Role Ids', value: '_mainroleartistids', align: 'start', sortable: true },
                 { text: 'Main Role Txt', value: '_mainroleartisttxs', align: 'start', sortable: true },
                 //{ text: 'Skills Ids', value: '_skillartistids', align: 'start', sortable: true },
-                { text: 'Skills Txt', value: '_skillartisttxs', align: 'start', sortable: true },
+                { text: 'Skills Txt', value: '_skillartisttxs', align: 'start', sortable: true, width: 250 },
+                { text: 'Portfolio', value: '_portfolios', align: 'start', sortable: true },
                 { text: 'Project Worked', value: 'projectsworked', align: 'start', sortable: true },
-                { text: 'Notes', value: '_notes', align: 'start', sortable: true },
-                { text: 'Cost', value: 'cost', align: 'start', sortable: true },
+                { text: 'Notes', value: '_notes', align: 'start', sortable: true, width: 250 },
+                { text: 'Schedules', value: '_schedules', align: 'start', sortable: true, width: 250 },
+                { text: 'Rating', value: '_rating', align: 'center', sortable: true },
+                { text: 'Cost', value: 'cost', align: 'start', sortable: true, width: 150 },
                 { text: 'eMail', value: 'email', align: 'start', sortable: true },
                 { text: 'Phone', value: 'phone', align: 'start', sortable: true },
                 { text: 'Mobile', value: 'mobile', align: 'start', sortable: true },
                 { text: 'Status', value: 'activo', align: 'start', sortable: true  },
-                { text: '[Options]', value: 'actions', align: 'center', sortable: false },
+                { text: '[Options]', value: 'actions', align: 'center', sortable: false, width: 200 },
+            ]
+        },
+        headermainroles(){
+            return [
+                { text: '#', value: 'selected', align: 'center', sortable: true },
+                { text: 'Main Role', value: 'text', align: 'start', sortable: true },
+            ]
+        },
+        headerskills(){
+            return [
+                { text: '#', value: 'selected', align: 'center', sortable: true },
+                { text: 'Skill', value: 'text', align: 'start', sortable: true },
             ]
         },
         headersgrupos(){
@@ -685,7 +876,7 @@
 
     watch: {
         dialog (val) {
-            val || this.close()
+            val || this.closedialog()
         },
     },
 
@@ -699,6 +890,10 @@
         save () {
         },
         cancel () {
+        },
+        open () {
+        },
+        close () {
         },
         pickFile () {
             this.$refs.image.click ()
@@ -781,35 +976,40 @@
             var sos = ""
             var index = ""
             var nots = ""
+            var pors = ""
+            var sum = 0
+            var qty = 0
+            var sche = ""
+            // eslint-disable-next-line
+            //debugger
             for ( var i = 0; i < items.length ; i++) {
-                //busca MainRole
-                filtered = me.mainroleartists.filter( function(e) {
-                    return e.artistid === items[i].id
-                })
-                for (var mr = 0 ; mr < filtered.length; mr++ ){
-                    lor += filtered[mr].skillid.toString()+', '
-                    index = this.skills.findIndex(x => x.value === filtered[mr].skillid)
-                    sor += me.skills[index].text+', '
-                }
-                // eslint-disable-next-line
-                //debugger
-                items[i]._mainroleartistids= lor.substring(0, lor.length - 2)
-                items[i]._mainroleartisttxs= sor.substring(0, sor.length - 2)
-                lor = ''
-                sor = ''
                 //busca Skills
                 filtered = me.skillartists.filter( function(e) {
                     return e.artistid === items[i].id
                 })
                 for (var ms = 0 ; ms < filtered.length; ms++ ){
                     los += filtered[ms].skillid.toString()+', '
-                    index = this.skills.findIndex(x => x.value === filtered[ms].skillid)
+                    index = me.skills.findIndex(x => x.value === filtered[ms].skillid)
                     sos += me.skills[index].text+', '
                 }
                 items[i]._skillartistids= los.substring(0, los.length - 2)
                 items[i]._skillartisttxs= sos.substring(0, sos.length - 2)
                 los = ''
                 sos = ''
+                //busca MainRole
+                filtered = me.mainroleartists.filter( function(e) {
+                    return e.artistid === items[i].id
+                })
+                for (var mr = 0 ; mr < filtered.length; mr++ ){
+                    lor += filtered[mr].skillid.toString()+', '
+                    index = me.skills.findIndex(x => x.value === filtered[mr].skillid)
+                    sor += me.skills[index].text+', '
+                }
+                me.roles = me.skills.filter( x => x.ismainrole)
+                items[i]._mainroleartistids= lor.substring(0, lor.length - 2)
+                items[i]._mainroleartisttxs= sor.substring(0, sor.length - 2)
+                lor = ''
+                sor = ''
                 //busca Notas
                 filtered = me.notes.filter( function(e) {
                     return e.artistid === items[i].id
@@ -819,6 +1019,37 @@
                 }
                 items[i]._notes = nots.length>512?nots.substr(0,512):nots.substring(0, nots.length - 2)
                 nots = ''
+                //busca Portfolios
+                filtered = me.portfolios.filter( function(e) {
+                    return e.artistid === items[i].id
+                })
+                for (var po = 0 ; po < filtered.length; po++ ){
+                    pors += filtered[po].text+' '
+                }
+                items[i]._portfolios = pors.length>128?pors.substr(0,128):pors.substring(0, pors.length - 1)
+                pors = ''
+                //Calcula Rating
+                filtered = me.ratings.filter( function(e) {
+                    return e.artistid === items[i].id
+                })
+                for (var ra = 0 ; ra < filtered.length; ra++ ){
+                    if (filtered[ra].activo){
+                        sum += filtered[ra].score
+                        qty++
+                    }
+                }
+                items[i]._rating = Math.round(sum / qty)
+                sum = 0
+                qty = 0
+                // Arma Schedule
+                filtered = me.schedules.filter( function(e) {
+                    return e.artistid === items[i].id
+                })
+                for (var sc = 0 ; sc < filtered.length; sc++ ){
+                    sche += "[" + filtered[sc].startdate.substr(0,10) + '~' + filtered[sc].enddate.substr(0,10) + "] " + filtered[sc].reason + ", "
+                }
+                items[i]._schedules = sche.length>128?sche.substr(0,128):sche.substring(0, sche.length - 2)
+                sche = ''
             }
         },
         select(){
@@ -828,6 +1059,9 @@
             let mainroleartistsArray = []
             let skillartistsArray = []
             let notesArray = []
+            let portfoliosArray = []
+            let ratingsArray = []
+            let schedulesArray = []
             let header={"Authorization" : "Bearer " + this.$store.state.token};
             let configuracion= {headers : header};
             axios.get('api/Usuarios/Listar',configuracion).then(function(response){
@@ -846,7 +1080,8 @@
             axios.get('api/Skills/Select',configuracion).then(function(response){
                 skillsArray=response.data;
                 skillsArray.map(function(x){
-                    me.skills.push({selected: false, value:x.id, text: x.skill, ismainrole: x.ismainrole });
+                    me.skills.push({selected: false, value:x.id, text: x.skill, ismainrole: x.ismainrole, relid: 0 });
+                    me.roles=me.skills.filter(e => e.ismainrole)
                 });
             }).catch(function(error){
                 me.snacktext = 'An error was detected. Code: '+ error.response.status;
@@ -890,22 +1125,42 @@
                 me.snackbar = true;
                 console.log(error);
             });
-        },
-        lovskillstxs (lov) {
-            let me = this;
-            var aux = ''
-            if ( me.skills.length > 0) {
-                var index = 0
-                if (lov.length > 0){
-                    for (var i = 0; i < lov.length-1; i++){
-                        index = this.skills.findIndex(x => x.value == lov[i])
-                        aux += this.skills[index].text+', '
-                    }
-                    index = this.skills.findIndex(x => x.value == lov[lov.length-1])
-                    aux += this.skills[index].text
-                }
-            }
-            return aux
+            axios.get('api/Portfolios/Listar',configuracion).then(function(response){
+                portfoliosArray=response.data;
+                portfoliosArray.map(function(x){
+                    me.portfolios.push({selected: false, value:x.id, artistid: x.artistid, text: x.url, iduseralta: x.iduseralta,
+                        fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
+                });
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = 'error'
+                me.snackbar = true;
+                console.log(error);
+            });
+            axios.get('api/Ratings/Listar',configuracion).then(function(response){
+                ratingsArray=response.data;
+                ratingsArray.map(function(x){
+                    me.ratings.push({selected: false, value:x.id, artistid: x.artistid, projectname: x.projectname, score: x.score, iduseralta: x.iduseralta,
+                        fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
+                });
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = 'error'
+                me.snackbar = true;
+                console.log(error);
+            });
+            axios.get('api/Schedules/Listar',configuracion).then(function(response){
+                schedulesArray=response.data;
+                schedulesArray.map(function(x){
+                    me.schedules.push({selected: false, value:x.id, artistid: x.artistid, startdate: x.startdate, enddate: x.enddate,
+                        reason: x.reason, iduseralta: x.iduseralta, fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
+                });
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = 'error'
+                me.snackbar = true;
+                console.log(error);
+            });
         },
         editItem (item) {
             this.id=item.id;
@@ -948,7 +1203,7 @@
                     me.snacktext = 'Eliminated';
                     me.snackcolor = "success";
                     me.snackbar = true;
-                    me.close();
+                    me.closedialog();
                     me.listar();
                 }).catch(function(error){
                     me.snacktext = 'An error was detected. Code: '+ error.response.status;
@@ -960,6 +1215,7 @@
         },
         infoItem(item){
             var index = this.usuarios.findIndex(x => x.iduseralta === item.iduseralta);
+            this.adNombre = item.fullname;
             this.iduseralta=this.usuarios[index].email + ' ' + this.usuarios[index].apellido +' '+ this.usuarios[index].nombre;
             this.fecalta=item.fecalta;
             this.iduserumod=this.usuarios[index].email + ' ' + this.usuarios[index].apellido +' '+ this.usuarios[index].nombre;
@@ -971,9 +1227,10 @@
             this.fecalta='';
             this.iduserumod='';
             this.fecumod='';
+            this.adNombre='';
             this.recordInfo = false;
         },
-        close () {
+        closedialog () {
             this.dialog = false
             this.limpiar();
         },
@@ -1053,7 +1310,7 @@
                     me.snacktext = 'Updated';
                     me.snackcolor = "success";
                     me.snackbar = true;
-                    me.close();
+                    me.closedialog();
                     me.listar();
                     me.limpiar();
                 }).catch(function(error){
@@ -1084,7 +1341,7 @@
                     me.snacktext = 'Created';
                     me.snackcolor = "success";
                     me.snackbar = true;
-                    me.close();
+                    me.closedialog();
                     me.listar();
                     me.limpiar();
                 }).catch(function(error){
@@ -1113,15 +1370,75 @@
                 console.log(error);
             });
         },
-        tratarMainrole(item){
-            let me = this
-            console.log(me, item)
+        tratarRoles(element){
+            var me=this;
+            let index = 0;
+            for (var l = 0; l < me.roles.length; l++){
+                me.roles[l].selected = false;
+                me.roles[l].relid = 0;
+            }
+            // eslint-disable-next-line
+            //debugger
+            for (var i = 0; i < me.mainroleartists.length; i++){
+                if (me.mainroleartists[i].artistid === element.id){
+                    index = me.roles.findIndex(elemento => elemento.value === me.mainroleartists[i].skillid );
+                    me.roles[index].selected = true;
+                    me.roles[index].relid = me.mainroleartists[i].value;
+                }
+            }
+            me.workedartistid = element.id;
+            me.roleheader = 'Main Role assigned to ' + element.fullname;
+            me.roledialog=!me.roledialog;
         },
-        tratarSkill(item){
-            let me = this
-            console.log(me, item)
+        tratarSkill(element){
+            var me=this;
+            let index = 0;
+            for (var l = 0; l < me.skills.length; l++){
+                me.skills[l].selected = false;
+                me.skills[l].relid = 0;
+            }
+            // eslint-disable-next-line
+            //debugger
+            for (var i = 0; i < me.skillartists.length; i++){
+                if (me.skillartists[i].artistid === element.id){
+                    index = me.skills.findIndex(elemento => elemento.value === me.skillartists[i].skillid );
+                    me.skills[index].selected = true;
+                    me.skills[index].relid = me.skillartists[i].value;
+                }
+            }
+            me.workedartistid = element.id;
+            me.skillheader = 'Skill assigned to ' + element.fullname;
+            me.skilldialog=!me.skilldialog;
+        },
+        tratarPortfolio(element){
+            var me=this;
+            let index = 0;
+            for (var l = 0; l < me.skills.length; l++){
+                me.skills[l].selected = false;
+                me.skills[l].relid = 0;
+            }
+            // eslint-disable-next-line
+            //debugger
+            for (var i = 0; i < me.skillartists.length; i++){
+                if (me.skillartists[i].artistid === element.id){
+                    index = me.skills.findIndex(elemento => elemento.value === me.skillartists[i].skillid );
+                    me.skills[index].selected = true;
+                    me.skills[index].relid = me.skillartists[i].value;
+                }
+            }
+            me.workedartistid = element.id;
+            me.portfolioheader = 'Portfolio of ' + element.fullname;
+            me.portfoliodialog=!me.portfoliodialog;
         },
         tratarNote(item){
+            let me = this
+            console.log(me, item)
+        },
+        tratarRating(item){
+            let me = this
+            console.log(me, item)
+        },
+        tratarSchedule(item){
             let me = this
             console.log(me, item)
         },
@@ -1140,6 +1457,88 @@
             me.workuserId = item.id;
             me.groupheader = 'Grupos de ' + item.iniciales + ' ' + item.email;
             me.groupdialog=!me.groupdialog;
+        },
+        accionRole (item) {
+            var me=this;
+            if (item.selected === true ) {
+                let header={"Authorization" : "Bearer " + this.$store.state.token};
+                let configuracion= {headers : header};
+                axios.post('api/Mainroleartists/Crear',{
+                    'skillid': item.value,
+                    'artistid': this.workedartistid,
+                    'iduseralta': me.$store.state.usuario.idusuario
+                },configuracion)
+                .then(function(response){
+                    me.mainroleartists.push({selected: true, skillid: response.data.skillid, artistid: response.data.artistid, value: response.data.id});
+                    me.fillSnowflake(me.artists)
+                    //console.log(response);
+                    me.snacktext = 'Created';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackbar = true;
+                    me.snackcolor = 'error'
+                    console.log(error);
+                });
+            } else {
+                var indice = me.mainroleartists.find(x => item.value === x.skillid && me.workedartistid === x.artistid).value;
+                let header={"Authorization" : "Bearer " + me.$store.state.token};
+                let configuracion= {headers : header};
+                axios.delete('api/Mainroleartists/Eliminar/'+indice,configuracion).then( () => {
+                    me.mainroleartists = me.mainroleartists.filter(x => x.value != indice);
+                    me.fillSnowflake(me.artists)
+                    me.snacktext = 'Eliminated';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackcolor = "error";
+                    me.snackbar = true;
+                    console.log(error);
+                });
+            }
+        },
+        accionSkill (item) {
+            var me=this;
+            if (item.selected === true ) {
+                let header={"Authorization" : "Bearer " + this.$store.state.token};
+                let configuracion= {headers : header};
+                axios.post('api/Skillartists/Crear',{
+                    'skillid': item.value,
+                    'artistid': this.workedartistid,
+                    'iduseralta': me.$store.state.usuario.idusuario
+                },configuracion)
+                .then(function(response){
+                    me.skillartists.push({selected: true, skillid: response.data.skillid, artistid: response.data.artistid, value: response.data.id});
+                    me.fillSnowflake(me.artists)
+                    //console.log(response);
+                    me.snacktext = 'Created';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackbar = true;
+                    me.snackcolor = 'error'
+                    console.log(error);
+                });
+            } else {
+                var indice = me.skillartists.find(x => item.value === x.skillid && me.workedartistid === x.artistid).value;
+                let header={"Authorization" : "Bearer " + me.$store.state.token};
+                let configuracion= {headers : header};
+                axios.delete('api/Skillartists/Eliminar/'+indice,configuracion).then( () => {
+                    me.skillartists = me.skillartists.filter(x => x.value != indice);
+                    me.fillSnowflake(me.artists)
+                    me.snacktext = 'Eliminated';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackcolor = "error";
+                    me.snackbar = true;
+                    console.log(error);
+                });
+            }
         },
         tratarProyectos(item){
             var me=this;
@@ -1281,7 +1680,7 @@
         },
         activarDesactivarMostrar(accion,item){
             this.adModal=1;
-            this.adNombre=item.apellido+' '+item.nombre;
+            this.adNombre=item.fullname;
             this.adId=item.id;                
             if (accion==1){
                 this.adAccion=1;
