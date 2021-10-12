@@ -28,10 +28,11 @@
         <v-col cols="12" md="12" sm="12">
             <v-data-table
             v-model="selected"
-            dense
             :headers="headerartists"
             :items="artists"
+            :items-per-page="10"
             :search="searcha"
+            item-key="fullname"
             show-select
             class="elevation-1 blue-grey lighten-5"
             no-data-text="Nothing to show"
@@ -186,7 +187,7 @@
                                 </v-card-text>
                                 <v-card-actions>
                                     <v-spacer/>
-                                    <v-btn small @click="recordInfo=false">Exit
+                                    <v-btn small @click="recordInfo=false">Close
                                     <v-icon>mdi-cancel</v-icon>
                                     </v-btn>
                                 </v-card-actions>
@@ -198,7 +199,7 @@
                                 :items="roles"
                                 :search="searchr"
                                 class="elevation-1"
-                                items-per-page="5"
+                                :items-per-page="5"
                                 no-data-text="Nothing to Show"
                             >
                                 <template v-slot:top>
@@ -214,7 +215,7 @@
                                                 hide-details
                                                 clearable 
                                                 ></v-text-field>
-                                            <v-btn color="primary" dense dark class="ma-2" @click.native="roledialog=false">Exit</v-btn>
+                                            <v-btn color="primary" dense dark class="ma-2" @click.native="roledialog=false">Close</v-btn>
                                         </v-card-actions>
                                     </v-card>
                                 </template>
@@ -233,7 +234,7 @@
                                 :items="skills"
                                 :search="searchs"
                                 class="elevation-1"
-                                items-per-page="5"
+                                :items-per-page="5"
                                 no-data-text="Nothing to Show"
                             >
                                 <template v-slot:top>
@@ -248,8 +249,9 @@
                                                 single-line 
                                                 hide-details
                                                 clearable 
-                                                ></v-text-field>
-                                            <v-btn color="primary" dense dark class="ma-2" @click.native="skilldialog=false">Exit</v-btn>
+                                                >
+                                            </v-text-field>
+                                            <v-btn color="primary" dense dark class="ma-2" @click.native="skilldialog=false">Close</v-btn>
                                         </v-card-actions>
                                     </v-card>
                                 </template>
@@ -261,7 +263,565 @@
                                     ></v-simple-checkbox>
                                 </template>
                             </v-data-table>
-                        </v-dialog>                        
+                        </v-dialog>
+                        <v-dialog v-model="portfoliodialog" max-width=700>
+                            <v-data-table
+                                :headers="headerportfolio"
+                                :items="portfolioartists"
+                                sort-by="text"
+                                class="elevation-1"
+                                :items-per-page="5"
+                            >
+                                <template v-slot:top>
+                                <v-toolbar
+                                    flat
+                                >
+                                    <v-toolbar-title>Portfolio of {{portfolioheader}}</v-toolbar-title>
+                                    <v-divider
+                                    class="mx-4"
+                                    inset
+                                    vertical
+                                    ></v-divider>
+                                    <v-spacer/>   
+                                    <v-dialog
+                                        v-model="portfolioCRUDdialog"
+                                        max-width="600px"
+                                        >
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-btn
+                                            color="primary"
+                                            dark
+                                            class="mb-2"
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            >
+                                            NEW
+                                            </v-btn>
+                                        </template>
+                                        <v-card>
+                                            <v-card-title>
+                                                <p class="text-h5">{{ formTitlePortfolio }} for {{ portfolioheader }}</p>
+                                            </v-card-title>
+                                            <v-card-text>
+                                                <v-form
+                                                ref="portfolioform"
+                                                v-model="validportfolioform"
+                                                >
+                                                    <v-container>
+                                                        <v-col
+                                                            cols="12"
+                                                            sm="12"
+                                                            md="12"
+                                                        >
+                                                            <v-text-field
+                                                            v-model="url"
+                                                            label="URL Instance"
+                                                            :rules="urlRules"
+                                                            counter="128"
+                                                            ></v-text-field>
+                                                        </v-col>
+                                                    </v-container>
+                                                </v-form>
+                                            </v-card-text>
+                                            <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn
+                                                color="primary"
+                                                text
+                                                @click="closePortfolio"
+                                            >
+                                                Cancel
+                                            </v-btn>
+                                            <v-btn
+                                                color="primary"
+                                                text
+                                                :disabled ="!validportfolioform"
+                                                @click="savePortfolio"
+                                            >
+                                                Save
+                                            </v-btn>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </v-dialog>
+                                    <v-dialog v-model="dialogDeletePortfolio" max-width="520px">
+                                    <v-card>
+                                        <v-card-title class="text-h5">Are you sure you want to delete this item?
+                                        </v-card-title>
+                                        <p class="ml-3" >{{url}}</p>
+                                        <v-card-actions>
+                                        <v-spacer></v-spacer>
+                                        <v-btn color="primary" text @click="closeDeletePortfolio">Cancel</v-btn>
+                                        <v-btn color="primary" text @click="deletePorfolioConfirm">OK</v-btn>
+                                        <v-spacer></v-spacer>
+                                        </v-card-actions>
+                                    </v-card>
+                                    </v-dialog>
+                                </v-toolbar>
+                                </template>
+                                <template v-slot:[`item.text`]="{ item }">
+                                    <v-chip
+                                        class="ma-2"
+                                        color="scondary"
+                                        label
+                                        @click="openTab(item.text)"
+                                    >
+                                        {{ item.text}}
+                                    </v-chip>
+                                </template>
+                                <template v-slot:[`item.actions`]="{ item }">
+                                <v-icon
+                                    small
+                                    class="mr-2"
+                                    @click="editPortfolio(item)"
+                                >
+                                    mdi-pencil
+                                </v-icon>
+                                <v-icon
+                                    small
+                                    @click="deletePortfolio(item)"
+                                >
+                                    mdi-delete
+                                </v-icon>
+                                </template>
+                            </v-data-table>
+                        </v-dialog>
+                        <v-dialog v-model="notedialog" max-width=700>
+                            <v-data-table
+                                :headers="headernotes"
+                                :items="noteartists"
+                                sort-by="fecumod"
+                                sort-desc
+                                :search="searchn"
+                                class="elevation-1"
+                                :items-per-page="5"
+                            >
+                                <template v-slot:top>
+                                <v-toolbar
+                                    flat
+                                >
+                                    <v-toolbar-title>Notes of {{ noteheader }}</v-toolbar-title>
+                                    <v-divider
+                                    class="mx-4"
+                                    inset
+                                    vertical
+                                    ></v-divider>
+                                    <v-spacer/>   
+                                    <v-dialog
+                                        v-model="noteCRUDdialog"
+                                        max-width="600px"
+                                        >
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-btn
+                                            color="primary"
+                                            dark
+                                            class="mb-2"
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            >
+                                            NEW
+                                            </v-btn>
+                                        </template>
+                                        <v-card>
+                                            <v-card-title>
+                                                <p class="text-h5">{{ formTitleNote }} for {{ noteheader }}</p>
+                                            </v-card-title>
+                                            <v-card-text>
+                                                <v-form
+                                                ref="noteform"
+                                                v-model="validnoteform"
+                                                >
+                                                    <v-container>
+                                                        <v-col
+                                                            cols="12"
+                                                            sm="12"
+                                                            md="12"
+                                                        >
+                                                            <v-text-field
+                                                            v-model="note"
+                                                            label="Note"
+                                                            :rules="noteRules"
+                                                            counter="512"
+                                                            ></v-text-field>
+                                                        </v-col>
+                                                    </v-container>
+                                                </v-form>
+                                            </v-card-text>
+                                            <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn
+                                                color="primary"
+                                                text
+                                                @click="closeNote"
+                                            >
+                                                Cancel
+                                            </v-btn>
+                                            <v-btn
+                                                color="primary"
+                                                text
+                                                :disabled ="!validnoteform"
+                                                @click="saveNote"
+                                            >
+                                                Save
+                                            </v-btn>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </v-dialog>
+                                    <v-dialog v-model="dialogDeleteNote" max-width="520px">
+                                    <v-card>
+                                        <v-card-title class="text-h5">Are you sure you want to delete this note?
+                                        </v-card-title>
+                                        <p class="ml-3" >{{note}}</p>
+                                        <v-card-actions>
+                                        <v-spacer></v-spacer>
+                                        <v-btn color="primary" text @click="closeDeleteNote">Cancel</v-btn>
+                                        <v-btn color="primary" text @click="deleteNoteConfirm">OK</v-btn>
+                                        <v-spacer></v-spacer>
+                                        </v-card-actions>
+                                    </v-card>
+                                    </v-dialog>
+                                </v-toolbar>
+                                </template>
+                                <template v-slot:[`item.fecumod`]="{ item }">
+                                    {{ item.fecumod.substr(0,10) }}
+                                </template>
+                                <template v-slot:[`item.text`]="{ item }">
+                                    {{ item.text}}
+                                </template>
+                                <template v-slot:[`item.actions`]="{ item }">
+                                <v-icon
+                                    small
+                                    class="mr-2"
+                                    @click="editNote(item)"
+                                >
+                                    mdi-pencil
+                                </v-icon>
+                                <v-icon
+                                    small
+                                    @click="deleteNote(item)"
+                                >
+                                    mdi-delete
+                                </v-icon>
+                                </template>
+                            </v-data-table>
+                        </v-dialog>
+                        <v-dialog v-model="scheduledialog" max-width=700>
+                            <v-data-table
+                                :headers="headerschedules"
+                                :items="scheduleartists"
+                                sort-by="fecumod"
+                                sort-desc
+                                :search="searchn"
+                                class="elevation-1"
+                                :items-per-page="5"
+                            >
+                                <template v-slot:top>
+                                <v-toolbar
+                                    flat
+                                >
+                                    <v-toolbar-title>Schedule of {{ scheduleheader }}</v-toolbar-title>
+                                    <v-divider
+                                    class="mx-4"
+                                    inset
+                                    vertical
+                                    ></v-divider>
+                                    <v-spacer/>   
+                                    <v-dialog
+                                        v-model="scheduleCRUDdialog"
+                                        max-width="600px"
+                                        >
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-btn
+                                            color="primary"
+                                            dark
+                                            class="mb-2"
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            >
+                                            NEW
+                                            </v-btn>
+                                        </template>
+                                        <v-card>
+                                            <v-card-title>
+                                                <p class="text-h5">{{ formTitleSchedule }} for {{ scheduleheader }}</p>
+                                            </v-card-title>
+                                            <v-card-text>
+                                                <v-form
+                                                ref="scheduleform"
+                                                v-model="validscheduleform"
+                                                >
+                                                    <v-container>
+                                                        <v-row>
+                                                            <v-col
+                                                                cols="12"
+                                                                sm="6"
+                                                                md="6"
+                                                            >
+                                                                <v-menu
+                                                                ref="menu"
+                                                                v-model="menu"
+                                                                :close-on-content-click="false"
+                                                                :return-value.sync="dates"
+                                                                transition="scale-transition"
+                                                                offset-y
+                                                                min-width="auto"
+                                                                >
+                                                                <template v-slot:activator="{ on, attrs }">
+                                                                    <v-text-field
+                                                                    v-model="dateRangeText"
+                                                                    label="Date range"
+                                                                    prepend-icon="mdi-calendar"
+                                                                    readonly
+                                                                    v-bind="attrs"
+                                                                    v-on="on"
+                                                                    ></v-text-field>
+                                                                </template>
+                                                                <v-date-picker
+                                                                    v-model="dates"
+                                                                    color="primary"
+                                                                    range
+                                                                    no-title
+                                                                    scrollable
+                                                                >
+                                                                    <v-spacer></v-spacer>
+                                                                    <v-btn
+                                                                    text
+                                                                    color="primary"
+                                                                    @click="menu = false"
+                                                                    >
+                                                                    Cancel
+                                                                    </v-btn>
+                                                                    <v-btn
+                                                                    text
+                                                                    color="primary"
+                                                                    @click="$refs.menu.save(dates)"
+                                                                    >
+                                                                    OK
+                                                                    </v-btn>
+                                                                </v-date-picker>
+                                                                </v-menu>
+                                                            </v-col>
+                                                            <v-col
+                                                                cols="12"
+                                                                sm="6"
+                                                                md="6"
+                                                            >
+                                                                <v-text-field
+                                                                v-model="reason"
+                                                                label="Reason"
+                                                                counter="32"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-container>
+                                                </v-form>
+                                            </v-card-text>
+                                            <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn
+                                                color="primary"
+                                                text
+                                                @click="closeSchedule"
+                                            >
+                                                Cancel
+                                            </v-btn>
+                                            <v-btn
+                                                color="primary"
+                                                text
+                                                :disabled ="!validscheduleform"
+                                                @click="saveSchedule"
+                                            >
+                                                Save
+                                            </v-btn>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </v-dialog>
+                                    <v-dialog v-model="dialogDeleteSchedule" max-width="570px">
+                                    <v-card>
+                                        <v-card-title class="text-h5">Are you sure you want to delete this schedule?
+                                        </v-card-title>
+                                        <p class="ml-3" >{{ dateRangeText }} {{reason}}</p>
+                                        <v-card-actions>
+                                        <v-spacer></v-spacer>
+                                        <v-btn color="primary" text @click="closeDeleteSchedule">Cancel</v-btn>
+                                        <v-btn color="primary" text @click="deleteScheduleConfirm">OK</v-btn>
+                                        <v-spacer></v-spacer>
+                                        </v-card-actions>
+                                    </v-card>
+                                    </v-dialog>
+                                </v-toolbar>
+                                </template>
+                                <template v-slot:[`item.startdate`]="{ item }">
+                                    {{ item.startdate.substr(0,10) }}
+                                </template>
+                                <template v-slot:[`item.enddate`]="{ item }">
+                                    {{ item.enddate.substr(0,10) }}
+                                </template>
+                                <template v-slot:[`item.reason`]="{ item }">
+                                    {{ item.reason}}
+                                </template>
+                                <template v-slot:[`item.actions`]="{ item }">
+                                <v-icon
+                                    small
+                                    class="mr-2"
+                                    @click="editSchedule(item)"
+                                >
+                                    mdi-pencil
+                                </v-icon>
+                                <v-icon
+                                    small
+                                    @click="deleteSchedule(item)"
+                                >
+                                    mdi-delete
+                                </v-icon>
+                                </template>
+                            </v-data-table>
+                        </v-dialog>
+
+                        <v-dialog v-model="ratingdialog" max-width=700>
+                            <v-data-table
+                                :headers="headerratings"
+                                :items="ratingartists"
+                                sort-by="fecumod"
+                                sort-desc
+                                :search="searchn"
+                                class="elevation-1"
+                                :items-per-page="5"
+                            >
+                                <template v-slot:top>
+                                <v-toolbar
+                                    flat
+                                >
+                                    <v-toolbar-title>Ratings of {{ ratingheader }}</v-toolbar-title>
+                                    <v-divider
+                                    class="mx-4"
+                                    inset
+                                    vertical
+                                    ></v-divider>
+                                    <v-spacer/>   
+                                    <v-dialog
+                                        v-model="ratingCRUDdialog"
+                                        max-width="600px"
+                                        >
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-btn
+                                            color="primary"
+                                            dark
+                                            class="mb-2"
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            >
+                                            NEW
+                                            </v-btn>
+                                        </template>
+                                        <v-card>
+                                            <v-card-title>
+                                                <p class="text-h5">{{ formTitleRating }} for {{ ratingheader }}</p>
+                                            </v-card-title>
+                                            <v-card-text>
+                                                <v-form
+                                                ref="ratingform"
+                                                v-model="validratingform"
+                                                >
+                                                    <v-container>
+                                                        <v-row>
+                                                            <v-col
+                                                                cols="12"
+                                                                sm="8"
+                                                                md="8"
+                                                            >
+                                                                <v-text-field
+                                                                v-model="projectname"
+                                                                label="Project name"
+                                                                type="text"
+                                                                :rules="noempty32"
+                                                                counter="32"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col
+                                                                cols="12"
+                                                                sm="4"
+                                                                md="4"
+                                                            >
+                                                                <v-text-field
+                                                                v-model="Sscore"
+                                                                type="number"
+                                                                label="Score"
+                                                                :rules="scoreRules"
+                                                                min="0"
+                                                                max="5"
+                                                                ></v-text-field>
+                                                                <!-- <v-rating
+                                                                v-model="score"
+                                                                color="yellow darken-4"
+                                                                background-color="grey darken-1"
+                                                                empty-icon="$ratingFull"
+                                                                x-small
+                                                                hover
+                                                                ></v-rating> -->
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-container>
+                                                </v-form>
+                                            </v-card-text>
+                                            <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn
+                                                color="primary"
+                                                text
+                                                @click="closeRating"
+                                            >
+                                                Cancel
+                                            </v-btn>
+                                            <v-btn
+                                                color="primary"
+                                                text
+                                                :disabled ="!validratingform"
+                                                @click="saveRating"
+                                            >
+                                                Save
+                                            </v-btn>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </v-dialog>
+                                    <v-dialog v-model="dialogDeleteRating" max-width="550px">
+                                    <v-card>
+                                        <v-card-title class="text-h5">Are you sure you want to delete this rating?
+                                        </v-card-title>
+                                        <p class="ml-3" >{{rating}}</p>
+                                        <v-card-actions>
+                                        <v-spacer></v-spacer>
+                                        <v-btn color="primary" text @click="closeDeleteRating">Cancel</v-btn>
+                                        <v-btn color="primary" text @click="deleteRatingConfirm">OK</v-btn>
+                                        <v-spacer></v-spacer>
+                                        </v-card-actions>
+                                    </v-card>
+                                    </v-dialog>
+                                </v-toolbar>
+                                </template>
+                                <template v-slot:[`item.fecumod`]="{ item }">
+                                    {{ item.fecumod.substr(0,10) }}
+                                </template>
+                                <template v-slot:[`item.text`]="{ item }">
+                                    {{ item.text}}
+                                </template>
+                                <template v-slot:[`item.actions`]="{ item }">
+                                <v-icon
+                                    small
+                                    class="mr-2"
+                                    @click="editRating(item)"
+                                >
+                                    mdi-pencil
+                                </v-icon>
+                                <v-icon
+                                    small
+                                    @click="deleteRating(item)"
+                                >
+                                    mdi-delete
+                                </v-icon>
+                                </template>
+                            </v-data-table>
+                        </v-dialog>
+
                     </v-toolbar>
                 </template>
                 <template v-slot:[`item.actions`]="{ item }">
@@ -269,6 +829,7 @@
                         bottom>
                         <template v-slot:activator="{ on, attrs }">
                             <v-icon
+                            :disabled="!item.activo"
                             dense
                             class="mr-1"
                             v-bind="attrs"
@@ -351,6 +912,7 @@
                         <v-tooltip bottom>
                             <template v-slot:activator="{ on, attrs }">
                                 <v-icon
+                                :disabled="!item.activo"
                                 x-small
                                 class="mr-1"
                                 v-bind="attrs"
@@ -372,6 +934,7 @@
                         <v-tooltip bottom>
                             <template v-slot:activator="{ on, attrs }">
                                 <v-icon
+                                :disabled="!item.activo"
                                 x-small
                                 class="mr-1"
                                 v-bind="attrs"
@@ -393,6 +956,7 @@
                         <v-tooltip bottom>
                             <template v-slot:activator="{ on, attrs }">
                                 <v-icon
+                                :disabled="!item.activo"
                                 x-small
                                 class="mr-1"
                                 v-bind="attrs"
@@ -414,6 +978,7 @@
                         <v-tooltip bottom>
                             <template v-slot:activator="{ on, attrs }">
                                 <v-icon
+                                :disabled="!item.activo"
                                 x-small
                                 class="mr-1"
                                 v-bind="attrs"
@@ -435,6 +1000,7 @@
                         <v-tooltip bottom>
                             <template v-slot:activator="{ on, attrs }">
                                 <v-icon
+                                :disabled="!item.activo"
                                 x-small
                                 class="mr-1"
                                 v-bind="attrs"
@@ -444,7 +1010,7 @@
                                 mdi-details
                                 </v-icon>
                             </template>
-                            <span>Manage Portfolio</span>
+                            <span>Manage Schedules</span>
                         </v-tooltip>
                     </td>
                     <td>
@@ -456,6 +1022,7 @@
                         <v-tooltip bottom>
                             <template v-slot:activator="{ on, attrs }">
                                 <v-icon
+                                :disabled="!item.activo"
                                 x-small
                                 class="mr-1"
                                 v-bind="attrs"
@@ -471,7 +1038,7 @@
                     <td>
                         <v-rating
                             v-model="item._rating"
-                            color="yellow darken-3"
+                            color="yellow darken-4"
                             background-color="grey darken-1"
                             readonly
                             x-small
@@ -504,181 +1071,6 @@
                 </template>
             </v-data-table>
         </v-col>
-        <v-col cols="12" md="6" sm="3">
-            <v-dialog v-model="groupdialog" max-width="750px">
-                <v-data-table
-                dense
-                :headers="headersgrupos"
-                :items="grupos"
-                :search="searchg"
-                class="elevation-1"
-                no-data-text="Nada para mostrar"
-                >
-                    <template v-slot:top>
-                        <v-card flat color="white">
-                            <v-card-title>{{groupheader}}</v-card-title>
-                            <v-card-actions>
-                                <v-row>
-                                    <v-col cols="12" md="6" sm="6">
-                                        <v-text-field label="Search" class="ma-2" 
-                                        outlined 
-                                        dense 
-                                        v-model="searchg" 
-                                        append-icon="mdi-magnify" 
-                                        single-line 
-                                        hide-details
-                                        clearable 
-                                        ></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" md="5" sm="5">
-                                        <v-text-field 
-                                            label="Agregar grupo"
-                                            class="ma-2"
-                                            outlined 
-                                            dense 
-                                            hide-details
-                                            v-model="addgroup"
-                                            clearable
-                                            counter="50"
-                                            append-icon="mdi-plus-circle"
-                                            @click:append="agregarGrupo(addgroup)"
-                                            ></v-text-field>
-                                    </v-col>
-                                </v-row>
-                                <v-btn color="primary" dense dark class="ma-2" @click.native="groupdialog=false">Salir</v-btn>
-                            </v-card-actions>
-                        </v-card>
-                    </template>
-                    <template v-slot:[`item.selected`]="{ item }">
-                        <v-simple-checkbox
-                            v-model="item.selected"
-                            :ripple="false"
-                            @click="accionGrupo(item)"
-                        ></v-simple-checkbox>
-                    </template>
-                    <template v-slot:no-data>
-                        <v-btn color="primary" @click="listar">Reset</v-btn>
-                    </template>
-                </v-data-table>
-            </v-dialog>
-            <v-dialog v-model="proydialog" max-width="750px">
-                <v-data-table
-                dense
-                :headers="headersproyectos"
-                :items="proyectos"
-                :search="searchp"
-                class="elevation-1"
-                no-data-text="Nada para mostrar"
-                >
-                    <template v-slot:top>
-                        <v-card flat color="white">
-                            <v-card-title>{{proyheader}}</v-card-title>
-                            <v-card-actions>
-                                <v-row>
-                                    <v-col cols="12" md="8" sm="8">
-                                        <v-text-field label="Search" class="ma-2" 
-                                        outlined 
-                                        dense 
-                                        v-model="searchp" 
-                                        append-icon="mdi-magnify" 
-                                        single-line 
-                                        hide-details
-                                        clearable 
-                                        ></v-text-field>
-                                    </v-col>
-                                </v-row>
-                                <v-btn color="primary" dense dark class="ma-2" @click.native="proydialog=false">Salir</v-btn>
-                            </v-card-actions>
-                        </v-card>
-                    </template>
-                    <template v-slot:[`item.selected`]="{ item }">
-                        <v-simple-checkbox
-                            v-model="item.selected"
-                            :ripple="false"
-                            @click="accionProyecto(item)"
-                        ></v-simple-checkbox>
-                    </template>
-                    <template v-slot:[`item.tarifaproyectousuario`]="props">
-                        <v-edit-dialog
-                            v-if="props.item.selected"  
-                            :return-value.sync="props.item.tarifaproyectousuario"
-                            large
-                            cancel-text="Exit"
-                            save-text="Save"
-                            @save="editProyecto(props.item)"
-                            @cancel="cancel"
-                            persistent
-                        >
-                            {{ props.item.tarifaproyectousuario }}
-                            <template v-if="props.item.selected" v-slot:input>
-                                <v-text-field
-                                dense
-                                v-model="props.item.tarifaproyectousuario"
-                                type="number"
-                                label="Edit"
-                                single-line
-                                counter
-                                clearable
-                                ></v-text-field>
-                            </template>
-                        </v-edit-dialog>
-                    </template>
-                    <template v-slot:[`item.costoproyectousuario`]="props">
-                        <v-edit-dialog
-                            v-if="props.item.selected"  
-                            :return-value.sync="props.item.costoproyectousuario"
-                            large
-                            cancel-text="Exit"
-                            save-text="Save"
-                            @save="editProyecto(props.item)"
-                            @cancel="cancel"
-                            persistent
-                        >
-                            {{ props.item.costoproyectousuario }}
-                            <template v-if="props.item.selected" v-slot:input>
-                                <v-text-field
-                                dense
-                                v-model="props.item.costoproyectousuario"
-                                type="number"
-                                label="Edit"
-                                single-line
-                                counter
-                                clearable
-                                ></v-text-field>
-                            </template>
-                        </v-edit-dialog>
-                    </template>
-                    <template v-slot:[`item.notas`]="props">
-                        <v-edit-dialog
-                            v-if="props.item.selected"  
-                            :return-value.sync="props.item.notas"
-                            large
-                            cancel-text="Exit"
-                            save-text="Save"
-                            @save="editProyecto(props.item)"
-                            @cancel="cancel"
-                            persistent
-                        >
-                            {{ props.item.notas }}
-                            <template v-if="props.item.selected" v-slot:input>
-                                <v-text-field
-                                dense
-                                v-model="props.item.notas"
-                                counter="256"
-                                label="Edit"
-                                single-line
-                                clearable
-                                ></v-text-field>
-                            </template>
-                        </v-edit-dialog>
-                    </template>                    
-
-                    <template v-slot:no-data>
-                        <v-btn color="primary" @click="listar">Reset</v-btn>
-                    </template>
-                </v-data-table>
-            </v-dialog>
-        </v-col>        
     </v-row>
 </template>
 <script>
@@ -686,10 +1078,24 @@
   import jsPDF from 'jspdf'
   export default {
       data: () => ({
-          validForm: false,
+        validForm: false,
+        validportfolioform: false,
+        validnoteform: false,
+        validscheduleform: false,
+        validratingform: false,
+        menu: false,
         fullnameRules: [
             v => !!v || 'Full Name is required',
         v => (v && v.length <= 64) || 'Name must be less than 64 characters',
+        ],
+        urlRules: [
+            v => !!v || 'URL is required',
+            v => (v && v.length <= 128) || 'URL must be less than 128 characters',
+            v => !(/[ ]/.test(v)) || 'no spaces allowed',
+        ],
+        noteRules: [
+            v => !!v || 'Note is required',
+            v => (v && v.length <= 128) || 'Note must be less than 512 characters',
         ],
         colores: [
             {value: '#F44336', text: 'Rojo'},
@@ -724,6 +1130,7 @@
             {value: 15, text: "15"},
             {value: -1, text: "All"},
         ],
+        dependentWindow: '',
         searcha: '',
         searchr: '',
         searchs: '',
@@ -736,20 +1143,24 @@
         artists: [],
         schedules: [],
         _shcedules: '',
+        scheduleartists: [],
         skills: [],
-        roles: [],
         _skillartistids: [],
         _skillartisttxs: [],
-        mainroleartists: [],
+        skillartists: [],
+        roles: [],
         _mainroleartistids: [],
         _mainroleartisttxs: [],
+        mainroleartists: [],
         portfolios: [],
+        _portfolios: '',
+        portfolioartists: [],
         notes: [],
         _notes: '',
-        _portfolios: '',
-        skillartists: [],
+        noteartists: [],
         ratings: [],
         _rating: [],
+        ratingartists: [],
         selections: [],
         selectedartists: [],
         usuarios: [],
@@ -778,12 +1189,28 @@
         skilldialog: false,
         skillheader: '',
         portfoliodialog: false,
+        portfolioCRUDdialog: false,
+        dialogDeletePortfolio: false,
         portfolioheader: '',
+        url: '',
         notedialog: false,
+        noteCRUDdialog: false,
+        dialogDeleteNote: false,
         noteheader: '',
+        note: '',
         scheduledialog: false,
+        scheduleCRUDdialog: false,
+        dialogDeleteSchedule: false,
         scheduleheader: '',
+        startdate: '',
+        enddate: '',
+        dates: [],
+        reason: '',
+        projectname: '',
+        score: 0,
         ratingdialog: false,
+        ratingCRUDdialog: false,
+        dialogDeleteRating: false,
         ratingheader: '',
         adModal: 0,
         adAccion: 0,
@@ -804,7 +1231,7 @@
         groupdialog: false,
         proydialog: false,
         searchg: '',
-        searchp: '',
+        searchn: '',
         rolid:'',
         iniciales:'',
         nombre:'',
@@ -821,6 +1248,9 @@
     }),
 
     computed: {
+        dateRangeText () {
+            return this.dates.join(' ~ ')
+        },
         headerartists(){
             return [
                 { text: 'Avatar', value: 'imgartist', align: 'center', sortable: false },
@@ -832,7 +1262,7 @@
                 { text: 'Portfolio', value: '_portfolios', align: 'start', sortable: true },
                 { text: 'Project Worked', value: 'projectsworked', align: 'start', sortable: true },
                 { text: 'Notes', value: '_notes', align: 'start', sortable: true, width: 250 },
-                { text: 'Schedules', value: '_schedules', align: 'start', sortable: true, width: 250 },
+                { text: 'Schedules', value: '_schedules', align: 'start', sortable: true, width: 300 },
                 { text: 'Rating', value: '_rating', align: 'center', sortable: true },
                 { text: 'Cost', value: 'cost', align: 'start', sortable: true, width: 150 },
                 { text: 'eMail', value: 'email', align: 'start', sortable: true },
@@ -854,23 +1284,49 @@
                 { text: 'Skill', value: 'text', align: 'start', sortable: true },
             ]
         },
-        headersgrupos(){
+        headerportfolio(){
             return [
-                { text: '#', value: 'selected', align: 'center', sortable: false },
-                { text: 'Nombre grupo', value: 'nombre', align: 'start', sortable: true },
+                { text: 'Instance', value: 'text', align: 'start', sortable: true },
+                { text: '[Options]', value: 'actions', align: 'center', sortable: false, width: 100 },
             ]
         },
-        headersproyectos(){
+        headernotes(){
             return [
-                { text: '#', value: 'selected', align: 'center', sortable: false },
-                { text: 'Proyecto', value: 'nombre', align: 'start', sortable: true },
-                { text: 'Tarifa', value: 'tarifaproyectousuario', align: 'end', sortable: true },
-                { text: 'Costo', value: 'costoproyectousuario', align: 'end', sortable: true },
-                { text: 'Notas', value: 'notas', align: 'start', sortable: true },
+                { text: 'Updated', value: 'fecumod', align: 'start', sortable: true },
+                { text: 'Note', value: 'text', align: 'start', sortable: true },
+                { text: '[Options]', value: 'actions', align: 'center', sortable: false, width: 100 },
+            ]
+        },
+        headerschedules(){
+            return [
+                { text: 'Start', value: 'startdate', align: 'start', sortable: true },
+                { text: 'End', value: 'enddate', align: 'start', sortable: true },
+                { text: 'Reason', value: 'reason', align: 'start', sortable: true },
+                { text: '[Options]', value: 'actions', align: 'center', sortable: false, width: 100 },
+            ]
+        },
+        headerratings(){
+            return [
+                { text: 'Updated', value: 'fecumod', align: 'start', sortable: true },
+                { text: 'Project', value: 'projectname', align: 'start', sortable: true },
+                { text: 'Score', value: 'score', align: 'center', sortable: true },
+                { text: '[Options]', value: 'actions', align: 'center', sortable: false, width: 100 },
             ]
         },
         formTitle () {
             return this.editedIndex === -1 ? 'New Artist' : 'Update Artist'
+        },
+        formTitlePortfolio () {
+            return this.editedIndex === -1 ? 'New Portfolio' : 'Update Portfolio'
+        },
+        formTitleNote () {
+            return this.editedIndex === -1 ? 'New Note' : 'Update Note'
+        },
+        formTitleSchedule () {
+            return this.editedIndex === -1 ? 'New Schedule' : 'Update Schedule'
+        },
+        formTitleRating () {
+            return this.editedIndex === -1 ? 'New Rate' : 'Update Rate'
         },
     },
 
@@ -949,8 +1405,8 @@
             doc.save('Artist.pdf');
         },
         listar(){
-            let me=this;
-            let header={"Authorization" : "Bearer " + this.$store.state.token};
+            let me = this
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
             let configuracion= {headers : header};
             axios.get('api/Artists/Listar',configuracion).then(function(response){
                 //console.log(response);
@@ -1046,14 +1502,14 @@
                     return e.artistid === items[i].id
                 })
                 for (var sc = 0 ; sc < filtered.length; sc++ ){
-                    sche += "[" + filtered[sc].startdate.substr(0,10) + '~' + filtered[sc].enddate.substr(0,10) + "] " + filtered[sc].reason + ", "
+                    sche += "[" + filtered[sc].startdate.substr(0,10) + ' ~ ' + filtered[sc].enddate.substr(0,10) + "] " + filtered[sc].reason + ", "
                 }
                 items[i]._schedules = sche.length>128?sche.substr(0,128):sche.substring(0, sche.length - 2)
                 sche = ''
             }
         },
         select(){
-            let me=this;
+            let me = this;
             let usuariosArray = []
             let skillsArray = []
             let mainroleartistsArray = []
@@ -1062,7 +1518,7 @@
             let portfoliosArray = []
             let ratingsArray = []
             let schedulesArray = []
-            let header={"Authorization" : "Bearer " + this.$store.state.token};
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
             let configuracion= {headers : header};
             axios.get('api/Usuarios/Listar',configuracion).then(function(response){
                 usuariosArray=response.data;
@@ -1152,7 +1608,7 @@
             axios.get('api/Schedules/Listar',configuracion).then(function(response){
                 schedulesArray=response.data;
                 schedulesArray.map(function(x){
-                    me.schedules.push({selected: false, value:x.id, artistid: x.artistid, startdate: x.startdate, enddate: x.enddate,
+                    me.schedules.push({value:x.id, artistid: x.artistid, startdate: x.startdate, enddate: x.enddate,
                         reason: x.reason, iduseralta: x.iduseralta, fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
                 });
             }).catch(function(error){
@@ -1165,10 +1621,6 @@
         editItem (item) {
             this.id=item.id;
             this.fullname=item.fullname;
-            // this._skillartistids=item._skillartistids;
-            // this._skillartisttxs=item._skillartisttxs;
-            // this._mainroleartistids=item._mainroleartistids;
-            // this._mainroleartisttxs=item._mainroleartisttxs;
             this.projectsworked=item.projectsworked;
             this.cost=item.cost;
             this.costingdate=item.costingdate;
@@ -1194,7 +1646,7 @@
             this.dialog = true;
         },
         deleteItem (item) {
-            var me=this;
+            var me = this;
             var resulta = confirm('Esta seguro de querer borrar el registro?');
             if (resulta) {
                 let header={"Authorization" : "Bearer " + me.$store.state.token};
@@ -1235,15 +1687,15 @@
             this.limpiar();
         },
         editProyecto(item){
-            var me=this;
+            var me = this
             let index=0;
-            index = me.proyectousuarios.findIndex(elemento => elemento.value === item.relid );
-            let header={"Authorization" : "Bearer " + this.$store.state.token};
+            index = me.proyectousuarios.findIndex(element => element.value === item.relid );
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
             let configuracion= {headers : header};
 
             axios.put('api/Proyectousuarios/Actualizar',{
                 'id':item.relid,
-                'usuarioid':this.workuserId,
+                'usuarioid':me.workuserId,
                 'proyectoid':item.value,
                 'tarifaproyectousuario':item.tarifaproyectousuario,
                 'costoproyectousuario':item.costoproyectousuario,
@@ -1252,8 +1704,8 @@
             },configuracion).then( () => {
                 me.proyectousuarios[index].tarifaproyectousuario = (Number(item.tarifaproyectousuario)).toFixed(2);
                 me.proyectousuarios[index].costoproyectousuario = Number(item.costoproyectousuario);
-                me.proyectousuarios[index].notas          = item.notas;
-                //me.proyectos[me.proyectos.findIndex(elemento => elemento.value === me.proyectousuarios[index].proyectoid )].estimadotarifa = me.proyectotareas[index].estimadotarifa;
+                me.proyectousuarios[index].notas = item.notas;
+                //me.proyectos[me.proyectos.findIndex(element => element.value === me.proyectousuarios[index].proyectoid )].estimadotarifa = me.proyectotareas[index].estimadotarifa;
                 me.snacktext = 'Updated';
                 me.snackcolor = "success";
                 me.snackbar = true;
@@ -1306,7 +1758,6 @@
                     'proveedorid':me.proveedorid,
                     'iduserumod': me.$store.state.usuario.idusuario,
                 },configuracion).then( () => {
-                    me.buscarUserinfo();
                     me.snacktext = 'Updated';
                     me.snackcolor = "success";
                     me.snackbar = true;
@@ -1321,7 +1772,6 @@
                 });
             } else {
                 //Código para guardar
-                let me=this;
                 axios.post('api/Artists/Crear',{
                     'fullname': me.fullname,
                     'projectsworked': me.projectsworked,
@@ -1337,7 +1787,6 @@
                 },configuracion)
                 .then(function(){
                     //console.log(response);
-                    me.buscarUserinfo();
                     me.snacktext = 'Created';
                     me.snackcolor = "success";
                     me.snackbar = true;
@@ -1352,24 +1801,6 @@
                 });
             }
         },
-        buscarUserinfo(){
-            let me=this;
-            let header={"Authorization" : "Bearer " + me.$store.state.token};
-            let configuracion= {headers : header};
-            axios.get('api/Artists/Traer/'+me.$store.state.usuario.idusuario,configuracion)
-            .then(respuesta => {
-                return respuesta.data
-            })
-            .then(data => {
-                this.$store.dispatch("guardarUserinfo", data)
-            })
-            .catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackcolor = 'error'
-                me.snackbar = true;
-                console.log(error);
-            });
-        },
         tratarRoles(element){
             var me=this;
             let index = 0;
@@ -1381,7 +1812,7 @@
             //debugger
             for (var i = 0; i < me.mainroleartists.length; i++){
                 if (me.mainroleartists[i].artistid === element.id){
-                    index = me.roles.findIndex(elemento => elemento.value === me.mainroleartists[i].skillid );
+                    index = me.roles.findIndex(element => element.value === me.mainroleartists[i].skillid );
                     me.roles[index].selected = true;
                     me.roles[index].relid = me.mainroleartists[i].value;
                 }
@@ -1391,7 +1822,7 @@
             me.roledialog=!me.roledialog;
         },
         tratarSkill(element){
-            var me=this;
+            var me = this;
             let index = 0;
             for (var l = 0; l < me.skills.length; l++){
                 me.skills[l].selected = false;
@@ -1401,7 +1832,7 @@
             //debugger
             for (var i = 0; i < me.skillartists.length; i++){
                 if (me.skillartists[i].artistid === element.id){
-                    index = me.skills.findIndex(elemento => elemento.value === me.skillartists[i].skillid );
+                    index = me.skills.findIndex(element => element.value === me.skillartists[i].skillid );
                     me.skills[index].selected = true;
                     me.skills[index].relid = me.skillartists[i].value;
                 }
@@ -1411,36 +1842,32 @@
             me.skilldialog=!me.skilldialog;
         },
         tratarPortfolio(element){
-            var me=this;
-            let index = 0;
-            for (var l = 0; l < me.skills.length; l++){
-                me.skills[l].selected = false;
-                me.skills[l].relid = 0;
-            }
-            // eslint-disable-next-line
-            //debugger
-            for (var i = 0; i < me.skillartists.length; i++){
-                if (me.skillartists[i].artistid === element.id){
-                    index = me.skills.findIndex(elemento => elemento.value === me.skillartists[i].skillid );
-                    me.skills[index].selected = true;
-                    me.skills[index].relid = me.skillartists[i].value;
-                }
-            }
+            var me = this;
+            me.portfolioartists = me.portfolios.filter(e => e.artistid === element.id)
             me.workedartistid = element.id;
-            me.portfolioheader = 'Portfolio of ' + element.fullname;
+            me.portfolioheader = element.fullname;
             me.portfoliodialog=!me.portfoliodialog;
         },
-        tratarNote(item){
-            let me = this
-            console.log(me, item)
+        tratarNote(element){
+            var me = this;
+            me.noteartists = me.notes.filter(e => e.artistid === element.id)
+            me.workedartistid = element.id;
+            me.noteheader = element.fullname;
+            me.notedialog=!me.notedialog;
         },
-        tratarRating(item){
-            let me = this
-            console.log(me, item)
+        tratarRating(element){
+            var me = this;
+            me.ratingartists = me.ratings.filter(e => e.artistid === element.id)
+            me.workedartistid = element.id;
+            me.ratingheader = element.fullname;
+            me.ratingdialog=!me.ratingdialog;
         },
-        tratarSchedule(item){
-            let me = this
-            console.log(me, item)
+        tratarSchedule(element){
+            var me = this;
+            me.scheduleartists = me.schedules.filter(e => e.artistid === element.id)
+            me.workedartistid = element.id;
+            me.scheduleheader = element.fullname;
+            me.scheduledialog=!me.scheduledialog;
         },
         tratarGrupos(item){
             let me=this;
@@ -1450,7 +1877,7 @@
             }
             for (let i = 0; i < me.grupousuarios.length; i++){
                 if (me.grupousuarios[i].usuarioid === item.id){
-                    index = me.grupos.findIndex(elemento => elemento.value === me.grupousuarios[i].grupoid );
+                    index = me.grupos.findIndex(element => element.value === me.grupousuarios[i].grupoid );
                     me.grupos[index].selected = true;
                 }
             }
@@ -1459,13 +1886,13 @@
             me.groupdialog=!me.groupdialog;
         },
         accionRole (item) {
-            var me=this;
+            var me = this;
             if (item.selected === true ) {
-                let header={"Authorization" : "Bearer " + this.$store.state.token};
+                let header={"Authorization" : "Bearer " + me.$store.state.token};
                 let configuracion= {headers : header};
                 axios.post('api/Mainroleartists/Crear',{
                     'skillid': item.value,
-                    'artistid': this.workedartistid,
+                    'artistid': me.workedartistid,
                     'iduseralta': me.$store.state.usuario.idusuario
                 },configuracion)
                 .then(function(response){
@@ -1500,13 +1927,13 @@
             }
         },
         accionSkill (item) {
-            var me=this;
+            var me = this;
             if (item.selected === true ) {
-                let header={"Authorization" : "Bearer " + this.$store.state.token};
+                let header={"Authorization" : "Bearer " + me.$store.state.token};
                 let configuracion= {headers : header};
                 axios.post('api/Skillartists/Crear',{
                     'skillid': item.value,
-                    'artistid': this.workedartistid,
+                    'artistid': me.workedartistid,
                     'iduseralta': me.$store.state.usuario.idusuario
                 },configuracion)
                 .then(function(response){
@@ -1540,8 +1967,414 @@
                 });
             }
         },
+        editPortfolio(element){
+            this.editedIndex = this.portfolios.indexOf(element)
+            this.url = element.text
+            this.portfolioCRUDdialog = true
+        },
+        closePortfolio(){
+            this.editedIndex = -1
+            this.url = ''
+            this.portfolioCRUDdialog = false
+        },
+        deletePortfolio(element){
+            this.editedIndex = this.portfolios.indexOf(element)
+            this.url = element.text
+            this.dialogDeletePortfolio = true
+        },
+        closeDeletePortfolio(){
+            this.dialogDeletePortfolio = false
+            this.url = ''
+            this.editedIndex = -1
+        },
+        deletePorfolioConfirm(){
+            let me = this;
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
+            let configuracion= {headers : header};
+            axios.delete('api/Portfolios/Eliminar/'+me.portfolios[me.editedIndex].value,configuracion).then( () => {
+                me.portfolios = me.portfolios.filter(x => x.value != me.portfolios[me.editedIndex].value);
+                me.portfolioartists = me.portfolios.filter(e => e.artistid === me.workedartistid)
+                me.fillSnowflake(me.artists);
+                me.closeDeletePortfolio;
+                me.snacktext = 'Eliminated';
+                me.snackcolor = "success";
+                me.snackbar = true;
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = "error";
+                me.snackbar = true;
+                console.log(error);
+            });
+        },
+        savePortfolio(){
+            let me = this;
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
+            let configuracion= {headers : header};
+            //console.log(me.editedIndex, me.url)
+            if (me.editedIndex > -1) {
+                //Código para editar
+                //Código para guardar
+                axios.put('api/Portfolios/Actualizar',{
+                    'id': me.portfolios[me.editedIndex].value,
+                    'url': me.url,
+                    'iduserumod': me.$store.state.usuario.idusuario,
+                },configuracion).then( (response) => {
+                    // eslint-disable-next-line
+                    //debugger
+                    me.portfolios[me.editedIndex].text = response.data.url
+                    me.portfolios[me.editedIndex].iduserumod = response.data.iduserumod
+                    me.portfolios[me.editedIndex].fecumod = response.data.fecumod
+                    me.portfolioartists = me.portfolios.filter(e => e.artistid === me.workedartistid)
+                    me.fillSnowflake(me.artists);
+                    me.closePortfolio();
+                    me.snacktext = 'Updated';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackcolor = "error";
+                    me.snackbar = true;
+                    console.log(error);
+                });
+            } else {
+                //Código para guardar
+                axios.post('api/Portfolios/Crear',{
+                    'artistid': me.workedartistid,
+                    'url': me.url,
+                    'iduseralta': me.$store.state.usuario.idusuario                      
+                },configuracion)
+                .then(function(response){
+                    me.portfolios.push({selected: false, value: response.data.id, artistid: response.data.artistid, text: response.data.url,
+                        iduseralta: response.data.iduseralta, fecalta: response.data.fecalta, iduserumod: response.data.iduserumod, fecumod: response.data.fecumod, activo: response.data.activo});
+                    me.portfolioartists = me.portfolios.filter(e => e.artistid === me.workedartistid)
+                    me.fillSnowflake(me.artists);
+                    me.closePortfolio();
+                    me.snacktext = 'Created';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackcolor = "error";
+                    me.snackbar = true;
+                    console.log(error);
+                });
+            }
+        },
+        openTab: function (link) {
+            this.dependentWindow = window.open(link, '_blank')
+        },
+        editNote(element){
+            this.editedIndex = this.notes.indexOf(element)
+            this.note = element.text
+            this.noteCRUDdialog = true
+        },
+        closeNote(){
+            this.editedIndex = -1
+            this.note = ''
+            this.noteCRUDdialog = false
+        },
+        deleteNote(element){
+            this.editedIndex = this.notes.indexOf(element)
+            this.note = element.text
+            this.dialogDeleteNote = true
+        },
+        closeDeleteNote(){
+            this.dialogDeleteNote = false
+            this.note = ''
+            this.editedIndex = -1
+        },
+        deleteNoteConfirm(){
+            let me = this;
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
+            let configuracion= {headers : header};
+            axios.delete('api/Notes/Eliminar/'+me.notes[me.editedIndex].value,configuracion).then( () => {
+                me.notes = me.notes.filter(x => x.value != me.notes[me.editedIndex].value);
+                me.noteartists = me.notes.filter(e => e.artistid === me.workedartistid)
+                me.fillSnowflake(me.artists);
+                me.closeDeleteNote;
+                me.snacktext = 'Eliminated';
+                me.snackcolor = "success";
+                me.snackbar = true;
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = "error";
+                me.snackbar = true;
+                console.log(error);
+            });
+        },
+        saveNote(){
+            let me = this;
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
+            let configuracion= {headers : header};
+            //console.log(me.editedIndex, me.note)
+            if (me.editedIndex > -1) {
+                //Código para editar
+                //Código para guardar
+                axios.put('api/Notes/Actualizar',{
+                    'id': me.notes[me.editedIndex].value,
+                    'note': me.note,
+                    'iduserumod': me.$store.state.usuario.idusuario,
+                },configuracion).then( (response) => {
+                    // eslint-disable-next-line
+                    //debugger
+                    me.notes[me.editedIndex].text = response.data.note
+                    me.notes[me.editedIndex].iduserumod = response.data.iduserumod
+                    me.notes[me.editedIndex].fecumod = response.data.fecumod
+                    me.noteartists = me.notes.filter(e => e.artistid === me.workedartistid)
+                    me.fillSnowflake(me.artists);
+                    me.closeNote();
+                    me.snacktext = 'Updated';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackcolor = "error";
+                    me.snackbar = true;
+                    console.log(error);
+                });
+            } else {
+                //Código para guardar
+                axios.post('api/Notes/Crear',{
+                    'artistid': me.workedartistid,
+                    'note': me.note,
+                    'iduseralta': me.$store.state.usuario.idusuario                      
+                },configuracion)
+                .then(function(response){
+                    me.notes.push({selected: false, value: response.data.id, artistid: response.data.artistid, text: response.data.note,
+                        iduseralta: response.data.iduseralta, fecalta: response.data.fecalta, iduserumod: response.data.iduserumod, fecumod: response.data.fecumod, activo: response.data.activo});
+                    me.noteartists = me.notes.filter(e => e.artistid === me.workedartistid)
+                    me.fillSnowflake(me.artists);
+                    me.closeNote();
+                    me.snacktext = 'Created';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackcolor = "error";
+                    me.snackbar = true;
+                    console.log(error);
+                });
+            }
+        },
+        editSchedule(element){
+            this.editedIndex = this.schedules.indexOf(element)
+            this.startdate = element.startdate
+            this.enddate = element.enddate
+            this.reason = element.reason
+            this.dates = []
+            this.dates.push(this.startdate.substr(0,10),this.enddate.substr(0,10))
+            this.scheduleCRUDdialog = true
+        },
+        closeSchedule(){
+            this.editedIndex = -1
+            this.startdate = ''
+            this.enddate = ''
+            this.reason = ''
+            this.dates = []
+            this.scheduleCRUDdialog = false
+        },
+        deleteSchedule(element){
+            this.editedIndex = this.schedules.indexOf(element)
+            this.startdate = element.startdate
+            this.enddate = element.enddate
+            this.reason = element.reason
+            this.dates = []
+            this.dates.push(this.startdate.substr(0,10),this.enddate.substr(0,10))
+            this.dialogDeleteSchedule = true
+        },
+        closeDeleteSchedule(){
+            this.dialogDeleteSchedule = false
+            this.startdate = ''
+            this.enddate = ''
+            this.reason = ''
+            this.dates = []
+            this.editedIndex = -1
+        },
+        deleteScheduleConfirm(){
+            let me = this;
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
+            let configuracion= {headers : header};
+            axios.delete('api/Schedules/Eliminar/'+me.schedules[me.editedIndex].value,configuracion).then( () => {
+                me.schedules = me.schedules.filter(x => x.value != me.schedules[me.editedIndex].value);
+                me.scheduleartists = me.schedules.filter(e => e.artistid === me.workedartistid)
+                me.fillSnowflake(me.artists);
+                me.closeDeleteSchedule;
+                me.snacktext = 'Eliminated';
+                me.snackcolor = "success";
+                me.snackbar = true;
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = "error";
+                me.snackbar = true;
+                console.log(error);
+            });
+        },
+        saveSchedule(){
+            let me = this;
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
+            let configuracion= {headers : header};
+            //console.log(me.editedIndex, me.reason)
+            if (me.editedIndex > -1) {
+                //Código para editar
+                //Código para guardar
+                axios.put('api/Schedules/Actualizar',{
+                    'id': me.schedules[me.editedIndex].value,
+                    'startdate': me.dates[0],
+                    'enddate': me.dates[1],
+                    'reason': me.reason,
+                    'iduserumod': me.$store.state.usuario.idusuario,
+                },configuracion).then( (response) => {
+                    // eslint-disable-next-line
+                    //debugger
+                    me.schedules[me.editedIndex].startdate = response.data.startdate
+                    me.schedules[me.editedIndex].enddate = response.data.enddate
+                    me.schedules[me.editedIndex].reason = response.data.reason
+                    me.schedules[me.editedIndex].iduserumod = response.data.iduserumod
+                    me.schedules[me.editedIndex].fecumod = response.data.fecumod
+                    me.scheduleartists = me.schedules.filter(e => e.artistid === me.workedartistid)
+                    me.fillSnowflake(me.artists);
+                    me.closeSchedule();
+                    me.snacktext = 'Updated';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackcolor = "error";
+                    me.snackbar = true;
+                    console.log(error);
+                });
+            } else {
+                //Código para guardar
+                axios.post('api/Schedules/Crear',{
+                    'artistid': me.workedartistid,
+                    'startdate': me.dates[0],
+                    'enddate': me.dates[1],
+                    'reason': me.reason,
+                    'iduseralta': me.$store.state.usuario.idusuario                      
+                },configuracion)
+                .then(function(response){
+                    me.schedules.push({selected: false, value: response.data.id, artistid: response.data.artistid, 
+                        startdate: response.data.startdate, enddate: response.data.enddate, reason: response.data.reason,
+                        iduseralta: response.data.iduseralta, fecalta: response.data.fecalta, iduserumod: response.data.iduserumod, fecumod: response.data.fecumod, activo: response.data.activo});
+                    me.scheduleartists = me.schedules.filter(e => e.artistid === me.workedartistid)
+                    me.fillSnowflake(me.artists);
+                    me.closeSchedule();
+                    me.snacktext = 'Created';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackcolor = "error";
+                    me.snackbar = true;
+                    console.log(error);
+                });
+            }
+        },
+
+        editRating(element){
+            this.editedIndex = this.ratings.indexOf(element)
+            this.score = element.score
+            this.projectname = element.projectname
+            this.ratingCRUDdialog = true
+        },
+        closeRating(){
+            this.editedIndex = -1
+            this.score = 0
+            this.score = ''
+            this.ratingCRUDdialog = false
+        },
+        deleteRating(element){
+            this.editedIndex = this.ratings.indexOf(element)
+            this.score = element.score
+            this.projectname = element.projectname
+            this.dialogDeleteRating = true
+        },
+        closeDeleteRating(){
+            this.dialogDeleteRating = false
+            this.score = 0
+            this.score = ''
+            this.editedIndex = -1
+        },
+        deleteRatingConfirm(){
+            let me = this;
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
+            let configuracion= {headers : header};
+            axios.delete('api/Ratings/Eliminar/'+me.ratings[me.editedIndex].value,configuracion).then( () => {
+                me.ratings = me.ratings.filter(x => x.value != me.ratings[me.editedIndex].value);
+                me.ratingartists = me.ratings.filter(e => e.artistid === me.workedartistid)
+                me.fillSnowflake(me.artists);
+                me.closeDeleteRating;
+                me.snacktext = 'Eliminated';
+                me.snackcolor = "success";
+                me.snackbar = true;
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = "error";
+                me.snackbar = true;
+                console.log(error);
+            });
+        },
+        saveRating(){
+            let me = this;
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
+            let configuracion= {headers : header};
+            //console.log(me.editedIndex, me.rating)
+            if (me.editedIndex > -1) {
+                //Código para editar
+                //Código para guardar
+                axios.put('api/Ratings/Actualizar',{
+                    'id': me.ratings[me.editedIndex].value,
+                    'rating': me.rating,
+                    'iduserumod': me.$store.state.usuario.idusuario,
+                },configuracion).then( (response) => {
+                    // eslint-disable-next-line
+                    //debugger
+                    me.ratings[me.editedIndex].text = response.data.rating
+                    me.ratings[me.editedIndex].iduserumod = response.data.iduserumod
+                    me.ratings[me.editedIndex].fecumod = response.data.fecumod
+                    me.ratingartists = me.ratings.filter(e => e.artistid === me.workedartistid)
+                    me.fillSnowflake(me.artists);
+                    me.closeRating();
+                    me.snacktext = 'Updated';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackcolor = "error";
+                    me.snackbar = true;
+                    console.log(error);
+                });
+            } else {
+                //Código para guardar
+                axios.post('api/Ratings/Crear',{
+                    'artistid': me.workedartistid,
+                    'rating': me.rating,
+                    'iduseralta': me.$store.state.usuario.idusuario                      
+                },configuracion)
+                .then(function(response){
+                    me.ratings.push({selected: false, value: response.data.id, artistid: response.data.artistid, text: response.data.rating,
+                        iduseralta: response.data.iduseralta, fecalta: response.data.fecalta, iduserumod: response.data.iduserumod, fecumod: response.data.fecumod, activo: response.data.activo});
+                    me.ratingartists = me.ratings.filter(e => e.artistid === me.workedartistid)
+                    me.fillSnowflake(me.artists);
+                    me.closeRating();
+                    me.snacktext = 'Created';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackcolor = "error";
+                    me.snackbar = true;
+                    console.log(error);
+                });
+            }
+        },
+
+
+
+
+
         tratarProyectos(item){
-            var me=this;
+            var me = this;
             let index = 0;
             for (var l = 0; l < me.proyectos.length; l++){
                 me.proyectos[l].selected = false;
@@ -1552,7 +2385,7 @@
             }
             for (let i = 0; i < me.proyectousuarios.length; i++){
                 if (me.proyectousuarios[i].usuarioid === item.id){
-                    index = me.proyectos.findIndex(elemento => elemento.value === me.proyectousuarios[i].proyectoid )
+                    index = me.proyectos.findIndex(element => element.value === me.proyectousuarios[i].proyectoid )
                     me.proyectos[index].selected = true;
                     me.proyectos[index].relid = me.proyectousuarios[i].value;
                     me.proyectos[index].tarifaproyectousuario = me.proyectousuarios[i].tarifaproyectousuario;
@@ -1607,7 +2440,7 @@
         accionProyecto(item){
             var me=this;
             let index = 0;
-            index = me.proyectos.findIndex(elemento => elemento.value === item.value );
+            index = me.proyectos.findIndex(element => element.value === item.value );
             if (item.selected === true ) {
                 let header={"Authorization" : "Bearer " + this.$store.state.token};
                 let configuracion= {headers : header};
@@ -1696,10 +2529,10 @@
             this.adModal=0;
         },
         activar(){
-            let me=this;
-            let header={"Authorization" : "Bearer " + this.$store.state.token};
+            let me = this;
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
             let configuracion= {headers : header};
-            axios.put('api/Artists/Activar/'+this.adId,{},configuracion).then( () => {
+            axios.put('api/Artists/Activar/'+me.adId,{},configuracion).then( () => {
                 me.snacktext = 'Activated';
                 me.snackcolor = "success";
                 me.snackbar = true;
@@ -1716,11 +2549,11 @@
             });
         },
         desactivar(){
-            let me=this;
-            let header={"Authorization" : "Bearer " + this.$store.state.token};
+            let me = this;
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
             let configuracion= {headers : header};
 
-            axios.put('api/Artists/Desactivar/'+this.adId,{},configuracion).then( () => {
+            axios.put('api/Artists/Desactivar/'+me.adId,{},configuracion).then( () => {
                 me.snacktext = 'Inactivated';
                 me.snackcolor = "success";
                 me.snackbar = true;
@@ -1728,7 +2561,7 @@
                 me.adAccion=0;
                 me.adNombre="";
                 me.adId="";
-                me.listar();                       
+                me.listar();
             }).catch(function(error){
                 me.snacktext = 'An error was detected. Code: '+ error.response.status;
                 me.snackcolor = "error";
