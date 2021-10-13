@@ -37,6 +37,77 @@
             class="elevation-1 blue-grey lighten-5"
             no-data-text="Nothing to show"
             >
+                <template v-slot:[`header.fullname`]="{ header }">
+                {{ header.text }}
+                <v-menu offset-y :close-on-content-click="false">
+                    <template v-slot:activator="{ on, attrs }">
+                    <v-btn icon v-bind="attrs" v-on="on">
+                        <v-icon small :color="fullnameFilterValues ? 'accent' : ''">
+                        mdi-filter
+                        </v-icon>
+                    </v-btn>
+                    </template>
+                    <div style="background-color: white; width: 280px">
+                    <v-text-field
+                        v-model="fullnameFilterValues"
+                        class="pa-4"
+                        type="text"
+                        label="Texto a buscar"
+                        clearable
+                    ></v-text-field>
+                    </div>
+                </v-menu>
+                </template>
+                <template v-slot:[`header._mainroleartisttxs`]="{ header }">
+                {{ header.text }}
+                <v-menu offset-y :close-on-content-click="false">
+                    <template v-slot:activator="{ on, attrs }">
+                    <v-btn icon v-bind="attrs" v-on="on">
+                        <v-icon small :color="roleFilterValues.length ? 'accent' : ''">
+                        mdi-filter
+                        </v-icon>
+                    </v-btn>
+                    </template>
+                    <div style="background-color: white; width: 280px">
+                    <v-select
+                        v-model="roleFilterValues"
+                        :items="roles"
+                        label="Main Role"
+                        append-icon="mdi-magnify-plus-outline"
+                        chips
+                        multiple
+                        class="elevation-1"
+                        clearable
+                        >
+                    </v-select>
+                    </div>
+                </v-menu>
+                </template>
+                <template v-slot:[`header._skillartisttxs`]="{ header }">
+                {{ header.text }}
+                <v-menu offset-y :close-on-content-click="false">
+                    <template v-slot:activator="{ on, attrs }">
+                    <v-btn icon v-bind="attrs" v-on="on">
+                        <v-icon small :color="skillFilterValues.length ? 'accent' : ''">
+                        mdi-filter
+                        </v-icon>
+                    </v-btn>
+                    </template>
+                    <div style="background-color: white; width: 280px">
+                    <v-select
+                        v-model="skillFilterValues"
+                        :items="skills"
+                        label="Skills"
+                        append-icon="mdi-magnify-plus-outline"
+                        clearable
+                        chips
+                        multiple
+                        class="elevation-1"
+                        >
+                    </v-select>
+                    </div>
+                </v-menu>
+                </template>
                 <template v-slot:top>
                     <v-toolbar flat color="white">
                         <div class="ma-2">
@@ -733,7 +804,7 @@
                                                                 v-model="projectname"
                                                                 label="Project name"
                                                                 type="text"
-                                                                :rules="noempty32"
+                                                                :rules="projectnameRules"
                                                                 counter="32"
                                                                 ></v-text-field>
                                                             </v-col>
@@ -743,7 +814,7 @@
                                                                 md="4"
                                                             >
                                                                 <v-text-field
-                                                                v-model="Sscore"
+                                                                v-model="score"
                                                                 type="number"
                                                                 label="Score"
                                                                 :rules="scoreRules"
@@ -787,7 +858,7 @@
                                     <v-card>
                                         <v-card-title class="text-h5">Are you sure you want to delete this rating?
                                         </v-card-title>
-                                        <p class="ml-3" >{{rating}}</p>
+                                        <p class="ml-3" >{{ projectname }}: {{ score }}</p>
                                         <v-card-actions>
                                         <v-spacer></v-spacer>
                                         <v-btn color="primary" text @click="closeDeleteRating">Cancel</v-btn>
@@ -1097,6 +1168,16 @@
             v => !!v || 'Note is required',
             v => (v && v.length <= 128) || 'Note must be less than 512 characters',
         ],
+        projectnameRules: [
+            v => !!v || 'Project name is required',
+            v => (v && v.length <= 32) || 'Project name must be less than 32 characters',
+        ],
+        scoreRules: [
+            v => !!v || 'Score is required',
+            v => (v && v.length <= 1) || 'Score must be less than 1 digit',
+            v => (v && v <= 5) || 'Score name must be less than or equla 5',
+            v => (v && v >= 0) || 'Score must be grather thanor equal 0',
+        ],
         colores: [
             {value: '#F44336', text: 'Rojo'},
             {value: '#E91E63', text: 'Rosa'},
@@ -1140,11 +1221,16 @@
         timeout: 4000,
         recordInfo:0,
         selected: [],
+        fullnameFilterValues: '',
+        roleFilterValues: [],
+        skillFilterValues: [],
+
         artists: [],
         schedules: [],
         _shcedules: '',
         scheduleartists: [],
         skills: [],
+        skillfilter: [],
         _skillartistids: [],
         _skillartisttxs: [],
         skillartists: [],
@@ -1206,12 +1292,12 @@
         enddate: '',
         dates: [],
         reason: '',
-        projectname: '',
-        score: 0,
         ratingdialog: false,
         ratingCRUDdialog: false,
         dialogDeleteRating: false,
         ratingheader: '',
+        projectname: '',
+        score: 0,
         adModal: 0,
         adAccion: 0,
         adNombre: '',
@@ -1254,11 +1340,11 @@
         headerartists(){
             return [
                 { text: 'Avatar', value: 'imgartist', align: 'center', sortable: false },
-                { text: 'Full Name', value: 'fullname', align: 'start', sortable: true, width: 250 },
+                { text: 'Full Name', value: 'fullname', align: 'start', sortable: true, width: 250, filter: this.fullnameFilter },
                 //{ text: 'Main Role Ids', value: '_mainroleartistids', align: 'start', sortable: true },
-                { text: 'Main Role Txt', value: '_mainroleartisttxs', align: 'start', sortable: true },
+                { text: 'Main Role Txt', value: '_mainroleartisttxs', align: 'start', sortable: true, filter: this.roleFilter },
                 //{ text: 'Skills Ids', value: '_skillartistids', align: 'start', sortable: true },
-                { text: 'Skills Txt', value: '_skillartisttxs', align: 'start', sortable: true, width: 250 },
+                { text: 'Skills Txt', value: '_skillartisttxs', align: 'start', sortable: true, width: 250, filter: this.skillFilter },
                 { text: 'Portfolio', value: '_portfolios', align: 'start', sortable: true },
                 { text: 'Project Worked', value: 'projectsworked', align: 'start', sortable: true },
                 { text: 'Notes', value: '_notes', align: 'start', sortable: true, width: 250 },
@@ -1343,6 +1429,37 @@
     },
 
     methods: {
+        fullnameFilter(value) {
+            // If this filter has no value we just skip the entire filter
+            if (!this.fullnameFilterValues) {
+            return true;
+            }
+            // Check if the current loop value (The calories value)
+            // equals to the selected value at the <v-select>.
+            return value.includes(this.fullnameFilterValues);
+        },
+        roleFilter(value) {
+            // If this filter has no value we just skip the entire filter
+            if (this.roleFilterValues.length==0) {
+            return true;
+            }
+            // Check if the current loop value (The calories value)
+            // equals to the selected value at the <v-select>.
+            value = value.split(', ')
+            var valueids = value.map( txt => this.roles.find(e => e.text === txt).value)
+            return this.roleFilterValues.find(e => valueids.indexOf(e) > -1);
+        },
+        skillFilter(value) {
+            // If this filter has no value we just skip the entire filter
+            if (this.skillFilterValues.length==0) {
+            return true;
+            }
+            // Check if the current loop value (The calories value)
+            // equals to the selected value at the <v-select>.
+            value = value.split(', ')
+            var valueids = value.map( txt => this.skills.find(e => e.text === txt).value)
+            return this.skillFilterValues.find(e => valueids.indexOf(e) > -1);
+        },
         save () {
         },
         cancel () {
@@ -1596,7 +1713,7 @@
             axios.get('api/Ratings/Listar',configuracion).then(function(response){
                 ratingsArray=response.data;
                 ratingsArray.map(function(x){
-                    me.ratings.push({selected: false, value:x.id, artistid: x.artistid, projectname: x.projectname, score: x.score, iduseralta: x.iduseralta,
+                    me.ratings.push({value:x.id, artistid: x.artistid, projectname: x.projectname, score: x.score, iduseralta: x.iduseralta,
                         fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
                 });
             }).catch(function(error){
@@ -2280,7 +2397,7 @@
         closeRating(){
             this.editedIndex = -1
             this.score = 0
-            this.score = ''
+            this.projectname= ''
             this.ratingCRUDdialog = false
         },
         deleteRating(element){
@@ -2292,7 +2409,7 @@
         closeDeleteRating(){
             this.dialogDeleteRating = false
             this.score = 0
-            this.score = ''
+            this.projectname = ''
             this.editedIndex = -1
         },
         deleteRatingConfirm(){
@@ -2318,18 +2435,20 @@
             let me = this;
             let header={"Authorization" : "Bearer " + me.$store.state.token};
             let configuracion= {headers : header};
-            //console.log(me.editedIndex, me.rating)
+            //console.log(me.editedIndex, me.projectname, me.score)
             if (me.editedIndex > -1) {
                 //Código para editar
                 //Código para guardar
                 axios.put('api/Ratings/Actualizar',{
                     'id': me.ratings[me.editedIndex].value,
-                    'rating': me.rating,
+                    'projectname': me.projectname,
+                    'score': me.score,
                     'iduserumod': me.$store.state.usuario.idusuario,
                 },configuracion).then( (response) => {
                     // eslint-disable-next-line
                     //debugger
-                    me.ratings[me.editedIndex].text = response.data.rating
+                    me.ratings[me.editedIndex].score = response.data.score
+                    me.ratings[me.editedIndex].projectname = response.data.projectname
                     me.ratings[me.editedIndex].iduserumod = response.data.iduserumod
                     me.ratings[me.editedIndex].fecumod = response.data.fecumod
                     me.ratingartists = me.ratings.filter(e => e.artistid === me.workedartistid)
@@ -2348,12 +2467,14 @@
                 //Código para guardar
                 axios.post('api/Ratings/Crear',{
                     'artistid': me.workedartistid,
-                    'rating': me.rating,
+                    'projectname': me.projectname, 
+                    'score': me.score,
                     'iduseralta': me.$store.state.usuario.idusuario                      
                 },configuracion)
                 .then(function(response){
-                    me.ratings.push({selected: false, value: response.data.id, artistid: response.data.artistid, text: response.data.rating,
-                        iduseralta: response.data.iduseralta, fecalta: response.data.fecalta, iduserumod: response.data.iduserumod, fecumod: response.data.fecumod, activo: response.data.activo});
+                    me.ratings.push({selected: false, value: response.data.id, artistid: response.data.artistid, score: response.data.score, 
+                        projectname: response.data.projectname, iduseralta: response.data.iduseralta, fecalta: response.data.fecalta, 
+                        iduserumod: response.data.iduserumod, fecumod: response.data.fecumod, activo: response.data.activo});
                     me.ratingartists = me.ratings.filter(e => e.artistid === me.workedartistid)
                     me.fillSnowflake(me.artists);
                     me.closeRating();

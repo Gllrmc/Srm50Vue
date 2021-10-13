@@ -127,10 +127,10 @@ import 'jspdf-autotable'
         roles: [],
         dialog: false,
         headers: [
-            { text: '[Options]', value: 'actions', align: 'center', sortable: false },
             { text: 'Role', value: 'nombre', align: 'start', sortable: true },
             { text: 'Description', value: 'nombre', align: 'start', sortable: true },
             { text: 'Status', value: 'activo', align: 'start', sortable: false  },
+            { text: '[Options]', value: 'actions', align: 'center', sortable: false },
         ],
         search:'',
         adModal: 0,

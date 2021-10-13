@@ -19,18 +19,6 @@
           </v-list-item>
         </template>
         <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
-          <v-list-item :to="{ name: 'actividades'}">
-            <v-list-item-action>
-              <v-icon color="primary">mdi-movie-open-star</v-icon>
-            </v-list-item-action>
-            <v-list-item-content>
-              <v-list-item-title >
-                Dashboard
-              </v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </template>
-        <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
           <v-list-item :to="{ name: 'artists'}">
             <v-list-item-action>
               <v-icon color="primary">mdi-video-vintage</v-icon>
