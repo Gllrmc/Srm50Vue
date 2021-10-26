@@ -5,6 +5,7 @@ import store from './store'
 import vuetify from './plugins/vuetify'
 import i18n from 'vue-i18n'
 import axios from 'axios'
+import excel from 'vue-excel-export'
 
 // STYLES
 // Main Theme SCSS
@@ -16,6 +17,7 @@ Vue.config.productionTip = false
 
 Vue.config.devtools = true
 
+Vue.use(excel)
 
 new Vue({
   i18n,

@@ -5,7 +5,7 @@
                 v-model="snackbar"
                 :timeout="timeout"
                 absolute
-                bottom
+                top
                 app
                 right
                 :color="snackcolor"

@@ -5,7 +5,7 @@
                 v-model="snackbar"
                 :timeout="timeout"
                 absolute
-                bottom
+                top
                 app
                 right
                 :color="snackcolor"
@@ -58,7 +58,7 @@
                     </div>
                 </v-menu>
                 </template>
-                <template v-slot:[`header._mainroleartisttxs`]="{ header }">
+                <template v-slot:[`header.mainrole`]="{ header }">
                 {{ header.text }}
                 <v-menu offset-y :close-on-content-click="false">
                     <template v-slot:activator="{ on, attrs }">
@@ -74,10 +74,11 @@
                         :items="roles"
                         label="Main Role"
                         append-icon="mdi-magnify-plus-outline"
+                        clearable
                         chips
+                        deletable-chips
                         multiple
                         class="elevation-1"
-                        clearable
                         >
                     </v-select>
                     </div>
@@ -96,11 +97,12 @@
                     <div style="background-color: white; width: 280px">
                     <v-select
                         v-model="skillFilterValues"
-                        :items="skills"
+                        :items="skillsfilter"
                         label="Skills"
                         append-icon="mdi-magnify-plus-outline"
                         clearable
                         chips
+                        deletable-chips
                         multiple
                         class="elevation-1"
                         >
@@ -110,15 +112,76 @@
                 </template>
                 <template v-slot:top>
                     <v-toolbar flat color="white">
-                        <div class="ma-2">
-                            <v-btn small @click="crearPDF()"><v-icon>mdi-printer</v-icon></v-btn>
-                        </div>
                         <v-toolbar-title>Artists</v-toolbar-title>
                         <v-divider
                             class="mx-4"
                             inset
                             vertical
                         ></v-divider>
+                        <tr>
+                            <td>
+                                <v-tooltip bottom>
+                                    <template v-slot:activator="{ on, attrs }">
+                                        <v-btn 
+                                            x-small 
+                                            class="mr-1" 
+                                            :disabled="!selected.length" 
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            @click="crearPreview()">
+                                            <v-icon>
+                                                mdi-format-list-bulleted
+                                            </v-icon>
+                                        </v-btn>
+                                    </template>
+                                    <span>CheckIn</span>
+                                </v-tooltip>
+                            </td>
+                            <td>
+                                <v-tooltip bottom>
+                                    <template v-slot:activator="{ on, attrs }">
+                                        <export-excel
+                                            :data   = "json_data"
+                                            :fields = "json_fields"
+                                            worksheet = "Artist Export"
+                                            type    = "xls"
+                                            name    = "MAnAdata.xls"
+                                            >
+                                            <v-btn 
+                                                x-small 
+                                                class="mr-1" 
+                                                :disabled="!selected.length" 
+                                                v-bind="attrs"
+                                                v-on="on"
+                                                @click="crearXLS()">
+                                                <v-icon>
+                                                    mdi-file-excel-box
+                                                </v-icon>
+                                            </v-btn>
+                                        </export-excel>
+                                    </template>
+                                    <span>Export</span>
+                                </v-tooltip>
+                            </td>
+                            <td>
+                                <v-tooltip bottom>
+                                    <template v-slot:activator="{ on, attrs }">
+                                        <v-btn 
+                                            x-small 
+                                            class="mr-1" 
+                                            :disabled="!selected.length" 
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            @click="crearPDF()">
+                                            <v-icon>
+                                                mdi-printer
+                                            </v-icon>
+                                        </v-btn>
+                                    </template>
+                                    <span>Contact List</span>
+                                </v-tooltip>
+                            </td>
+                        </tr>
                         <v-spacer></v-spacer>
                         <v-text-field dense label="Search" outlined v-model="searcha" clearable append-icon="mdi-magnify" single-line hide-details></v-text-field>
                         <v-spacer></v-spacer>
@@ -148,6 +211,41 @@
                                                     counter="64"
                                                 />
                                             </v-col>
+                                            <v-col cols="12" sm="6" md="6">
+                                                <v-select 
+                                                    dense 
+                                                    v-model="mainroleid"
+                                                    :items="roles" 
+                                                    label="Main Role"
+                                                    />
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="6">
+                                                <v-text-field
+                                                    dense
+                                                    v-model="email"
+                                                    label="Email"
+                                                    :rules="emailRules"
+                                                    counter="64"
+                                                />
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="6">
+                                                <v-text-field
+                                                    dense
+                                                    v-model="phone"
+                                                    label="Phone"
+                                                    :rules="phoneRules"
+                                                    counter="32"
+                                                />
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="6">
+                                                <v-text-field
+                                                    dense
+                                                    v-model="mobile"
+                                                    :rules="mobileRules"
+                                                    label="Mobile"
+                                                    counter="32"
+                                                />
+                                            </v-col>
                                             <v-col cols="12" sm="12" md="12">
                                                 <v-text-field 
                                                     dense
@@ -162,30 +260,6 @@
                                                     v-model="cost"
                                                     label="Cost"
                                                     counter="128"
-                                                />
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="6">
-                                                <v-text-field
-                                                    dense
-                                                    v-model="phone"
-                                                    label="Phone"
-                                                    counter="32"
-                                                />
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="6">
-                                                <v-text-field
-                                                    dense
-                                                    v-model="mobile"
-                                                    label="Mobile"
-                                                    counter="32"
-                                                />
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="6">
-                                                <v-text-field
-                                                    dense
-                                                    v-model="email"
-                                                    label="Email"
-                                                    counter="64"
                                                 />
                                             </v-col>
                                             <v-col cols="12" sm="2" md="2">
@@ -263,41 +337,6 @@
                                     </v-btn>
                                 </v-card-actions>
                             </v-card>
-                        </v-dialog>
-                        <v-dialog v-model="roledialog" max-width=500>
-                            <v-data-table
-                                :headers="headermainroles"
-                                :items="roles"
-                                :search="searchr"
-                                class="elevation-1"
-                                :items-per-page="5"
-                                no-data-text="Nothing to Show"
-                            >
-                                <template v-slot:top>
-                                    <v-card flat color="white">
-                                        <v-card-title>{{roleheader}}</v-card-title>
-                                        <v-card-actions>
-                                                <v-text-field label="Search" class="ma-2" 
-                                                outlined 
-                                                dense 
-                                                v-model="searchr" 
-                                                append-icon="mdi-magnify" 
-                                                single-line 
-                                                hide-details
-                                                clearable 
-                                                ></v-text-field>
-                                            <v-btn color="primary" dense dark class="ma-2" @click.native="roledialog=false">Close</v-btn>
-                                        </v-card-actions>
-                                    </v-card>
-                                </template>
-                                <template v-slot:[`item.selected`]="{ item }">
-                                    <v-simple-checkbox
-                                        v-model="item.selected"
-                                        :ripple="false"
-                                        @click="accionRole(item)"
-                                    ></v-simple-checkbox>
-                                </template>
-                            </v-data-table>
                         </v-dialog>
                         <v-dialog v-model="skilldialog" max-width=500>
                             <v-data-table
@@ -978,27 +1017,51 @@
                         </div>
                     </td>
                 </template>
-                <template v-slot:[`item._mainroleartisttxs`]="{ item }">
-                    <td>
-                        <v-tooltip bottom>
-                            <template v-slot:activator="{ on, attrs }">
-                                <v-icon
+                <template v-slot:[`item.mainrole`]="{ item }">
+                    <v-edit-dialog
+                        :return-value.sync="item.mainrole"
+                        large
+                        persistent
+                        @save="save(item)"
+                        @cancel="cancel"
+                        @open="open"
+                        @close="close"
+                        >
+                        <div>{{ item.mainrole }}</div>
+                        <template v-slot:input>
+                            <div class="mt-4 text-h6">
+                            Update Main Role
+                            </div>
+                            <v-select
+                                dense
                                 :disabled="!item.activo"
-                                x-small
-                                class="mr-1"
-                                v-bind="attrs"
-                                v-on="on"
-                                @click="tratarRoles(item)"
-                                >
-                                mdi-details
-                                </v-icon>
-                            </template>
-                            <span>Manage Main Role</span>
-                        </v-tooltip>
-                    </td>
-                    <td>
-                        {{ item._mainroleartisttxs }}
-                    </td>
+                                v-model="item.mainroleid"
+                                :items="roles" 
+                                label="Inline Edition"
+                                autofocus
+                            ></v-select>
+                        </template>
+                    </v-edit-dialog>                    
+                </template>
+                <template v-slot:[`item.projectsworked`]="{ item }">
+                    <v-edit-dialog
+                    :return-value.sync="item.projectsworked"
+                    @save="save(item)"
+                    @cancel="cancel"
+                    @open="open"
+                    @close="close"
+                    >
+                    {{ item.projectsworked }}
+                    <template v-slot:input>
+                        <v-text-field
+                        v-model="item.projectsworked"
+                        :rules="projectsworkedRules"
+                        label="Projects Worked"
+                        single-line
+                        counter="64"
+                        ></v-text-field>
+                    </template>
+                    </v-edit-dialog>
                 </template>
                 <template v-slot:[`item._skillartisttxs`]="{ item }">
                     <td>
@@ -1063,7 +1126,17 @@
                         </v-tooltip>
                     </td>
                     <td>
-                        {{ item._portfolios }}
+                        <a v-if="item._portfolios && item._portfolios.split(' ').length">
+                            <a v-for="(elem, i) in item._portfolios.split(' ')"
+                            :key="i"
+                            @click="openTab(elem)"
+                            @mouseover.stop.prevent="viewTab(elem)"
+                            @mouseleave.stop.prevent="closeTab()"
+                            >
+                                {{ elem }}
+                            </a>
+                        </a>
+                        <p v-else>No portfolio Foud</p>
                     </td>
                 </template>
                 <template v-slot:[`item._schedules`]="{ item }">
@@ -1117,6 +1190,86 @@
                         ></v-rating>
                     </td>
                 </template>
+                <template v-slot:[`item.cost`]="{ item }">
+                    <v-edit-dialog
+                    :return-value.sync="item.cost"
+                    @save="save(item)"
+                    @cancel="cancel"
+                    @open="open"
+                    @close="close"
+                    >
+                    {{ item.cost }}
+                    <template v-slot:input>
+                        <v-text-field
+                        v-model="item.cost"
+                        :rules="costRules"
+                        label="Cost info"
+                        single-line
+                        counter="128"
+                        ></v-text-field>
+                    </template>
+                    </v-edit-dialog>
+                </template>
+                <template v-slot:[`item.email`]="{ item }">
+                    <v-edit-dialog
+                    :return-value.sync="item.email"
+                    @save="save(item)"
+                    @cancel="cancel"
+                    @open="open"
+                    @close="close"
+                    >
+                    {{ item.email }}
+                    <template v-slot:input>
+                        <v-text-field
+                        v-model="item.email"
+                        :rules="emailRules"
+                        label="Email"
+                        single-line
+                        counter="64"
+                        ></v-text-field>
+                    </template>
+                    </v-edit-dialog>
+                </template>
+                <template v-slot:[`item.phone`]="{ item }">
+                    <v-edit-dialog
+                    :return-value.sync="item.phone"
+                    @save="save(item)"
+                    @cancel="cancel"
+                    @open="open"
+                    @close="close"
+                    >
+                    {{ item.phone }}
+                    <template v-slot:input>
+                        <v-text-field
+                        v-model="item.phone"
+                        :rules="phoneRules"
+                        label="Phone"
+                        single-line
+                        counter="32"
+                        ></v-text-field>
+                    </template>
+                    </v-edit-dialog>
+                </template>
+                <template v-slot:[`item.mobile`]="{ item }">
+                    <v-edit-dialog
+                    :return-value.sync="item.mobile"
+                    @save="save(item)"
+                    @cancel="cancel"
+                    @open="open"
+                    @close="close"
+                    >
+                    {{ item.mobile }}
+                    <template v-slot:input>
+                        <v-text-field
+                        v-model="item.mobile"
+                        :rules="mobileRules"
+                        label="Mobile"
+                        single-line
+                        counter="32"
+                        ></v-text-field>
+                    </template>
+                    </v-edit-dialog>
+                </template>
                 <template v-slot:[`item.imgartist`]="{ item }">
                     <td>
                         <div v-if="item.imgartist">
@@ -1147,8 +1300,20 @@
 <script>
   import axios from 'axios'
   import jsPDF from 'jspdf'
+
+
   export default {
       data: () => ({
+        json_fields: {},
+        json_data: [],
+        json_meta: [
+        [
+            {
+                    'key': 'charset',
+                    'value': 'utf-8'
+                }
+            ]
+        ],                    
         validForm: false,
         validportfolioform: false,
         validnoteform: false,
@@ -1157,20 +1322,36 @@
         menu: false,
         fullnameRules: [
             v => !!v || 'Full Name is required',
-        v => (v && v.length <= 64) || 'Name must be less than 64 characters',
+        v => (v && v.length <= 64) || 'Name must be less than or equal 64 characters',
         ],
         urlRules: [
             v => !!v || 'URL is required',
-            v => (v && v.length <= 128) || 'URL must be less than 128 characters',
+            v => (v && v.length <= 128) || 'URL must be less than or equal 128 characters',
             v => !(/[ ]/.test(v)) || 'no spaces allowed',
         ],
         noteRules: [
             v => !!v || 'Note is required',
-            v => (v && v.length <= 128) || 'Note must be less than 512 characters',
+            v => (v && v.length <= 128) || 'Note must be less than or equal 512 characters',
         ],
         projectnameRules: [
             v => !!v || 'Project name is required',
-            v => (v && v.length <= 32) || 'Project name must be less than 32 characters',
+            v => (v && v.length <= 32) || 'Project name must be less or equal than 32 characters',
+        ],
+        projectsworkedRules: [
+            v => (v && v.length <= 64) || 'Project worked must be less or equal than 64 characters',
+        ],
+        costRules: [
+            v => (v && v.length <= 128) || 'Project worked must be less or equal than 128 characters',
+        ],
+        emailRules: [
+            v => (v && v.length <= 64) || 'Email address must be less or equal than 64 characters',
+            v => (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(v)) || 'Please enter a valid email address',
+        ],
+        phoneRules: [
+            v => (v && v.length <= 32) || 'Phone must be less or equal than 64 characters',
+        ],
+        mobileRules: [
+            v => (v && v.length <= 32) || 'Mobile must be less or equal than 64 characters',
         ],
         scoreRules: [
             v => !!v || 'Score is required',
@@ -1230,14 +1411,11 @@
         _shcedules: '',
         scheduleartists: [],
         skills: [],
-        skillfilter: [],
+        skillsfilter: [],
         _skillartistids: [],
         _skillartisttxs: [],
         skillartists: [],
         roles: [],
-        _mainroleartistids: [],
-        _mainroleartisttxs: [],
-        mainroleartists: [],
         portfolios: [],
         _portfolios: '',
         portfolioartists: [],
@@ -1252,6 +1430,7 @@
         usuarios: [],
         id: '',
         fullname: '',
+        mainroleid: '',
         projectsworked: '',
         cost: '',
         costingdate: new Date(),
@@ -1341,27 +1520,21 @@
             return [
                 { text: 'Avatar', value: 'imgartist', align: 'center', sortable: false },
                 { text: 'Full Name', value: 'fullname', align: 'start', sortable: true, width: 250, filter: this.fullnameFilter },
-                //{ text: 'Main Role Ids', value: '_mainroleartistids', align: 'start', sortable: true },
-                { text: 'Main Role Txt', value: '_mainroleartisttxs', align: 'start', sortable: true, filter: this.roleFilter },
+                //{ text: 'Main Role Ids', value: 'mainroleid', align: 'start', sortable: true },
+                { text: 'Main Role', value: 'mainrole', align: 'start', sortable: true, filter: this.roleFilter  },
                 //{ text: 'Skills Ids', value: '_skillartistids', align: 'start', sortable: true },
-                { text: 'Skills Txt', value: '_skillartisttxs', align: 'start', sortable: true, width: 250, filter: this.skillFilter },
+                { text: 'Skills', value: '_skillartisttxs', align: 'start', sortable: true, width: 250, filter: this.skillFilter },
                 { text: 'Portfolio', value: '_portfolios', align: 'start', sortable: true },
-                { text: 'Project Worked', value: 'projectsworked', align: 'start', sortable: true },
-                { text: 'Notes', value: '_notes', align: 'start', sortable: true, width: 250 },
+                { text: 'Project Worked', value: 'projectsworked', align: 'start', sortable: true, width: 300 },
+                { text: 'Notes', value: '_notes', align: 'start', sortable: true, width: 350 },
                 { text: 'Schedules', value: '_schedules', align: 'start', sortable: true, width: 300 },
                 { text: 'Rating', value: '_rating', align: 'center', sortable: true },
                 { text: 'Cost', value: 'cost', align: 'start', sortable: true, width: 150 },
-                { text: 'eMail', value: 'email', align: 'start', sortable: true },
-                { text: 'Phone', value: 'phone', align: 'start', sortable: true },
-                { text: 'Mobile', value: 'mobile', align: 'start', sortable: true },
+                { text: 'eMail', value: 'email', align: 'start', sortable: true, width: 200 },
+                { text: 'Phone', value: 'phone', align: 'start', sortable: true, width: 150 },
+                { text: 'Mobile', value: 'mobile', align: 'start', sortable: true, width: 150 },
                 { text: 'Status', value: 'activo', align: 'start', sortable: true  },
                 { text: '[Options]', value: 'actions', align: 'center', sortable: false, width: 200 },
-            ]
-        },
-        headermainroles(){
-            return [
-                { text: '#', value: 'selected', align: 'center', sortable: true },
-                { text: 'Main Role', value: 'text', align: 'start', sortable: true },
             ]
         },
         headerskills(){
@@ -1436,7 +1609,7 @@
             }
             // Check if the current loop value (The calories value)
             // equals to the selected value at the <v-select>.
-            return value.includes(this.fullnameFilterValues);
+            return value.includes(this.fullnameFilterValues)
         },
         roleFilter(value) {
             // If this filter has no value we just skip the entire filter
@@ -1454,15 +1627,60 @@
             if (this.skillFilterValues.length==0) {
             return true;
             }
-            // Check if the current loop value (The calories value)
+            // Check if the current loop value (The skil value)
             // equals to the selected value at the <v-select>.
             value = value.split(', ')
-            var valueids = value.map( txt => this.skills.find(e => e.text === txt).value)
-            return this.skillFilterValues.find(e => valueids.indexOf(e) > -1);
+            for (var i = 0; i < value.length; i++ ){
+                for (var j = 0; j < this.skillFilterValues.length; j++ ){
+                    if ( value[i] == this.skillFilterValues[j] ){
+                        return true;
+                    }
+                }
+            }
+            return false;
         },
-        save () {
+        save (elem) {
+            if (elem.activo){
+                let me = this;
+                let header={"Authorization" : "Bearer " + this.$store.state.token};
+                let configuracion= {headers : header};
+                axios.put('api/Artists/Actualizar',{
+                    'id': elem.id,
+                    'fullname': elem.fullname,
+                    'mainroleid': elem.mainroleid,
+                    'projectsworked': elem.projectsworked,
+                    'cost': elem.cost,
+                    'costingdate': elem.costingdate,
+                    'costinguserid': elem.costinguserid,
+                    'email':elem.email,
+                    'phone': elem.phone,
+                    'mobile':elem.mobile,
+                    'imgartist':elem.imgartist,
+                    'proveedorid':elem.proveedorid,
+                    'iduserumod': me.$store.state.usuario.idusuario,
+                },configuracion).then( () => {
+                    me.snacktext = 'Updated';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                    me.closedialog();
+                    me.listar();
+                    me.limpiar();
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackcolor = "error";
+                    me.snackbar = true;
+                    console.log(error);
+                });
+            } else {
+            this.snacktext = 'Dormant'
+            this.snackcolor = "error";
+            this.snackbar = true;
+            }
         },
         cancel () {
+            this.snacktext = 'Canceled'
+            this.snackcolor = "error";
+            this.snackbar = true;
         },
         open () {
         },
@@ -1495,31 +1713,71 @@
             this.imageUrl = ''
             this.imgartist = ''
         },
+        crearXLS(){
+            this.json_fields = {
+                'Full Name': 'fullname',
+                'Main Role': 'mainrole',
+                'Skills': '_skillartisttxs',
+                'Portfolio': '_portfolios',
+                'Projects Worked' : 'projectsworked',
+                'Notes' : '_notes',
+                'Schedules' : '_schedules',
+                'Rating': '_rating',
+                'Cost': 'cost',
+                'Costing date': 'costingdate',
+                'Costing userid': 'costinguserid',
+                'eMail': 'email',
+                'Phone': 'phone',
+                'Mobile': 'mobile',
+                'Last update': 'fecumod',
+                //'Active': 'activo',
+            },
+            this.json_data = this.artists.filter(e => e.activo === true );
+            // this.json_data = [];
+            // for (var x=0; x<this.ordenpagos.length; x++){
+            //     for (let i=0; i<this.items.length; i++){
+            //         if (this.items[i]["value"]===this.ordenpagos[x]["iditem"]){
+            //             this.json_data.push(this.ordenpagos[x]);
+            //             break
+            //         }
+            //     }
+            // }
+        },
         crearPDF(){
             var columns = [
                     {title: "Fullname", dataKey: "fullname"},
-                    {title: "Projects Worked", dataKey: "projectsworked"},
-                    {title: "Cost", dataKey: "cost"},
+                    {title: "Main Role", dataKey: "mainrole"},
+                    {title: "Skills", dataKey: "_skillartisttxs"},
+                    //{title: "Portfolio", dataKey: "_portfolios"},
+                    //{title: "Projects Worked", dataKey: "projectsworked"},
+                    //{title: "Notes", dataKey: "_notes"},
+                    //{title: "Schedules", dataKey: "_schedules"},
+                    //{title: "Rating", dataKey: "_rating"},
+                    //{title: "Cost", dataKey: "cost"},
+                    //{title: "Costing date", dataKey: "costingdate"},
+                    //{title: "Costing user id", dataKey: "costinguserid"},
                     {title: "eMail", dataKey: "email"},
                     {title: "Phone", dataKey: "phone"},
                     {title: "Mobile", dataKey: "mobile"},
-                    {title: "Active", dataKey: "activo"}
+                    //{title: "Active", dataKey: "activo"}
             ];
             var rows = [];
 
             this.artists.map(function(x){
-                    rows.push({fullname:x.fullname,projectsworked:x.projectsworked,cost:x.cost,email:x.email,phone:x.phone,mobile:x.mobile,activo:x.activo});
+                    rows.push({fullname:x.fullname, mainrole:x.mainrole, _skillartisttxs:x._skillartisttxs, _portfolios:x._portfolios, 
+                    projectsworked:x.projectsworked,_notes:x._notes, _schedules:x._schedules, _rating: x._rating, cost:x.cost, costingdate: x.costingdate,
+                    costinguserid:x.costinguserid, email:x.email, phone:x.phone, mobile:x.mobile, activo:x.activo});
             });
 
             // Only pt supported (not mm or in)
             var doc = new jsPDF('l', 'pt');
-            doc.autoTable(columns, rows, {
+            doc.autoTable(columns, rows.filter(e => e.activo === true), {
                 margin: {top: 60},
                 addPageContent: () => {
-                    doc.text("Artist List", 40, 30);
+                    doc.text("Artist Contact List", 40, 30);
                 }
             });
-            doc.save('Artist.pdf');
+            doc.save('ArtistCallList.pdf');
         },
         listar(){
             let me = this
@@ -1543,9 +1801,7 @@
         fillSnowflake(items){
             let me = this
             var filtered = []
-            var lor = ""
             var los = ""
-            var sor = ""
             var sos = ""
             var index = ""
             var nots = ""
@@ -1569,20 +1825,6 @@
                 items[i]._skillartisttxs= sos.substring(0, sos.length - 2)
                 los = ''
                 sos = ''
-                //busca MainRole
-                filtered = me.mainroleartists.filter( function(e) {
-                    return e.artistid === items[i].id
-                })
-                for (var mr = 0 ; mr < filtered.length; mr++ ){
-                    lor += filtered[mr].skillid.toString()+', '
-                    index = me.skills.findIndex(x => x.value === filtered[mr].skillid)
-                    sor += me.skills[index].text+', '
-                }
-                me.roles = me.skills.filter( x => x.ismainrole)
-                items[i]._mainroleartistids= lor.substring(0, lor.length - 2)
-                items[i]._mainroleartisttxs= sor.substring(0, sor.length - 2)
-                lor = ''
-                sor = ''
                 //busca Notas
                 filtered = me.notes.filter( function(e) {
                     return e.artistid === items[i].id
@@ -1629,7 +1871,6 @@
             let me = this;
             let usuariosArray = []
             let skillsArray = []
-            let mainroleartistsArray = []
             let skillartistsArray = []
             let notesArray = []
             let portfoliosArray = []
@@ -1654,7 +1895,8 @@
                 skillsArray=response.data;
                 skillsArray.map(function(x){
                     me.skills.push({selected: false, value:x.id, text: x.skill, ismainrole: x.ismainrole, relid: 0 });
-                    me.roles=me.skills.filter(e => e.ismainrole)
+                    me.skillsfilter.push({text: x.skill, ismainrole: x.ismainrole });
+                    me.roles = me.skills.filter(e => e.ismainrole)
                 });
             }).catch(function(error){
                 me.snacktext = 'An error was detected. Code: '+ error.response.status;
@@ -1666,18 +1908,6 @@
                 skillartistsArray=response.data;
                 skillartistsArray.map(function(x){
                     me.skillartists.push({selected: false, value: x.id, skillid: x.skillid, artistid: x.artistid, iduseralta: x.iduseralta,
-                        fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
-                });
-            }).catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackcolor = 'error'
-                me.snackbar = true;
-                console.log(error);
-            });
-            axios.get('api/Mainroleartists/Listar',configuracion).then(function(response){
-                mainroleartistsArray=response.data;
-                mainroleartistsArray.map(function(x){
-                    me.mainroleartists.push({selected: false, value:x.id, skillid: x.skillid, artistid: x.artistid, iduseralta: x.iduseralta,
                         fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
                 });
             }).catch(function(error){
@@ -1738,6 +1968,7 @@
         editItem (item) {
             this.id=item.id;
             this.fullname=item.fullname;
+            this.mainroleid=item.mainroleid;
             this.projectsworked=item.projectsworked;
             this.cost=item.cost;
             this.costingdate=item.costingdate;
@@ -1803,40 +2034,11 @@
             this.dialog = false
             this.limpiar();
         },
-        editProyecto(item){
-            var me = this
-            let index=0;
-            index = me.proyectousuarios.findIndex(element => element.value === item.relid );
-            let header={"Authorization" : "Bearer " + me.$store.state.token};
-            let configuracion= {headers : header};
-
-            axios.put('api/Proyectousuarios/Actualizar',{
-                'id':item.relid,
-                'usuarioid':me.workuserId,
-                'proyectoid':item.value,
-                'tarifaproyectousuario':item.tarifaproyectousuario,
-                'costoproyectousuario':item.costoproyectousuario,
-                'notas':item.notas,
-                'iduseralta': me.$store.state.usuario.idusuario                      
-            },configuracion).then( () => {
-                me.proyectousuarios[index].tarifaproyectousuario = (Number(item.tarifaproyectousuario)).toFixed(2);
-                me.proyectousuarios[index].costoproyectousuario = Number(item.costoproyectousuario);
-                me.proyectousuarios[index].notas = item.notas;
-                //me.proyectos[me.proyectos.findIndex(element => element.value === me.proyectousuarios[index].proyectoid )].estimadotarifa = me.proyectotareas[index].estimadotarifa;
-                me.snacktext = 'Updated';
-                me.snackcolor = "success";
-                me.snackbar = true;
-            }).catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackbar = true;
-                me.snackcolor = 'error'
-                console.log(error);
-            });
-        },
         limpiar(){
                 this.id = ""
                 this.fullname = ""
-                this.projectworked = ""
+                this.mainroleid = ""
+                this.projectsworked = ""
                 this.cost = ""
                 this.costingdate = new Date();
                 this.email = ""
@@ -1864,6 +2066,7 @@
                 axios.put('api/Artists/Actualizar',{
                     'id': me.id,
                     'fullname': me.fullname,
+                    'mainroleid': me.mainroleid,
                     'projectsworked': me.projectsworked,
                     'cost': me.cost,
                     'costingdate': me.costingdate,
@@ -1891,6 +2094,7 @@
                 //Código para guardar
                 axios.post('api/Artists/Crear',{
                     'fullname': me.fullname,
+                    'mainroleid': me.mainroleid,
                     'projectsworked': me.projectsworked,
                     'cost': me.cost,
                     'costingdate': me.costingdate,
@@ -1917,26 +2121,6 @@
                     console.log(error);
                 });
             }
-        },
-        tratarRoles(element){
-            var me=this;
-            let index = 0;
-            for (var l = 0; l < me.roles.length; l++){
-                me.roles[l].selected = false;
-                me.roles[l].relid = 0;
-            }
-            // eslint-disable-next-line
-            //debugger
-            for (var i = 0; i < me.mainroleartists.length; i++){
-                if (me.mainroleartists[i].artistid === element.id){
-                    index = me.roles.findIndex(element => element.value === me.mainroleartists[i].skillid );
-                    me.roles[index].selected = true;
-                    me.roles[index].relid = me.mainroleartists[i].value;
-                }
-            }
-            me.workedartistid = element.id;
-            me.roleheader = 'Main Role assigned to ' + element.fullname;
-            me.roledialog=!me.roledialog;
         },
         tratarSkill(element){
             var me = this;
@@ -2001,47 +2185,6 @@
             me.workuserId = item.id;
             me.groupheader = 'Grupos de ' + item.iniciales + ' ' + item.email;
             me.groupdialog=!me.groupdialog;
-        },
-        accionRole (item) {
-            var me = this;
-            if (item.selected === true ) {
-                let header={"Authorization" : "Bearer " + me.$store.state.token};
-                let configuracion= {headers : header};
-                axios.post('api/Mainroleartists/Crear',{
-                    'skillid': item.value,
-                    'artistid': me.workedartistid,
-                    'iduseralta': me.$store.state.usuario.idusuario
-                },configuracion)
-                .then(function(response){
-                    me.mainroleartists.push({selected: true, skillid: response.data.skillid, artistid: response.data.artistid, value: response.data.id});
-                    me.fillSnowflake(me.artists)
-                    //console.log(response);
-                    me.snacktext = 'Created';
-                    me.snackcolor = "success";
-                    me.snackbar = true;
-                }).catch(function(error){
-                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                    me.snackbar = true;
-                    me.snackcolor = 'error'
-                    console.log(error);
-                });
-            } else {
-                var indice = me.mainroleartists.find(x => item.value === x.skillid && me.workedartistid === x.artistid).value;
-                let header={"Authorization" : "Bearer " + me.$store.state.token};
-                let configuracion= {headers : header};
-                axios.delete('api/Mainroleartists/Eliminar/'+indice,configuracion).then( () => {
-                    me.mainroleartists = me.mainroleartists.filter(x => x.value != indice);
-                    me.fillSnowflake(me.artists)
-                    me.snacktext = 'Eliminated';
-                    me.snackcolor = "success";
-                    me.snackbar = true;
-                }).catch(function(error){
-                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                    me.snackcolor = "error";
-                    me.snackbar = true;
-                    console.log(error);
-                });
-            }
         },
         accionSkill (item) {
             var me = this;
@@ -2112,7 +2255,7 @@
                 me.portfolios = me.portfolios.filter(x => x.value != me.portfolios[me.editedIndex].value);
                 me.portfolioartists = me.portfolios.filter(e => e.artistid === me.workedartistid)
                 me.fillSnowflake(me.artists);
-                me.closeDeletePortfolio;
+                me.closeDeletePortfolio();
                 me.snacktext = 'Eliminated';
                 me.snackcolor = "success";
                 me.snackbar = true;
@@ -2178,7 +2321,16 @@
             }
         },
         openTab: function (link) {
+            if (this.dependentWindow){
+                this.closeTab()
+            }
             this.dependentWindow = window.open(link, '_blank')
+        },
+        viewTab: function (link) {
+            this.dependentWindow = window.open(link, 'mywin', "width=500, height=400")
+        },
+        closeTab: function () {
+            this.dependentWindow.close()
         },
         editNote(element){
             this.editedIndex = this.notes.indexOf(element)
@@ -2208,7 +2360,7 @@
                 me.notes = me.notes.filter(x => x.value != me.notes[me.editedIndex].value);
                 me.noteartists = me.notes.filter(e => e.artistid === me.workedartistid)
                 me.fillSnowflake(me.artists);
-                me.closeDeleteNote;
+                me.closeDeleteNote();
                 me.snacktext = 'Eliminated';
                 me.snackcolor = "success";
                 me.snackbar = true;
@@ -2315,7 +2467,7 @@
                 me.schedules = me.schedules.filter(x => x.value != me.schedules[me.editedIndex].value);
                 me.scheduleartists = me.schedules.filter(e => e.artistid === me.workedartistid)
                 me.fillSnowflake(me.artists);
-                me.closeDeleteSchedule;
+                me.closeDeleteSchedule();
                 me.snacktext = 'Eliminated';
                 me.snackcolor = "success";
                 me.snackbar = true;
@@ -2420,7 +2572,7 @@
                 me.ratings = me.ratings.filter(x => x.value != me.ratings[me.editedIndex].value);
                 me.ratingartists = me.ratings.filter(e => e.artistid === me.workedartistid)
                 me.fillSnowflake(me.artists);
-                me.closeDeleteRating;
+                me.closeDeleteRating();
                 me.snacktext = 'Eliminated';
                 me.snackcolor = "success";
                 me.snackbar = true;

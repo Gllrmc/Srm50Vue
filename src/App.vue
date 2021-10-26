@@ -37,7 +37,7 @@
             </v-list-item-action>
             <v-list-item-content>
               <v-list-item-title>
-                Selections
+                Check-In sets
               </v-list-item-title>
             </v-list-item-content>
           </v-list-item>
