@@ -43,8 +43,8 @@
 
             <v-card-text> 
               <div>
-                <p class="title font-weight primary--text pl-1">Powered by Akiel
-                <p class="font-weight-bold pl-1">
+                <p class="font-weight-bold primary--text pl-1">Powered by Akiel
+                <p class="font-weight pl-1">
                   Sales contact: Lucio Andres +54 (911) 3561-4639<br>
                   IT/IS contact: Guillermo Cristobal +54 (911) 3560-0383<br>
                   or check our <a href="https://akiel.com.ar" target="_blank">Website</a>

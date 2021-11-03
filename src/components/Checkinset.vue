@@ -25,11 +25,41 @@
                 </template>
             </v-snackbar>
         </template>
+        <template>
+        <v-toolbar
+            dark
+        >
+            <v-toolbar-title>Check-In Set selection</v-toolbar-title>
+                <v-autocomplete
+                v-model="chosen"
+                :loading="loading"
+                :items="checkins"
+                :search-input.sync="search"
+                cache-items
+                clearable
+                class="mx-4"
+                flat
+                hide-no-data
+                hide-details
+                label="What Check-In Set do you need?"
+                solo-inverted
+                @input="filtrarArtists(chosen)"
+                ></v-autocomplete>
+                <v-btn 
+                    :disabled="!chosen"
+                    @click="deleteCheckinset(chosen)"
+                    icon>
+                    <v-icon>
+                        mdi-delete
+                    </v-icon>
+                </v-btn>
+            </v-toolbar>
+        </template>
         <v-col cols="12" md="12" sm="12">
             <v-data-table
             v-model="selected"
             :headers="headerartists"
-            :items="artists"
+            :items="filteredartists"
             :footer-props="{
                 showFirstLastPage: true,
                 'first-icon': 'mdi-arrow-collapse-left',
@@ -198,9 +228,9 @@
                         <v-text-field dense label="Search" outlined v-model="searcha" clearable append-icon="mdi-magnify" single-line hide-details></v-text-field>
                         <v-spacer></v-spacer>
                         <v-dialog v-model="dialog" max-width="700px">
-                            <template v-slot:activator="{ on }">
+                            <!-- <template v-slot:activator="{ on }">
                             <v-btn color="primary" dark class="mb-2" v-on="on">NEW</v-btn>
-                            </template>
+                            </template> -->
                             <v-card>
                                 <v-card-title>
                                     <span class="headline">{{ formTitle }}</span>
@@ -360,6 +390,20 @@
                                     <v-btn color="secondary" dark :disabled="!validForm" text @click="guardarCheckin">SAVE</v-btn>
                                 </v-card-actions>
                             </v-card>
+                        </v-dialog>
+                        <v-dialog v-model="dialogDeleteCheckin" max-width="600">
+                            <v-card>
+                                <v-card-title class="text-h5">Are you sure you want to delete this Check-In Set?
+                                </v-card-title>
+                                <p class="ml-3" >{{ checkin }}</p>
+                                <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn color="primary" text @click="closeDeleteCheckinset">Cancel</v-btn>
+                                <v-btn color="primary" text @click="deleteCheckinsetConfirm">OK</v-btn>
+                                <v-spacer></v-spacer>
+                                </v-card-actions>
+                            </v-card>
+
                         </v-dialog>
                         <v-dialog v-model="adModal" max-width="390">
                             <v-card>
@@ -523,17 +567,17 @@
                                         </v-dialog>
                                         <v-btn class="ma-1" color="primary" dense dark @click.native="portfoliodialog=false">Close</v-btn>
                                         <v-dialog v-model="dialogDeletePortfolio" max-width="520px">
-                                        <v-card>
-                                            <v-card-title class="text-h5">Are you sure you want to delete this item?
-                                            </v-card-title>
-                                            <p class="ml-3" >{{url}}</p>
-                                            <v-card-actions>
-                                            <v-spacer></v-spacer>
-                                            <v-btn color="primary" text @click="closeDeletePortfolio">Cancel</v-btn>
-                                            <v-btn color="primary" text @click="deletePorfolioConfirm">OK</v-btn>
-                                            <v-spacer></v-spacer>
-                                            </v-card-actions>
-                                        </v-card>
+                                            <v-card>
+                                                <v-card-title class="text-h5">Are you sure you want to delete this item?
+                                                </v-card-title>
+                                                <p class="ml-3" >{{chosen}}</p>
+                                                <v-card-actions>
+                                                <v-spacer></v-spacer>
+                                                <v-btn color="primary" text @click="closeDeletePortfolio">Cancel</v-btn>
+                                                <v-btn color="primary" text @click="deletePorfolioConfirm">OK</v-btn>
+                                                <v-spacer></v-spacer>
+                                                </v-card-actions>
+                                            </v-card>
                                         </v-dialog>
                                     </v-toolbar>
                                 </template>
@@ -647,17 +691,17 @@
                                     </v-dialog>
                                     <v-btn class="ma-1" color="primary" dense dark @click.native="notedialog=false">Close</v-btn>
                                     <v-dialog v-model="dialogDeleteNote" max-width="520px">
-                                    <v-card>
-                                        <v-card-title class="text-h5">Are you sure you want to delete this note?
-                                        </v-card-title>
-                                        <p class="ml-3" >{{note}}</p>
-                                        <v-card-actions>
-                                        <v-spacer></v-spacer>
-                                        <v-btn color="primary" text @click="closeDeleteNote">Cancel</v-btn>
-                                        <v-btn color="primary" text @click="deleteNoteConfirm">OK</v-btn>
-                                        <v-spacer></v-spacer>
-                                        </v-card-actions>
-                                    </v-card>
+                                        <v-card>
+                                            <v-card-title class="text-h5">Are you sure you want to delete this note?
+                                            </v-card-title>
+                                            <p class="ml-3" >{{note}}</p>
+                                            <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn color="primary" text @click="closeDeleteNote">Cancel</v-btn>
+                                            <v-btn color="primary" text @click="deleteNoteConfirm">OK</v-btn>
+                                            <v-spacer></v-spacer>
+                                            </v-card-actions>
+                                        </v-card>
                                     </v-dialog>
                                 </v-toolbar>
                                 </template>
@@ -817,17 +861,17 @@
                                     </v-dialog>
                                     <v-btn class="ma-1" color="primary" dense dark @click.native="scheduledialog=false">Close</v-btn>
                                     <v-dialog v-model="dialogDeleteSchedule" max-width="570px">
-                                    <v-card>
-                                        <v-card-title class="text-h5">Are you sure you want to delete this schedule?
-                                        </v-card-title>
-                                        <p class="ml-3" >{{ dateRangeText }} {{reason}}</p>
-                                        <v-card-actions>
-                                        <v-spacer></v-spacer>
-                                        <v-btn color="primary" text @click="closeDeleteSchedule">Cancel</v-btn>
-                                        <v-btn color="primary" text @click="deleteScheduleConfirm">OK</v-btn>
-                                        <v-spacer></v-spacer>
-                                        </v-card-actions>
-                                    </v-card>
+                                        <v-card>
+                                            <v-card-title class="text-h5">Are you sure you want to delete this schedule?
+                                            </v-card-title>
+                                            <p class="ml-3" >{{ dateRangeText }} {{reason}}</p>
+                                            <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn color="primary" text @click="closeDeleteSchedule">Cancel</v-btn>
+                                            <v-btn color="primary" text @click="deleteScheduleConfirm">OK</v-btn>
+                                            <v-spacer></v-spacer>
+                                            </v-card-actions>
+                                        </v-card>
                                     </v-dialog>
                                 </v-toolbar>
                                 </template>
@@ -965,17 +1009,17 @@
                                     </v-dialog>
                                     <v-btn class="ma-1" color="primary" dense dark @click.native="ratingdialog=false">Close</v-btn>
                                     <v-dialog v-model="dialogDeleteRating" max-width="550px">
-                                    <v-card>
-                                        <v-card-title class="text-h5">Are you sure you want to delete this rating?
-                                        </v-card-title>
-                                        <p class="ml-3" >{{ projectname }}: {{ score }}</p>
-                                        <v-card-actions>
-                                        <v-spacer></v-spacer>
-                                        <v-btn color="primary" text @click="closeDeleteRating">Cancel</v-btn>
-                                        <v-btn color="primary" text @click="deleteRatingConfirm">OK</v-btn>
-                                        <v-spacer></v-spacer>
-                                        </v-card-actions>
-                                    </v-card>
+                                        <v-card>
+                                            <v-card-title class="text-h5">Are you sure you want to delete this rating?
+                                            </v-card-title>
+                                            <p class="ml-3" >{{ projectname }}: {{ score }}</p>
+                                            <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn color="primary" text @click="closeDeleteRating">Cancel</v-btn>
+                                            <v-btn color="primary" text @click="deleteRatingConfirm">OK</v-btn>
+                                            <v-spacer></v-spacer>
+                                            </v-card-actions>
+                                        </v-card>
                                     </v-dialog>
                                 </v-toolbar>
                                 </template>
@@ -1432,6 +1476,12 @@
 
   export default {
       data: () => ({
+        loading: false,
+        search: null,
+        chosen: null,
+        dialogDeleteCheckin: false,
+        items: [],
+
         json_fields: {},
         json_data: [],
         json_meta: [
@@ -1541,6 +1591,7 @@
         skillFilterValues: [],
 
         artists: [],
+        filteredartists: [],
         schedules: [],
         _shcedules: '',
         scheduleartists: [],
@@ -1562,6 +1613,8 @@
         selections: [],
         selectedartists: [],
         usuarios: [],
+        checkins: [],
+        checkinartists: [],
         id: '',
         fullname: '',
         mainroleid: '',
@@ -1730,6 +1783,9 @@
     },
 
     watch: {
+        search (val) {
+            val && val !== this.chosen
+        },
         dialog (val) {
             val || this.closedialog()
         },
@@ -1742,6 +1798,45 @@
     },
 
     methods: {
+        filtrarArtists(element){
+            let me = this
+            let subsetCheckinartistIds = []
+            if (!element){
+                me.filteredartists = []
+            } else {
+                subsetCheckinartistIds = me.checkinartists.filter(e => e.checkinid === element).map( function(e) { return e.id })
+                me.filteredartists = me.artists.filter( e => subsetCheckinartistIds.indexOf(e.id) > -1 )
+            }
+        },
+        deleteCheckinset(element){
+            this.editedIndex = this.checkins.findIndex(e => e.value === element)
+            this.checkin = this.checkins[this.editedIndex].text
+            this.dialogDeleteCheckin = true
+        },
+        deleteCheckinsetConfirm(){
+            let me = this;
+            let chkid = me.checkins[me.editedIndex].value;
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
+            let configuracion= {headers : header};
+            axios.delete('api/Checkinartists/Eliminarcheckinset/'+chkid,configuracion).then( () => {
+                me.checkins = me.checkins.filter ( x => x.value != chkid )
+                me.checkinartists = me.checkinartists.filter (x => x.checkinid != chkid )
+                me.chosen = ""
+                me.filteredartists = [];
+                me.closeDeleteCheckinset();
+                me.snacktext = 'Eliminated';
+                me.snackcolor = "success";
+                me.snackbar = true;
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = "error";
+                me.snackbar = true;
+                console.log(error);
+            });
+        },
+        closeDeleteCheckinset(){
+            this.dialogDeleteCheckin = false
+        },
         salir(){
             this.$store.dispatch("salir");
         },
@@ -2055,6 +2150,8 @@
             let portfoliosArray = []
             let ratingsArray = []
             let schedulesArray = []
+            let checkinsArray = []
+            let checkinartistsArray = []
             let header={"Authorization" : "Bearer " + me.$store.state.token};
             let configuracion= {headers : header};
             axios.get('api/Usuarios/Listar',configuracion).then(function(response){
@@ -2139,6 +2236,30 @@
                 schedulesArray.map(function(x){
                     me.schedules.push({value:x.id, artistid: x.artistid, startdate: x.startdate, enddate: x.enddate,
                         reason: x.reason, iduseralta: x.iduseralta, fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
+                });
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = 'error'
+                me.snackbar = true;
+                console.log(error);
+            });
+            axios.get('api/Checkins/Listar',configuracion).then(function(response){
+                checkinsArray=response.data;
+                checkinsArray.map(function(x){
+                    me.checkins.push({value:x.id, text: x.checkin, detail: x.detail,
+                        iduseralta: x.iduseralta, fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
+                });
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = 'error'
+                me.snackbar = true;
+                console.log(error);
+            });
+            axios.get('api/Checkinartists/Listar',configuracion).then(function(response){
+                checkinartistsArray=response.data;
+                checkinartistsArray.map(function(x){
+                    me.checkinartists.push({id:x.id, artistid: x.artistid, checkinid: x.checkinid,
+                        iduseralta: x.iduseralta, fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
                 });
             }).catch(function(error){
                 me.snacktext = 'An error was detected. Code: '+ error.response.status;

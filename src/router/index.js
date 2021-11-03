@@ -7,6 +7,7 @@ import Rol from '../components/Rol.vue'
 import Skill from '../components/Skill.vue'
 import Usuario from '../components/Usuario.vue'
 import Artist from '../components/Artist.vue'
+import Checkinset from '../components/Checkinset.vue'
 
 
 Vue.use(VueRouter)
@@ -37,6 +38,19 @@ const routes = [
     path: '/artists',
     name: 'artists',
     component: Artist,
+    meta: {
+      administrador: true,
+      jefeadministracion: true,
+      liderproyecto:true, 
+      consultor: true,
+      asistadministracion: true,
+      dataentry: true
+    }
+  },
+  {
+    path: '/checkinsets',
+    name: 'checkinsets',
+    component: Checkinset,
     meta: {
       administrador: true,
       jefeadministracion: true,

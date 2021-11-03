@@ -355,10 +355,6 @@
         recordInfo:0,
         usuarios: [],
         roles:[],
-        grupos:[],
-        proyectos:[],
-        grupousuarios:[],
-        proyectousuarios:[],
         workuserId:'',
         imageUrl:'',
         groupheader: '',
@@ -413,21 +409,6 @@
                 { text: 'Phone', value: 'telefono', align: 'start', sortable: true },
                 { text: 'Status', value: 'activo', align: 'start', sortable: true  },
                 { text: '[Options]', value: 'actions', align: 'center', sortable: false },
-            ]
-        },
-        headersgrupos(){
-            return [
-                { text: '#', value: 'selected', align: 'center', sortable: false },
-                { text: 'Nombre grupo', value: 'nombre', align: 'start', sortable: true },
-            ]
-        },
-        headersproyectos(){
-            return [
-                { text: '#', value: 'selected', align: 'center', sortable: false },
-                { text: 'Proyecto', value: 'nombre', align: 'start', sortable: true },
-                { text: 'Tarifa', value: 'tarifaproyectousuario', align: 'end', sortable: true },
-                { text: 'Costo', value: 'costoproyectousuario', align: 'end', sortable: true },
-                { text: 'Notas', value: 'notas', align: 'start', sortable: true },
             ]
         },
         formTitle () {
@@ -521,10 +502,6 @@
         select(){
             let me=this;
             var rolesArray=[];
-            var gruposArray=[];
-            var proyectosArray=[];
-            var grupousuariosArray=[];
-            var proyectousuariosArray=[];
             let header={"Authorization" : "Bearer " + this.$store.state.token};
             let configuracion= {headers : header};
             axios.get('api/Roles/Select',configuracion).then(function(response){
@@ -535,51 +512,6 @@
             }).catch(function(error){
                 me.snacktext = 'An error was detected. Code: '+ error.response.status;
                 me.snackcolor = "error";
-                me.snackbar = true;
-                console.log(error);
-            });
-            axios.get('api/Grupos/Listar',configuracion).then(function(response){
-                gruposArray=response.data;
-                gruposArray.map(function(x){
-                    me.grupos.push({selected: false, nombre: x.nombre, value:x.id});
-                });
-            }).catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackcolor = 'error'
-                me.snackbar = true;
-                console.log(error);
-            });
-            axios.get('api/Grupousuarios/Listar',configuracion).then(function(response){
-                grupousuariosArray=response.data;
-                grupousuariosArray.map(function(x){
-                    me.grupousuarios.push({grupoid: x.grupoid, usuarioid: x.usuarioid, value:x.id});
-                });
-            }).catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackcolor = 'error'
-                me.snackbar = true;
-                console.log(error);
-            });
-            axios.get('api/Proyectos/Listar',configuracion).then(function(response){
-                proyectosArray=response.data;
-                proyectosArray.map(function(x){
-                    me.proyectos.push({selected: false, value:x.id, nombre: x.nombre, relid: 0, tarifaproyectousuario: 0, costoproyectousuario: 0, notas: ''});
-                });
-            }).catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackcolor = 'error'
-                me.snackbar = true;
-                console.log(error);
-            });
-            axios.get('api/Proyectousuarios/Listar',configuracion).then(function(response){
-                proyectousuariosArray=response.data;
-                proyectousuariosArray.map(function(x){
-                    me.proyectousuarios.push({proyectoid: x.proyectoid, usuarioid: x.usuarioid, 
-                    tarifaproyectousuario: x.tarifaproyectousuario, costoproyectousuario: x.costoproyectousuario, value:x.id});
-                });
-            }).catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackcolor = 'error'
                 me.snackbar = true;
                 console.log(error);
             });
@@ -806,30 +738,6 @@
                 this.valida=1;
             }
             return this.valida;
-        },
-        agregarGrupo(addgroup){
-            let me=this;
-            if(addgroup.length >= 3 && addgroup.length <= 50 ){
-                let header={"Authorization" : "Bearer " + this.$store.state.token};
-                let configuracion= {headers : header};
-                axios.post('api/Grupos/Crear',{
-                    'nombre':addgroup,
-                    'iduseralta': me.$store.state.usuario.idusuario                      
-                },configuracion)
-                .then(function(response){
-                    //console.log(response);
-                    me.grupos.push({selected: false, nombre: response.data.nombre, value: response.data.id});
-                    me.snacktext = 'Created';
-                    me.snackcolor = "success";
-                    me.snackbar = true;
-                    me.addgroup = "";
-                }).catch(function(error){
-                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                    me.snackbar = true;
-                    me.snackcolor = 'error'
-                    console.log(error);
-                });
-            }
         },
         activarDesactivarMostrar(accion,item){
             this.adModal=1;

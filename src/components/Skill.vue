@@ -359,6 +359,9 @@
     },
 
     methods: {
+        salir(){
+            this.$store.dispatch("salir");
+        },
         save () {
         },
         cancel () {
@@ -429,7 +432,6 @@
         select(){
             let me=this;
             var usuariosArray=[];
-            var artistsArray=[];
             let header={"Authorization" : "Bearer " + this.$store.state.token};
             let configuracion= {headers : header};
             axios.get('api/Usuarios/Listar',configuracion).then(function(response){
@@ -444,17 +446,9 @@
                 me.snackcolor = 'error'
                 me.snackbar = true;
                 console.log(error);
-            });
-            axios.get('api/Artists/Listar',configuracion).then(function(response){
-                artistsArray=response.data;
-                artistsArray.map(function(x){
-                    me.artists.push({grupoid: x.grupoid, usuarioid: x.usuarioid, value:x.id});
-                });
-            }).catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackcolor = 'error'
-                me.snackbar = true;
-                console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
         editItem (item) {

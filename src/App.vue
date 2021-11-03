@@ -31,7 +31,7 @@
           </v-list-item>
         </template>
         <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
-          <v-list-item :to="{ name: 'actividades'}">
+          <v-list-item :to="{ name: 'checkinsets'}">
             <v-list-item-action>
               <v-icon color="primary">mdi-pin</v-icon>
             </v-list-item-action>
@@ -211,17 +211,17 @@
         </v-slide-y-transition>
       </v-container>
     </v-main>
-    <v-footer app
-      height="auto"
-      dense
+    <v-footer 
+      app
+      height="50"
     >
       <v-col 
       class="text-center"
       col="12">
         <v-card flat tile color="primary">
-          <v-card-text class="white--text font-weight-bold">
-            &copy;2021 Akiel Consultoría en Gestión de Negocios. Todos los Derechos Reservados<br>Version 1.0 
-          </v-card-text>
+          <p class="mb-2 white--text font-weight-bold">
+            &copy;2021 Akiel Consultoría en Gestión de Negocios. Todos los Derechos Reservados. Version 1.10 
+          </p>
         </v-card>
       </v-col>
     </v-footer>
