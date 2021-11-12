@@ -3,11 +3,11 @@ import VueRouter from 'vue-router'
 import store from '../store'
 import Home from '../views/Home.vue'
 import Login from '../components/Login.vue'
-import Rol from '../components/Rol.vue'
-import Skill from '../components/Skill.vue'
-import Usuario from '../components/Usuario.vue'
-import Artist from '../components/Artist.vue'
-import Checkinset from '../components/Checkinset.vue'
+// import Skill from '../components/Skill.vue'
+// import Rol from '../components/Rol.vue'
+// import Usuario from '../components/Usuario.vue'
+// import Artist from '../components/Artist.vue'
+// import Checkinset from '../components/Checkinset.vue'
 
 
 Vue.use(VueRouter)
@@ -37,7 +37,7 @@ const routes = [
   {
     path: '/artists',
     name: 'artists',
-    component: Artist,
+    component: () => import(/* webpackChunkName: "artists" */ '../components/Artist.vue'),
     meta: {
       administrador: true,
       jefeadministracion: true,
@@ -50,7 +50,7 @@ const routes = [
   {
     path: '/checkinsets',
     name: 'checkinsets',
-    component: Checkinset,
+    component: () => import(/* webpackChunkName: "preview" */ '../components/Checkinset.vue'),
     meta: {
       administrador: true,
       jefeadministracion: true,
@@ -63,7 +63,7 @@ const routes = [
   {
     path: '/skills',
     name: 'skills',
-    component: Skill,
+    component: () => import(/* webpackChunkName: "preview" */ '../components/Skill.vue'),
     meta: {
       administrador: true,
       jefeadministracion: true,
@@ -76,7 +76,7 @@ const routes = [
   {
     path: '/roles',
     name: 'roles',
-    component: Rol,
+    component: () => import(/* webpackChunkName: "admin" */ '../components/Rol.vue'),
     meta: {
       administrador: true,
       jefeadministracion: true,
@@ -89,7 +89,7 @@ const routes = [
   {
     path: '/usuarios',
     name: 'usuarios',
-    component: Usuario,
+    component: () => import(/* webpackChunkName: "admin" */ '../components/Usuario.vue'),
     meta: {
       administrador: true,
       jefeadministracion: true,
@@ -99,14 +99,14 @@ const routes = [
       dataentry: true
     }
   },
-  {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  }
+  // {
+  //   path: '/about',
+  //   name: 'About',
+  //   // route level code-splitting
+  //   // this generates a separate chunk (about.[hash].js) for this route
+  //   // which is lazy-loaded when the route is visited.
+  //   component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+  // }
 ]
 
 const router = new VueRouter({

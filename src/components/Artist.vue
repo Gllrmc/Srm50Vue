@@ -27,6 +27,7 @@
         </template>
         <v-col cols="12" md="12" sm="12">
             <v-data-table
+            ref="maintable"
             v-model="selected"
             :headers="headerartists"
             :items="artists"
@@ -47,30 +48,9 @@
             multi-sort
             class="elevation-1 blue-grey lighten-5"
             no-data-text="Nothing to show"
-            height="650px"
+            height="800px"
             >
-                <template v-slot:[`header.fullname`]="{ header }">
-                {{ header.text }}
-                <v-menu offset-y :close-on-content-click="false">
-                    <template v-slot:activator="{ on, attrs }">
-                    <v-btn icon v-bind="attrs" v-on="on">
-                        <v-icon small :color="fullnameFilterValues ? 'accent' : ''">
-                        mdi-filter
-                        </v-icon>
-                    </v-btn>
-                    </template>
-                    <div style="background-color: white; width: 280px">
-                    <v-text-field
-                        v-model="fullnameFilterValues"
-                        class="pa-4"
-                        type="text"
-                        label="Texto a buscar"
-                        clearable
-                    ></v-text-field>
-                    </div>
-                </v-menu>
-                </template>
-                <template v-slot:[`header.mainrole`]="{ header }">
+                <!-- <template v-slot:[`header.mainrole`]="{ header }">
                 {{ header.text }}
                 <v-menu offset-y :close-on-content-click="false">
                     <template v-slot:activator="{ on, attrs }">
@@ -95,32 +75,9 @@
                     </v-select>
                     </div>
                 </v-menu>
-                </template>
+                </template> -->
                 <template v-slot:[`header._skillartisttxs`]="{ header }">
                 {{ header.text }}
-                <v-menu offset-y :close-on-content-click="false">
-                    <template v-slot:activator="{ on, attrs }">
-                    <v-btn icon v-bind="attrs" v-on="on">
-                        <v-icon small :color="skillFilterValues.length ? 'accent' : ''">
-                        mdi-filter
-                        </v-icon>
-                    </v-btn>
-                    </template>
-                    <div style="background-color: white; width: 280px">
-                    <v-select
-                        v-model="skillFilterValues"
-                        :items="skillsfilter"
-                        label="Skills"
-                        append-icon="mdi-magnify-plus-outline"
-                        clearable
-                        chips
-                        deletable-chips
-                        multiple
-                        class="elevation-1"
-                        >
-                    </v-select>
-                    </div>
-                </v-menu>
                 </template>
                 <template v-slot:top>
                     <v-toolbar flat color="white">
@@ -132,50 +89,30 @@
                         ></v-divider>
                         <tr>
                             <td>
-                                <v-tooltip bottom>
-                                    <template v-slot:activator="{ on, attrs }">
-                                        <v-btn 
-                                            x-small 
-                                            class="mr-1" 
-                                            :disabled="!selected.length" 
-                                            v-bind="attrs"
-                                            v-on="on"
-                                            @click="tratarPreview()">
-                                            <v-icon>
-                                                mdi-format-list-bulleted
-                                            </v-icon>
-                                        </v-btn>
-                                    </template>
-                                    <span>Build Check-In set</span>
-                                </v-tooltip>
+                                <v-btn 
+                                    color="primary" dark 
+                                    class="mb-2 ma-1"
+                                    @click="tratarPreview()">
+                                    PRE-SELECT
+                                </v-btn>
                             </td>
                             <td>
-                                <v-tooltip bottom>
-                                    <template v-slot:activator="{ on, attrs }">
-                                        <export-excel
-                                            :data   = "json_data"
-                                            :fields = "json_fields"
-                                            worksheet = "Artist Export"
-                                            type    = "xls"
-                                            name    = "MAnAdata.xls"
-                                            >
-                                            <v-btn 
-                                                x-small 
-                                                class="mr-1" 
-                                                :disabled="!selected.length" 
-                                                v-bind="attrs"
-                                                v-on="on"
-                                                @click="crearXLS()">
-                                                <v-icon>
-                                                    mdi-file-excel-box
-                                                </v-icon>
-                                            </v-btn>
-                                        </export-excel>
-                                    </template>
-                                    <span>Export Data</span>
-                                </v-tooltip>
+                                <export-excel
+                                    :data   = "json_data"
+                                    :fields = "json_fields"
+                                    worksheet = "Artist Export"
+                                    type    = "xls"
+                                    name    = "MAnAdata.xls"
+                                    >
+                                    <v-btn 
+                                        color="primary" dark 
+                                        class="mb-2 ma-1"
+                                        @click="crearXLS()">
+                                        EXPORT
+                                    </v-btn>
+                                </export-excel>
                             </td>
-                            <td>
+                            <!-- <td>
                                 <v-tooltip bottom>
                                     <template v-slot:activator="{ on, attrs }">
                                         <v-btn 
@@ -192,10 +129,114 @@
                                     </template>
                                     <span>Contact List</span>
                                 </v-tooltip>
-                            </td>
+                            </td> -->
                         </tr>
                         <v-spacer></v-spacer>
-                        <v-text-field dense label="Search" outlined v-model="searcha" clearable append-icon="mdi-magnify" single-line hide-details></v-text-field>
+                        <div class="mb-2 ma-1" style="background-color: white; width: 280px">
+                            <v-select
+                                v-model="skillFilterValues"
+                                :items="skillsfilter"
+                                label="Choose Skills"
+                                append-icon="mdi-magnify-plus-outline"
+                                clearable
+                                chips
+                                deletable-chips
+                                multiple
+                                class="elevation-1"
+                                >
+                            </v-select>
+                        </div>
+                        <div class="mb-2 ma-1" style="background-color: white; width: 280px">
+                            <v-select
+                                v-model="skillFilterValues2"
+                                :items="skillsfilter"
+                                label="Choose combined Skills"
+                                append-icon="mdi-magnify-plus-outline"
+                                clearable
+                                chips
+                                deletable-chips
+                                multiple
+                                class="elevation-1"
+                                >
+                            </v-select>
+                        </div>
+                        <div class="mb-2 ma-1" style="background-color: white; width: 400px">
+                            <v-text-field class="mb-2 ma-1" dense label="Search" v-model="searcha" clearable append-icon="mdi-magnify" single-line hide-details></v-text-field>
+                        </div>
+                        <div class="mb-2 ma-2" style="background-color: white; width: 280px">
+                            <!-- <v-text-field class="mb-2 ma-1" dense label="Search" v-model="searcha" clearable append-icon="mdi-calendar" single-line hide-details></v-text-field> -->
+                            <v-menu
+                            ref="menus"
+                            v-model="menus"
+                            :close-on-content-click="false"
+                            :return-value.sync="searchdates"
+                            transition="scale-transition"
+                            offset-y
+                            min-width="auto"
+                            >
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-text-field
+                                :value="dateRangeSearchd"
+                                clearable
+                                label="Date range"
+                                append-icon="mdi-calendar"
+                                readonly
+                                @click:clear="clearAvailability()"
+                                v-bind="attrs"
+                                v-on="on"
+                                ></v-text-field>
+                            </template>
+                            <v-date-picker
+                                v-model="searchdates"
+                                color="primary"
+                                range
+                                no-title
+                                scrollable
+                                :min="nowDate"
+                            >
+                                <v-spacer></v-spacer>
+                                <v-btn
+                                text
+                                color="primary"
+                                @click="menus = false"
+                                >
+                                Cancel
+                                </v-btn>
+                                <v-btn
+                                text
+                                color="primary"
+                                @click="fillAvailability(searchdates.sort())"
+                                >
+                                OK
+                                </v-btn>
+                            </v-date-picker>
+                            </v-menu>
+                        </div>
+
+                        <!-- <v-menu offset-y :close-on-content-click="false">
+                            <template v-slot:activator="{ on, attrs }">
+                            <v-btn icon v-bind="attrs" v-on="on">
+                                <v-icon small :color="skillFilterValues.length ? 'accent' : ''">
+                                mdi-filter
+                                </v-icon>
+                            </v-btn>
+                            </template>
+                            <div style="background-color: white; width: 280px">
+                            <v-select
+                                v-model="skillFilterValues"
+                                :items="skillsfilter"
+                                label="Skills"
+                                append-icon="mdi-magnify-plus-outline"
+                                clearable
+                                chips
+                                deletable-chips
+                                multiple
+                                class="elevation-1"
+                                >
+                            </v-select>
+                            </div>
+                        </v-menu> -->
+
                         <v-spacer></v-spacer>
                         <v-dialog v-model="dialog" max-width="700px">
                             <template v-slot:activator="{ on }">
@@ -214,7 +255,7 @@
                                             class="grey lighten-5"
                                             grid-list-md>
                                             <v-row dense>
-                                                <v-col cols="12" sm="12" md="12">
+                                                <v-col cols="12" sm="8" md="8">
                                                     <v-text-field 
                                                         dense 
                                                         v-model="fullname" 
@@ -231,57 +272,22 @@
                                                         label="Main Role"
                                                         />
                                                 </v-col>
-                                                <v-col cols="12" sm="4" md="4">
-                                                    <v-text-field
-                                                        dense
-                                                        v-model="email"
-                                                        label="Email"
-                                                        :rules="emailRules"
-                                                        counter="64"
-                                                    />
-                                                </v-col>
-                                                <v-col cols="12" sm="4" md="4">
-                                                    <v-text-field
-                                                        dense
-                                                        v-model="alternativecontact"
-                                                        label="Alternative contact"
-                                                        :rules="alternativecontactRules"
-                                                        counter="64"
-                                                    />
-                                                </v-col>
                                                 <v-col cols="12" sm="6" md="6">
-                                                    <v-text-field
-                                                        dense
-                                                        v-model="phone"
-                                                        label="Phone"
-                                                        :rules="phoneRules"
-                                                        counter="32"
-                                                    />
-                                                </v-col>
-                                                <v-col cols="12" sm="6" md="6">
-                                                    <v-text-field
-                                                        dense
-                                                        v-model="mobile"
-                                                        :rules="phoneRules"
-                                                        label="Mobile"
-                                                        counter="32"
-                                                    />
-                                                </v-col>
-                                                <v-col cols="12" sm="12" md="12">
-                                                    <v-text-field 
-                                                        dense
-                                                        v-model="projectsworked"
-                                                        label="Projects Worked"
-                                                        counter="64"
-                                                    />
-                                                </v-col>
-                                                <v-col cols="12" sm="12" md="12">
                                                     <v-text-field 
                                                         dense 
-                                                        v-model="cost"
-                                                        label="Cost"
+                                                        v-model="dailyrate"
+                                                        label="Daily rate"
                                                         counter="128"
                                                     />
+                                                </v-col>
+                                                <v-col cols="12" sm="6" md="6">
+                                                    <div class="text-center">
+                                                        <v-rating
+                                                        v-model="rating"
+                                                        background-color="orange lighten-3"
+                                                        color="orange"
+                                                        ></v-rating>
+                                                    </div>
                                                 </v-col>
                                                 <v-col cols="12" sm="2" md="2">
                                                     <v-layout column>
@@ -321,7 +327,7 @@
                         >
                             <v-card>
                                 <v-card-title>
-                                    <span class="headline">Create Check In Set</span>
+                                    <span class="headline">Create Pre-select</span>
                                 </v-card-title>
                                 <v-card-text>
                                     <v-form
@@ -336,7 +342,7 @@
                                                     <v-text-field 
                                                         dense 
                                                         v-model="checkin" 
-                                                        label="Check In" 
+                                                        label="Pre-select" 
                                                         :rules="checkinRules"
                                                         counter="32"
                                                     />
@@ -564,13 +570,134 @@
                                 </template>
                             </v-data-table>
                         </v-dialog>
+                        <v-dialog persistent v-model="contactdialog" max-width=700>
+                            <v-data-table
+                                :headers="headercontact"
+                                :items="contactartists"
+                                sort-by="text"
+                                class="elevation-1"
+                                :items-per-page="5"
+                            >
+                                <template v-slot:top>
+                                    <v-toolbar
+                                        flat
+                                    >
+                                        <v-toolbar-title>Contact info of {{contactheader}}</v-toolbar-title>
+                                        <v-divider
+                                        class="mx-4"
+                                        inset
+                                        vertical
+                                        ></v-divider>
+                                        <v-spacer/>
+                                        <v-dialog
+                                            v-model="contactCRUDdialog"
+                                            max-width="600px"
+                                            >
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <v-btn
+                                                color="primary"
+                                                dark
+                                                class="ma-1"
+                                                v-bind="attrs"
+                                                v-on="on"
+                                                >
+                                                NEW
+                                                </v-btn>
+                                            </template>
+                                            <v-card>
+                                                <v-card-title>
+                                                    <p class="text-h5">{{ formTitleContact }} for {{ contactheader }}</p>
+                                                </v-card-title>
+                                                <v-card-text>
+                                                    <v-form
+                                                    ref="portfolioform"
+                                                    v-model="validcontactform"
+                                                    >
+                                                        <v-container>
+                                                            <v-col
+                                                                cols="12"
+                                                                sm="12"
+                                                                md="12"
+                                                            >
+                                                                <v-text-field
+                                                                v-model="contact"
+                                                                label="Contact Instance"
+                                                                :rules="contactRules"
+                                                                counter="128"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-container>
+                                                    </v-form>
+                                                </v-card-text>
+                                                <v-card-actions>
+                                                    <v-spacer></v-spacer>
+                                                    <v-btn
+                                                        color="primary"
+                                                        text
+                                                        @click="closeContact"
+                                                    >
+                                                        Cancel
+                                                    </v-btn>
+                                                    <v-btn
+                                                        color="primary"
+                                                        text
+                                                        :disabled ="!validcontactform"
+                                                        @click="saveContact"
+                                                    >
+                                                        Save
+                                                    </v-btn>
+                                                </v-card-actions>
+                                            </v-card>
+                                        </v-dialog>
+                                        <v-btn class="ma-1" color="primary" dense dark @click.native="contactdialog=false">Close</v-btn>
+                                        <v-dialog v-model="dialogDeleteContact" max-width="520px">
+                                        <v-card>
+                                            <v-card-title class="text-h5">Are you sure you want to delete this item?
+                                            </v-card-title>
+                                            <p class="ml-3" >{{contact}}</p>
+                                            <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn color="primary" text @click="closeDeleteContact">Cancel</v-btn>
+                                            <v-btn color="primary" text @click="deleteContactConfirm">OK</v-btn>
+                                            <v-spacer></v-spacer>
+                                            </v-card-actions>
+                                        </v-card>
+                                        </v-dialog>
+                                    </v-toolbar>
+                                </template>
+                                <template v-slot:[`item.text`]="{ item }">
+                                    <v-chip
+                                        class="ma-2"
+                                        color="scondary"
+                                        label
+                                        @click="openTab(item.text)"
+                                    >
+                                        {{ item.text}}
+                                    </v-chip>
+                                </template>
+                                <template v-slot:[`item.actions`]="{ item }">
+                                <v-icon
+                                    small
+                                    class="mr-2"
+                                    @click="editContact(item)"
+                                >
+                                    mdi-pencil
+                                </v-icon>
+                                <v-icon
+                                    small
+                                    @click="deleteContact(item)"
+                                >
+                                    mdi-delete
+                                </v-icon>
+                                </template>
+                            </v-data-table>
+                        </v-dialog>
                         <v-dialog persistent v-model="notedialog" max-width=700>
                             <v-data-table
                                 :headers="headernotes"
                                 :items="noteartists"
                                 sort-by="fecumod"
                                 sort-desc
-                                :search="searchn"
                                 class="elevation-1"
                                 :items-per-page="5"
                             >
@@ -690,7 +817,6 @@
                                 :items="scheduleartists"
                                 sort-by="fecumod"
                                 sort-desc
-                                :search="searchn"
                                 class="elevation-1"
                                 :items-per-page="5"
                             >
@@ -786,8 +912,8 @@
                                                                 md="6"
                                                             >
                                                                 <v-text-field
-                                                                v-model="reason"
-                                                                label="Reason"
+                                                                v-model="comment"
+                                                                label="Comment"
                                                                 counter="32"
                                                                 ></v-text-field>
                                                             </v-col>
@@ -820,7 +946,7 @@
                                     <v-card>
                                         <v-card-title class="text-h5">Are you sure you want to delete this schedule?
                                         </v-card-title>
-                                        <p class="ml-3" >{{ dateRangeText }} {{reason}}</p>
+                                        <p class="ml-3" >{{ dateRangeText }} {{comment}}</p>
                                         <v-card-actions>
                                         <v-spacer></v-spacer>
                                         <v-btn color="primary" text @click="closeDeleteSchedule">Cancel</v-btn>
@@ -837,8 +963,8 @@
                                 <template v-slot:[`item.enddate`]="{ item }">
                                     {{ item.enddate.substr(0,10) }}
                                 </template>
-                                <template v-slot:[`item.reason`]="{ item }">
-                                    {{ item.reason}}
+                                <template v-slot:[`item.comment`]="{ item }">
+                                    {{ item.comment}}
                                 </template>
                                 <template v-slot:[`item.actions`]="{ item }">
                                 <v-icon
@@ -851,151 +977,6 @@
                                 <v-icon
                                     small
                                     @click="deleteSchedule(item)"
-                                >
-                                    mdi-delete
-                                </v-icon>
-                                </template>
-                            </v-data-table>
-                        </v-dialog>
-                        <v-dialog persistent v-model="ratingdialog" max-width=700>
-                            <v-data-table
-                                :headers="headerratings"
-                                :items="ratingartists"
-                                sort-by="fecumod"
-                                sort-desc
-                                :search="searchn"
-                                class="elevation-1"
-                                :items-per-page="5"
-                            >
-                                <template v-slot:top>
-                                <v-toolbar
-                                    flat
-                                >
-                                    <v-toolbar-title>Ratings of {{ ratingheader }}</v-toolbar-title>
-                                    <v-divider
-                                    class="mx-4"
-                                    inset
-                                    vertical
-                                    ></v-divider>
-                                    <v-spacer/>   
-                                    <v-dialog
-                                        v-model="ratingCRUDdialog"
-                                        max-width="600px"
-                                        >
-                                        <template v-slot:activator="{ on, attrs }">
-                                            <v-btn
-                                            color="primary"
-                                            dark
-                                            class="ma-1"
-                                            v-bind="attrs"
-                                            v-on="on"
-                                            >
-                                            NEW
-                                            </v-btn>
-                                        </template>
-                                        <v-card>
-                                            <v-card-title>
-                                                <p class="text-h5">{{ formTitleRating }} for {{ ratingheader }}</p>
-                                            </v-card-title>
-                                            <v-card-text>
-                                                <v-form
-                                                ref="ratingform"
-                                                v-model="validratingform"
-                                                >
-                                                    <v-container>
-                                                        <v-row>
-                                                            <v-col
-                                                                cols="12"
-                                                                sm="8"
-                                                                md="8"
-                                                            >
-                                                                <v-text-field
-                                                                v-model="projectname"
-                                                                label="Project name"
-                                                                type="text"
-                                                                :rules="projectnameRules"
-                                                                counter="32"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                            <v-col
-                                                                cols="12"
-                                                                sm="4"
-                                                                md="4"
-                                                            >
-                                                                <v-text-field
-                                                                v-model="score"
-                                                                type="number"
-                                                                label="Score"
-                                                                :rules="scoreRules"
-                                                                min="0"
-                                                                max="5"
-                                                                ></v-text-field>
-                                                                <!-- <v-rating
-                                                                v-model="score"
-                                                                color="yellow darken-4"
-                                                                background-color="grey darken-1"
-                                                                empty-icon="$ratingFull"
-                                                                x-small
-                                                                hover
-                                                                ></v-rating> -->
-                                                            </v-col>
-                                                        </v-row>
-                                                    </v-container>
-                                                </v-form>
-                                            </v-card-text>
-                                            <v-card-actions>
-                                            <v-spacer></v-spacer>
-                                            <v-btn
-                                                color="primary"
-                                                text
-                                                @click="closeRating"
-                                            >
-                                                Cancel
-                                            </v-btn>
-                                            <v-btn
-                                                color="primary"
-                                                text
-                                                :disabled ="!validratingform"
-                                                @click="saveRating"
-                                            >
-                                                Save
-                                            </v-btn>
-                                            </v-card-actions>
-                                        </v-card>
-                                    </v-dialog>
-                                    <v-btn class="ma-1" color="primary" dense dark @click.native="ratingdialog=false">Close</v-btn>
-                                    <v-dialog v-model="dialogDeleteRating" max-width="550px">
-                                    <v-card>
-                                        <v-card-title class="text-h5">Are you sure you want to delete this rating?
-                                        </v-card-title>
-                                        <p class="ml-3" >{{ projectname }}: {{ score }}</p>
-                                        <v-card-actions>
-                                        <v-spacer></v-spacer>
-                                        <v-btn color="primary" text @click="closeDeleteRating">Cancel</v-btn>
-                                        <v-btn color="primary" text @click="deleteRatingConfirm">OK</v-btn>
-                                        <v-spacer></v-spacer>
-                                        </v-card-actions>
-                                    </v-card>
-                                    </v-dialog>
-                                </v-toolbar>
-                                </template>
-                                <template v-slot:[`item.fecumod`]="{ item }">
-                                    {{ item.fecumod.substr(0,10) }}
-                                </template>
-                                <template v-slot:[`item.text`]="{ item }">
-                                    {{ item.text}}
-                                </template>
-                                <template v-slot:[`item.actions`]="{ item }">
-                                <v-icon
-                                    small
-                                    class="mr-2"
-                                    @click="editRating(item)"
-                                >
-                                    mdi-pencil
-                                </v-icon>
-                                <v-icon
-                                    small
-                                    @click="deleteRating(item)"
                                 >
                                     mdi-delete
                                 </v-icon>
@@ -1113,33 +1094,6 @@
                         </template>
                     </v-edit-dialog>                    
                 </template>
-                <template v-slot:[`item.projectsworked`]="{ item }">
-                    <v-edit-dialog
-                    :return-value.sync="item.projectsworked"
-                    large
-                    persistent
-                    @save="save(item)"
-                    @cancel="cancel"
-                    @open="open"
-                    @close="close"
-                    >
-                    {{ item.projectsworked }}
-                    <template v-slot:input>
-                        <div class="mt-4 text-h6">
-                            Update Projects Worked
-                        </div>
-                        <v-text-field
-                        dense
-                        v-model="item.projectsworked"
-                        :rules="projectsworkedRules"
-                        label="Project Worked"
-                        hint="Inline Edition"
-                        single-line
-                        counter="64"
-                        ></v-text-field>
-                    </template>
-                    </v-edit-dialog>
-                </template>
                 <template v-slot:[`item._skillartisttxs`]="{ item }">
                     <td>
                         <v-tooltip bottom>
@@ -1211,7 +1165,37 @@
                                 {{ elem }}
                             </a>
                         </a>
-                        <p v-else>No portfolio Foud</p>
+                        <p v-else>No portfolio found</p>
+                    </td>
+                </template>
+                <template v-slot:[`item._contacts`]="{ item }">
+                    <td>
+                        <v-tooltip bottom>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-icon
+                                :disabled="!item.activo"
+                                x-small
+                                class="mr-1"
+                                v-bind="attrs"
+                                v-on="on"
+                                @click="tratarContact(item)"
+                                >
+                                mdi-details
+                                </v-icon>
+                            </template>
+                            <span>Manage Contact info</span>
+                        </v-tooltip>
+                    </td>
+                    <td>
+                        <a v-if="item._contacts && item._contacts.split(' ').length">
+                            <a v-for="(elem, i) in item._contacts.split(' ')"
+                            :key="i"
+                            @click="openTab(elem)"
+                            >
+                                {{ elem }}
+                            </a>
+                        </a>
+                        <p v-else>No contact info found</p>
                     </td>
                 </template>
                 <template v-slot:[`item._schedules`]="{ item }">
@@ -1232,58 +1216,82 @@
                             <span>Manage Schedules</span>
                         </v-tooltip>
                     </td>
-                    <td>
-                        {{ item._schedules }}
-                    </td>
-                </template>
-                <template v-slot:[`item._rating`]="{ item }">
-                    <td>
-                        <v-tooltip bottom>
+                    <td
+                     v-if="item._schedules">
+                        <v-menu
+                            open-on-hover
+                            min-width="auto"
+                        >
                             <template v-slot:activator="{ on, attrs }">
-                                <v-icon
-                                :disabled="!item.activo"
-                                x-small
-                                class="mr-1"
-                                v-bind="attrs"
-                                v-on="on"
-                                @click="tratarRating(item)"
+                                <p
+                                    v-bind="attrs"
+                                    v-on="on"
                                 >
-                                mdi-details
-                                </v-icon>
+                                    {{item._schedules}}
+                                </p>
                             </template>
-                            <span>Manage Ratings</span>
-                        </v-tooltip>
-                    </td>
-                    <td>
-                        <v-rating
-                            v-model="item._rating"
-                            color="yellow darken-4"
-                            background-color="grey darken-1"
+                            <v-date-picker
+                            v-model="item.busydates"
+                            no-title
+                            multiple
                             readonly
-                            x-small
-                            dense
-                        ></v-rating>
+                            :min="nowDate"
+                            elevation="15"
+                            >
+                            </v-date-picker>
+                        </v-menu>
                     </td>
                 </template>
-                <template v-slot:[`item.cost`]="{ item }">
+                <template v-slot:[`item.availability`]="{ item }">
+                    <td v-if="dateRangeSearchd">
+                        {{ parseFloat( item.availability * 100 ).toFixed(0)+'%' }}
+                    </td>
+                </template>
+                <!-- <template v-slot:[`item.events`]="{ item }">
+                    <div class="text-center">
+                        <v-menu
+                        open-on-hover
+                        top
+                        offset-y
+                        >
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-btn
+                                v-bind="attrs"
+                                v-on="{ on }"
+                                >
+                                {{ item.busydates }}
+                                </v-btn>
+                            </template>
+                            <v-sheet height="400">
+                                <v-calendar
+                                    ref="calendar"
+                                    type="month"
+                                    color="primary"
+                                    :events="item.events"
+                                ></v-calendar>
+                            </v-sheet>
+                        </v-menu>
+                    </div>
+                </template> -->
+                <template v-slot:[`item.dailyrate`]="{ item }">
                     <v-edit-dialog
-                    :return-value.sync="item.cost"
+                    :return-value.sync="item.dailyrate"
                     large
                     persistent
-                    @save="saveCost(item)"
+                    @save="save(item)"
                     @cancel="cancel"
                     @open="open"
                     @close="close"
                     >
-                    {{ item.cost }}
+                    {{ item.dailyrate }}
                     <template v-slot:input>
                         <div class="mt-4 text-h6">
-                            Update Costs
+                            Update Daily rate
                         </div>
                         <v-text-field
-                        v-model="item.cost"
-                        :rules="costRules"
-                        label="Costs"
+                        v-model="item.dailyrate"
+                        :rules="dailyrateRules"
+                        label="Daily rates"
                         hint="Inline Edition"
                         single-line
                         counter="128"
@@ -1291,64 +1299,9 @@
                     </template>
                     </v-edit-dialog>
                 </template>
-                <template v-slot:[`item.costingdate`]="{ item }">
-                    <td>{{ item.costingdate?item.costingdate.substr(0, 10):"" }}</td>
-                </template>
-                <template v-slot:[`item.email`]="{ item }">
+                <template v-slot:[`item.rating`]="{ item }">
                     <v-edit-dialog
-                    large
-                    persistent
-                    :return-value.sync="item.email"
-                    @save="save(item)"
-                    @cancel="cancel"
-                    @open="open"
-                    @close="close"
-                    >
-                    {{ item.email }}
-                    <template v-slot:input>
-                        <div class="mt-4 text-h6">
-                            Update eMail
-                        </div>
-                        <v-text-field
-                        v-model="item.email"
-                        :rules="emailRules"
-                        label="eMail"
-                        hint="Inline Edition"
-                        single-line
-                        counter="64"
-                        ></v-text-field>
-                    </template>
-                    </v-edit-dialog>
-                </template>
-                <template v-slot:[`item.alternativecontact`]="{ item }">
-                    <v-edit-dialog
-                    large
-                    persistent
-                    :return-value.sync="item.alternativecontact"
-                    @save="save(item)"
-                    @cancel="cancel"
-                    @open="open"
-                    @close="close"
-                    >
-                    {{ item.alternativecontact }}
-                    <template v-slot:input>
-                        <div class="mt-4 text-h6">
-                            Update Alternative Contact
-                        </div>
-                        <v-text-field
-                        v-model="item.alternativecontact"
-                        :rules="alternativecontact"
-                        label="Alternative contact"
-                        hint="Inline Edition"
-                        single-line
-                        counter="64"
-                        ></v-text-field>
-                    </template>
-                    </v-edit-dialog>
-                </template>
-                <template v-slot:[`item.phone`]="{ item }">
-                    <v-edit-dialog
-                    :return-value.sync="item.phone"
+                    :return-value.sync="item.rating"
                     large
                     persistent
                     @save="save(item)"
@@ -1356,46 +1309,27 @@
                     @open="open"
                     @close="close"
                     >
-                    {{ item.phone }}
-                    <template v-slot:input>
-                        <div class="mt-4 text-h6">
-                            Update Phone
+                        <div class="text-center">
+                            <v-rating
+                            v-model="item.rating"
+                            background-color="orange lighten-3"
+                            color="orange"
+                            small
+                            readonly
+                            ></v-rating>
                         </div>
-                        <v-text-field
-                        v-model="item.phone"
-                        :rules="phoneRules"
-                        label="Phone"
-                        hint="Inline Edition"
-                        single-line
-                        counter="32"
-                        ></v-text-field>
-                    </template>
-                    </v-edit-dialog>
-                </template>
-                <template v-slot:[`item.mobile`]="{ item }">
-                    <v-edit-dialog
-                    :return-value.sync="item.mobile"
-                    large
-                    persistent
-                    @save="save(item)"
-                    @cancel="cancel"
-                    @open="open"
-                    @close="close"
-                    >
-                    {{ item.mobile }}
-                    <template v-slot:input>
-                        <div class="mt-4 text-h6">
-                            Update Mobile
-                        </div>
-                        <v-text-field
-                        v-model="item.mobile"
-                        :rules="phoneRules"
-                        label="Mobile"
-                        hint="Inline Edition"
-                        single-line
-                        counter="32"
-                        ></v-text-field>
-                    </template>
+                        <template v-slot:input>
+                            <div class="mt-4 text-h6">
+                                Update Rating
+                            </div>
+                            <div class="text-center">
+                                <v-rating
+                                v-model="item.rating"
+                                background-color="orange lighten-3"
+                                color="orange"
+                                ></v-rating>
+                            </div>
+                        </template>
                     </v-edit-dialog>
                 </template>
                 <template v-slot:[`item.imgartist`]="{ item }">
@@ -1427,7 +1361,7 @@
 </template>
 <script>
   import axios from 'axios'
-  import jsPDF from 'jspdf'
+//   import jsPDF from 'jspdf'
 
 
   export default {
@@ -1444,10 +1378,12 @@
         ],                    
         validForm: false,
         validportfolioform: false,
+        validcontactform: false,
         validnoteform: false,
         validscheduleform: false,
-        validratingform: false,
         menu: false,
+        menus: false,
+        nowDate: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0,10),
         fullnameRules: [
             v => !!v || 'Full Name is required',
             v => (v && v.length > 0 && v.length <= 64) || 'Exceeds 64 characters',
@@ -1465,24 +1401,14 @@
             v => !!v || 'Project name is required',
             v => ( v && v.length <= 32) || 'Exceeds 32 characters',
         ],
-        projectsworkedRules: [
-            v => ( !!v.length == 0 || v.length <= 64) || 'Exceeds 64 characters',
-        ],
-        costRules: [
+        dailyrateRules: [
             v => ( !!v.length == 0 || v.length <= 128) || 'Exceeds 128 characters',
         ],
-        emailRules: [
-            v => ( !!v.length == 0 || v.length <= 64) || 'Exceeds 64 characters',
-            //v => ( v && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v)) || 'Please enter a valid email address',
+        contactRules: [
+            v => !!v || 'Contact info is required',
+            v => ( !!v.length == 0 || v.length <= 128) || 'Exceeds 128 characters',
         ],
-        alternativecontactRules: [
-            v => ( !!v.length == 0 || v.length <= 64) || 'Exceeds 64 characters',
-        ],
-        phoneRules: [
-            v => ( !!v.length == 0 || v.length <= 32) || 'Exceeds 32 characters',
-        ],
-        scoreRules: [
-            v => !!v || 'Score is required',
+        ratingRules: [
             v => (v && v.length > 0 && v.length <= 1) || 'Exceeds 1 digit',
             v => (v && v > 0 && v < 6) || 'Valid range 1 to 5',
         ],
@@ -1520,15 +1446,8 @@
             {value: 'white', text: 'Blanco'},
             {value: 'black', text: 'Negro'},
         ],
-        lineaspags: [
-            {value: 5, text: "5"},
-            {value: 10, text: "10"},
-            {value: 15, text: "15"},
-            {value: -1, text: "All"},
-        ],
         dependentWindow: '',
         searcha: '',
-        searchr: '',
         searchs: '',
         snackbar: false,
         snackcolor: '',
@@ -1536,10 +1455,9 @@
         timeout: 4000,
         recordInfo:0,
         selected: [],
-        fullnameFilterValues: '',
-        roleFilterValues: [],
+        // roleFilterValues: [],
         skillFilterValues: [],
-
+        skillFilterValues2: [],
         artists: [],
         schedules: [],
         _shcedules: '',
@@ -1553,26 +1471,20 @@
         portfolios: [],
         _portfolios: '',
         portfolioartists: [],
+        contacts: [],
+        _contacts: '',
+        contactartists: [],
         notes: [],
         _notes: '',
         noteartists: [],
-        ratings: [],
-        _rating: [],
-        ratingartists: [],
         selections: [],
         selectedartists: [],
         usuarios: [],
         id: '',
         fullname: '',
         mainroleid: '',
-        projectsworked: '',
-        cost: '',
-        costingdate: '',
-        costinguserid: '',
-        email: '',
-        alternativecontact: '',
-        phone: '',
-        mobile: '',
+        dailyrate: '',
+        rating: '',
         imgartist: '',
         proveeodrid: '',
         iduseralta:'',
@@ -1588,14 +1500,19 @@
         roleheader: '',
         skilldialog: false,
         skillheader: '',
+        checkin: '',
+        checkindialog: false,
+        detail: '',
         portfoliodialog: false,
         portfolioCRUDdialog: false,
         dialogDeletePortfolio: false,
-        checkindialog: false,
-        checkin: '',
-        detail: '',
         portfolioheader: '',
         url: '',
+        contactdialog: false,
+        contactCRUDdialog: false,
+        dialogDeleteContact: false,
+        contactheader: '',
+        contact: '',
         notedialog: false,
         noteCRUDdialog: false,
         dialogDeleteNote: false,
@@ -1608,71 +1525,44 @@
         startdate: '',
         enddate: '',
         dates: [],
-        reason: '',
-        ratingdialog: false,
-        ratingCRUDdialog: false,
-        dialogDeleteRating: false,
-        ratingheader: '',
+        searchdates: [],
+        comment: '',
         projectname: '',
         score: 0,
         adModal: 0,
         adAccion: 0,
         adNombre: '',
         adId: '',
-
-
-
-
-
-        grupos:[],
-        proyectos:[],
-        grupousuarios:[],
-        proyectousuarios:[],
-        workuserId:'',
-        groupheader: '',
-        proyheader: '',
-        groupdialog: false,
-        proydialog: false,
-        searchg: '',
-        searchn: '',
-        rolid:'',
-        iniciales:'',
-        nombre:'',
-        apellido:'',
-        telefono: '',
-        password:'',
-        colfondo:'#000000',
-        coltexto:'black',
-        lineaspag: 0,
-        pxch:false,
-        addgroup: '',
-        addproy: '',
-        actPassword:false,
+        // events: [],
+        filterDates: [],
+        daysinrangefilter: 0,
+        startrangefilter: '',
+        endrangefilter: '',
     }),
 
     computed: {
         dateRangeText () {
-            return this.dates.join(' ~ ')
+            return this.dates?this.dates.join('/'):''
+        },
+        dateRangeSearchd () {
+            return this.searchdates?this.searchdates.join('/'):''
         },
         headerartists(){
             return [
                 { text: 'Avatar', value: 'imgartist', align: 'center', sortable: false },
-                { text: 'Full Name', value: 'fullname', align: 'start', sortable: true, width: 250, filter: this.fullnameFilter },
+                { text: 'Full Name', value: 'fullname', align: 'start', sortable: true, width: 250 },
                 //{ text: 'Main Role Ids', value: 'mainroleid', align: 'start', sortable: true },
-                { text: 'Main Role', value: 'mainrole', align: 'start', sortable: true, filter: this.roleFilter },
+                { text: 'Occupation', value: 'mainrole', align: 'start', sortable: true },
                 //{ text: 'Skills Ids', value: '_skillartistids', align: 'start', sortable: true },
                 { text: 'Skills', value: '_skillartisttxs', align: 'start', sortable: true, width: 250, filter: this.skillFilter },
                 { text: 'Portfolio', value: '_portfolios', align: 'start', sortable: true },
-                { text: 'Project Worked', value: 'projectsworked', align: 'start', sortable: true, width: 300 },
                 { text: 'Notes', value: '_notes', align: 'start', sortable: true, width: 350 },
-                { text: 'Availability', value: '_schedules', align: 'start', sortable: true, width: 300 },
-                { text: 'Rating', value: '_rating', align: 'center', sortable: true },
-                { text: 'Cost', value: 'cost', align: 'start', sortable: true, width: 250 },
-                { text: 'Costing date', value: 'costingdate', align: 'start', sortable: true, width: 150 },
-                { text: 'eMail', value: 'email', align: 'start', sortable: true, width: 200 },
-                { text: 'Alternative Contact', value: 'alternativecontact', align: 'start', sortable: true, width: 200 },
-                { text: 'Phone', value: 'phone', align: 'start', sortable: true, width: 150 },
-                { text: 'Mobile', value: 'mobile', align: 'start', sortable: true, width: 150 },
+                { text: 'Commitments', value: '_schedules', align: 'start', sortable: true, width: 300 },
+                // { text: 'Events', value: 'events', align: 'start', sortable: true, width: 300 },
+                { text: 'Availabitilty', value: 'availability', align: 'start', sortable: true },
+                { text: 'Daily rate', value: 'dailyrate', align: 'start', sortable: true, width: 250 },
+                { text: 'Rating', value: 'rating', align: 'center', sortable: true },
+                { text: 'Contact info', value: '_contacts', align: 'start', sortable: true, width: 200 },
                 { text: 'Status', value: 'activo', align: 'start', sortable: true  },
                 { text: '[Options]', value: 'actions', align: 'center', sortable: false, width: 200 },
             ]
@@ -1689,6 +1579,12 @@
                 { text: '[Options]', value: 'actions', align: 'center', sortable: false, width: 100 },
             ]
         },
+        headercontact(){
+            return [
+                { text: 'Instance', value: 'text', align: 'start', sortable: true },
+                { text: '[Options]', value: 'actions', align: 'center', sortable: false, width: 100 },
+            ]
+        },
         headernotes(){
             return [
                 { text: 'Updated', value: 'fecumod', align: 'start', sortable: true },
@@ -1700,15 +1596,7 @@
             return [
                 { text: 'Start', value: 'startdate', align: 'start', sortable: true },
                 { text: 'End', value: 'enddate', align: 'start', sortable: true },
-                { text: 'Reason', value: 'reason', align: 'start', sortable: true },
-                { text: '[Options]', value: 'actions', align: 'center', sortable: false, width: 100 },
-            ]
-        },
-        headerratings(){
-            return [
-                { text: 'Updated', value: 'fecumod', align: 'start', sortable: true },
-                { text: 'Project', value: 'projectname', align: 'start', sortable: true },
-                { text: 'Score', value: 'score', align: 'center', sortable: true },
+                { text: 'Comment', value: 'comment', align: 'start', sortable: true },
                 { text: '[Options]', value: 'actions', align: 'center', sortable: false, width: 100 },
             ]
         },
@@ -1718,14 +1606,14 @@
         formTitlePortfolio () {
             return this.editedIndex === -1 ? 'New Portfolio' : 'Update Portfolio'
         },
+        formTitleContact () {
+            return this.editedIndex === -1 ? 'New contact info' : 'Update contact info'
+        },
         formTitleNote () {
             return this.editedIndex === -1 ? 'New Note' : 'Update Note'
         },
         formTitleSchedule () {
             return this.editedIndex === -1 ? 'New Range' : 'Update Range'
-        },
-        formTitleRating () {
-            return this.editedIndex === -1 ? 'New Rate' : 'Update Rate'
         },
     },
 
@@ -1745,42 +1633,62 @@
         salir(){
             this.$store.dispatch("salir");
         },
-        fullnameFilter(value) {
-            // If this filter has no value we just skip the entire filter
-            if (!this.fullnameFilterValues) {
-            return true;
-            }
-            // Check if the current loop value (The calories value)
-            // equals to the selected value at the <v-select>.
-            return value.includes(this.fullnameFilterValues)
-        },
-        roleFilter(value) {
-            // If this filter has no value we just skip the entire filter
-            if (this.roleFilterValues.length==0) {
-            return true;
-            }
-            // Check if the current loop value (The calories value)
-            // equals to the selected value at the <v-select>.
-            value = value.split(', ')
-            var valueids = value.map( txt => this.roles.find(e => e.text === txt).value)
-            return this.roleFilterValues.find(e => valueids.indexOf(e) > -1);
-        },
+        // roleFilter(value) {
+        //     // If this filter has no value we just skip the entire filter
+        //     if (this.roleFilterValues.length==0) {
+        //     return true;
+        //     }
+        //     // Check if the current loop value (The calories value)
+        //     // equals to the selected value at the <v-select>.
+        //     value = value.split(', ')
+        //     var valueids = value.map( txt => this.roles.find(e => e.text === txt).value)
+        //     return this.roleFilterValues.find(e => valueids.indexOf(e) > -1);
+        // },
         skillFilter(value) {
             // If this filter has no value we just skip the entire filter
-            if (this.skillFilterValues.length==0) {
-            return true;
-            }
-            // Check if the current loop value (The skil value)
-            // equals to the selected value at the <v-select>.
-            value = value.split(', ')
-            for (var i = 0; i < value.length; i++ ){
-                for (var j = 0; j < this.skillFilterValues.length; j++ ){
-                    if ( value[i] == this.skillFilterValues[j] ){
-                        return true;
+            var i = 0
+            var j = 0
+            var i2 = 0
+            var j2 = 0
+            if (this.skillFilterValues.length==0 && this.skillFilterValues2.length==0){
+                return true;
+            } else if (this.skillFilterValues2.length==0){
+                value = value.split(', ')
+                for ( i = 0; i < value.length; i++ ){
+                    for ( j = 0; j < this.skillFilterValues.length; j++ ){
+                        if ( value[i] == this.skillFilterValues[j] ){
+                            return true
+                        }
+                    }
+                }
+            } else if (this.skillFilterValues.length==0){
+                value = value.split(', ')
+                for ( i2 =0; i2<value.length; i2++ ){
+                    for ( j2 = 0; j2 < this.skillFilterValues2.length; j2++ ){
+                        if ( value[i2] == this.skillFilterValues2[j2] ){
+                            return true
+                        }
+                    }
+                }
+            } else {
+                value = value.split(', ')
+                for ( i = 0; i < value.length; i++ ){
+                    for ( j = 0; j < this.skillFilterValues.length; j++ ){
+                        if ( value[i] == this.skillFilterValues[j] ){
+                            for ( i2 =0; i2<value.length; i2++ ){
+                                for ( j2 = 0; j2 < this.skillFilterValues2.length; j2++ ){
+                                    if ( value[i2] == this.skillFilterValues2[j2] ){
+                                        return true
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
-            return false;
+            // Check if the current loop value (The skil value)
+            // equals to the selected value at the <v-select>.
+            return false
         },
         save (elem) {
             if (elem.activo){
@@ -1791,63 +1699,19 @@
                     'id': elem.id,
                     'fullname': elem.fullname,
                     'mainroleid': elem.mainroleid,
-                    'projectsworked': elem.projectsworked,
-                    'cost': elem.cost,
-                    'costingdate': elem.costingdate,
-                    'costinguserid': elem.costinguserid,
-                    'email':elem.email,
-                    'alternativecontact': elem.alternativecontact,
-                    'phone': elem.phone,
-                    'mobile':elem.mobile,
+                    'dailyrate': elem.dailyrate,
+                    'rating': elem.rating,
                     'imgartist':elem.imgartist,
                     'proveedorid':elem.proveedorid,
                     'iduserumod': me.$store.state.usuario.idusuario,
-                },configuracion).then( () => {
+                },configuracion).then( (response) => {
+                    me.editedIndex = me.artists.findIndex(x => x.id === elem.id)
+                    me.artists[me.editedIndex].mainrole = me.skills.find(x => x.value === response.data.mainroleid).text
                     me.snacktext = 'Updated';
                     me.snackcolor = "success";
                     me.snackbar = true;
                     me.closedialog();
                     me.limpiar();
-                }).catch(function(error){
-                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                    me.snackcolor = "error";
-                    me.snackbar = true;
-                });
-            } else {
-            this.snacktext = 'Dormant'
-            this.snackcolor = "error";
-            this.snackbar = true;
-            }
-        },
-        saveCost (elem) {
-            if (elem.activo){
-                let me = this;
-                var date = new Date();
-                let header={"Authorization" : "Bearer " + this.$store.state.token};
-                let configuracion= {headers : header};
-                axios.put('api/Artists/Actualizar',{
-                    'id': elem.id,
-                    'fullname': elem.fullname,
-                    'mainroleid': elem.mainroleid,
-                    'projectsworked': elem.projectsworked,
-                    'cost': elem.cost,
-                    'costingdate': new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString(),
-                    'costinguserid': me.$store.state.usuario.idusuario,
-                    'email':elem.email,
-                    'alternativecontact': elem.alternativecontact,
-                    'phone': elem.phone,
-                    'mobile':elem.mobile,
-                    'imgartist':elem.imgartist,
-                    'proveedorid':elem.proveedorid,
-                    'iduserumod': me.$store.state.usuario.idusuario,
-                },configuracion).then( function(response) {
-                    elem.costingdate = response.costingdate
-                    elem.costinguserid = response.costinguserid
-                    me.snacktext = 'Updated'
-                    me.snackcolor = "success"
-                    me.snackbar = true
-                    me.closedialog()
-                    me.limpiar()
                 }).catch(function(error){
                     me.snacktext = 'An error was detected. Code: '+ error.response.status;
                     me.snackcolor = "error";
@@ -1898,66 +1762,53 @@
         crearXLS(){
             this.json_fields = {
                 'Full Name': 'fullname',
-                'Main Role': 'mainrole',
+                'Occupation': 'mainrole',
                 'Skills': '_skillartisttxs',
                 'Portfolio': '_portfolios',
-                'Projects Worked' : 'projectsworked',
                 'Notes' : '_notes',
-                'Availability' : '_schedules',
-                'Rating': '_rating',
-                'Cost': 'cost',
-                'Costing date': {field: 'costingdate',
-                    callback: (value) => { return value.substr(0,10)}
-                },
-                'Costing userid': 'costinguserid',
-                'eMail': 'email',
-                'Alt.Contact': 'alternativecontact',
-                'Phone': 'phone',
-                'Mobile': 'mobile',
+                'Commitments' : '_schedules',
+                'Availability' : 'availability',
+                'Daily rate': 'dailyrate',
+                'Rating': 'rating',
+                'Contact info': '_contacts',
                 'Last update': {field: 'fecumod',
                     callback: (value) => {return value.substr(0,10) + ' ' + value.substr(11,5)}
                 },
                 //'Active': 'activo',
             },
-            this.json_data = this.selected.filter(e => e.activo === true );
+            this.json_data = this.selected.length===0?(this.$refs.maintable.$children[0].filteredItems.filter(e => e.activo === true )):(this.selected.filter(e => e.activo === true ));
         },
-        crearPDF(){
-            var columns = [
-                    {title: "Fullname", dataKey: "fullname"},
-                    {title: "Main Role", dataKey: "mainrole"},
-                    //{title: "Skills", dataKey: "_skillartisttxs"},
-                    //{title: "Portfolio", dataKey: "_portfolios"},
-                    //{title: "Projects Worked", dataKey: "projectsworked"},
-                    //{title: "Notes", dataKey: "_notes"},
-                    //{title: "Availability", dataKey: "_schedules"},
-                    //{title: "Rating", dataKey: "_rating"},
-                    //{title: "Cost", dataKey: "cost"},
-                    //{title: "Costing date", dataKey: "costingdate"},
-                    //{title: "Costing user id", dataKey: "costinguserid"},
-                    {title: "eMail", dataKey: "email"},
-                    {title: "Alt.Contact", dataKey: "alternativecontact"},
-                    {title: "Phone", dataKey: "phone"},
-                    {title: "Mobile", dataKey: "mobile"},
-                    //{title: "Active", dataKey: "activo"}
-            ];
-            var rows = [];
+        // crearPDF(){
+        //     var columns = [
+        //             {title: "Fullname", dataKey: "fullname"},
+        //             {title: "Main Role", dataKey: "mainrole"},
+        //             //{title: "Skills", dataKey: "_skillartisttxs"},
+        //             //{title: "Portfolio", dataKey: "_portfolios"},
+        //             //{title: "Notes", dataKey: "_notes"},
+        //             //{title: "Availability", dataKey: "_schedules"},
+        //             //{title: "Daily rate", dataKey: "dailyrate"},
+        //             //{title: "Rating", dataKey: "rating"},
+        //             {title: "Contact info", dataKey: "_contact"},
+        //             //{title: "Active", dataKey: "activo"}
+        //     ];
+        //     var rows = [];
 
-            this.selected.map(function(x){
-                    rows.push({fullname:x.fullname, mainrole:x.mainrole, _skillartisttxs:x._skillartisttxs, _portfolios:x._portfolios, 
-                    projectsworked:x.projectsworked,_notes:x._notes, _schedules:x._schedules, _rating: x._rating, cost:x.cost, costingdate: x.costingdate,
-                    costinguserid:x.costinguserid, email:x.email, alternativecontact: x.alternativecontact, phone:x.phone, mobile:x.mobile, activo:x.activo});
-            });
+        //     this.selected.map(function(x){
+        //             rows.push({fullname:x.fullname, mainrole:x.mainrole, _skillartisttxs:x._skillartisttxs, _portfolios:x._portfolios, 
+        //             _contacts:x._contacts, _notes:x._notes, _schedules:x._schedules, rating: x.rating, dailyrate:x.dailyrate,
+        //             activo:x.activo});
+        //     });
 
-            // Only pt supported (not mm or in)
-            var doc = new jsPDF('l', 'pt');
-            doc.autoTable(columns, rows.filter(e => e.activo === true), {
-                margin: {top: 60},
-                addPageContent: () => {
-                    doc.text("Artist Contact List", 40, 30);
-                }
-            });
-            doc.save('ArtistCallList.pdf');
-        },
+        //     // Only pt supported (not mm or in)
+        //     var doc = new jsPDF('l', 'pt');
+        //     doc.autoTable(columns, rows.filter(e => e.activo === true), {
+        //         margin: {top: 60},
+        //         addPageContent: () => {
+        //             doc.text("Artist Contact List", 40, 30);
+        //         }
+        //     });
+        //     doc.save('ArtistCallList.pdf');
+        // },
         listar(){
             let me = this
             let header={"Authorization" : "Bearer " + me.$store.state.token};
@@ -1965,11 +1816,18 @@
             axios.get('api/Artists/Listar',configuracion).then(function(response){
                 //console.log(response);
                 me.artists=response.data
-                setTimeout(() => {
+                me.$nextTick(() => {
                     me.fillSnowflake(me.artists)
+                })                
+                me.$nextTick(() => {
                     let trick = me.artists[0]
                     me.artists.splice( 0, 1, trick)
-                }, 1000)
+                })                
+                // setTimeout(() => {
+                //     me.fillSnowflake(me.artists)
+                //     let trick = me.artists[0]
+                //     me.artists.splice( 0, 1, trick)
+                // }, 1000)
             }).catch(function(error){
                 me.snacktext = 'An error was detected. Code: '+ error.response.status;
                 me.snackcolor = "error";
@@ -1979,15 +1837,7 @@
         },
         fillSnowflake(items){
             let me = this
-            var filtered = []
-            var los = ""
-            var sos = ""
-            var index = ""
-            var nots = ""
-            var pors = ""
-            var sum = 0
-            var qty = 0
-            var sche = ""
+            var filtered=[],busy=[],los="",sos="",index="",nots="",pors="",cons="",sche="",overlap=0
             // eslint-disable-next-line
             //debugger
             for ( var i = 0; i < items.length ; i++) {
@@ -2022,30 +1872,63 @@
                 }
                 items[i]._portfolios = pors.length>128?pors.substr(0,128):pors.substring(0, pors.length - 1)
                 pors = ''
-                //Calcula Rating
-                filtered = me.ratings.filter( function(e) {
+                //busca Contacts
+                filtered = me.contacts.filter( function(e) {
                     return e.artistid === items[i].id
                 })
-                for (var ra = 0 ; ra < filtered.length; ra++ ){
-                    if (filtered[ra].activo){
-                        sum += filtered[ra].score
-                        qty++
-                    }
+                for (var co = 0 ; co < filtered.length; co++ ){
+                    cons += filtered[co].text+', '
                 }
-                items[i]._rating = Math.round(sum / qty)
-                sum = 0
-                qty = 0
+                items[i]._contacts = cons.length>128?cons.substr(0,128):cons.substring(0, cons.length - 2)
+                cons = ''
                 // Arma Schedule
                 filtered = me.schedules.filter( function(e) {
                     return e.artistid === items[i].id
                 })
                 for (var sc = 0 ; sc < filtered.length; sc++ ){
-                    sche += "[" + filtered[sc].startdate.substr(0,10) + ' ~ ' + filtered[sc].enddate.substr(0,10) + "] " + filtered[sc].reason + ", "
+                    sche += "[" + filtered[sc].startdate.substr(0,10) + '/' + filtered[sc].enddate.substr(0,10) + "] " + filtered[sc].comment + ", "
+                    busy = [ ...busy, ...me.getDaysArr(filtered[sc].startdate.substr(0,10),filtered[sc].enddate.substr(0,10))]
                 }
-                items[i]._schedules = sche.length>128?sche.substr(0,128):sche.substring(0, sche.length - 2)
+                items[i]._schedules = sche.length>128?sche.substr(0,128):sche.substr(0, sche.length - 2)
+                items[i].busydates = [...busy].sort()
                 sche = ''
+                // Arma Availability
+                if (me.daysinrangefilter){
+                    overlap = busy.filter(x => x>=me.startrangefilter && x<=me.endrangefilter).length
+                    items[i].availability = (me.daysinrangefilter - overlap) / me.daysinrangefilter
+                } else {
+                    items[i].availability = ''
+                }
+                busy = []
             }
         },
+        fillAvailability(daterange){
+            let me = this
+            me.$refs.menus.save(daterange)
+            me.filterDates = [...me.getDaysArr (daterange[0],daterange[1])]
+            me.startrangefilter = daterange[0]
+            me.endrangefilter = daterange[1]
+            me.daysinrangefilter = me.filterDates.length
+            //console.log(me.daysinrangefilter,me.startrangefilter,me.endrangefilter)
+            me.fillSnowflake(me.artists)
+        },
+        clearAvailability(){
+            let me = this
+            me.$refs.menus.save('')
+            me.searchdates=[]
+            me.filterDates = []
+            me.startrangefilter = null
+            me.endrangefilter = null
+            me.daysinrangefilter = 0
+            //console.log(me.daysinrangefilter,me.startrangefilter,me.endrangefilter)
+            me.fillSnowflake(me.artists)
+        },
+        getDaysArr (start, end) {
+            for(var arr=[],dt=new Date(start); dt<=new Date(end); dt.setDate(dt.getDate()+1)){
+                arr.push(new Date(dt).toISOString().slice(0,10))
+            }
+            return arr
+        },        
         select(){
             let me = this;
             let usuariosArray = []
@@ -2053,7 +1936,7 @@
             let skillartistsArray = []
             let notesArray = []
             let portfoliosArray = []
-            let ratingsArray = []
+            let contactsArray = []
             let schedulesArray = []
             let header={"Authorization" : "Bearer " + me.$store.state.token};
             let configuracion= {headers : header};
@@ -2073,6 +1956,18 @@
                     me.salir();
                 }
             });
+            axios.get('api/Portfolios/Listar',configuracion).then(function(response){
+                portfoliosArray=response.data;
+                portfoliosArray.map(function(x){
+                    me.portfolios.push({value:x.id, artistid: x.artistid, text: x.url, iduseralta: x.iduseralta,
+                        fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
+                });
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = 'error'
+                me.snackbar = true;
+                console.log(error);
+            });
             axios.get('api/Skills/Select',configuracion).then(function(response){
                 skillsArray=response.data;
                 skillsArray.map(function(x){
@@ -2089,7 +1984,7 @@
             axios.get('api/Skillartists/Listar',configuracion).then(function(response){
                 skillartistsArray=response.data;
                 skillartistsArray.map(function(x){
-                    me.skillartists.push({selected: false, value: x.id, skillid: x.skillid, artistid: x.artistid, iduseralta: x.iduseralta,
+                    me.skillartists.push({value: x.id, skillid: x.skillid, artistid: x.artistid, iduseralta: x.iduseralta,
                         fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
                 });
             }).catch(function(error){
@@ -2098,34 +1993,10 @@
                 me.snackbar = true;
                 console.log(error);
             });
-            axios.get('api/Notes/Listar',configuracion).then(function(response){
-                notesArray=response.data;
-                notesArray.map(function(x){
-                    me.notes.push({selected: false, value:x.id, artistid: x.artistid, text: x.note, iduseralta: x.iduseralta,
-                        fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
-                });
-            }).catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackcolor = 'error'
-                me.snackbar = true;
-                console.log(error);
-            });
-            axios.get('api/Portfolios/Listar',configuracion).then(function(response){
-                portfoliosArray=response.data;
-                portfoliosArray.map(function(x){
-                    me.portfolios.push({selected: false, value:x.id, artistid: x.artistid, text: x.url, iduseralta: x.iduseralta,
-                        fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
-                });
-            }).catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackcolor = 'error'
-                me.snackbar = true;
-                console.log(error);
-            });
-            axios.get('api/Ratings/Listar',configuracion).then(function(response){
-                ratingsArray=response.data;
-                ratingsArray.map(function(x){
-                    me.ratings.push({value:x.id, artistid: x.artistid, projectname: x.projectname, score: x.score, iduseralta: x.iduseralta,
+            axios.get('api/Contacts/Listar',configuracion).then(function(response){
+                contactsArray=response.data;
+                contactsArray.map(function(x){
+                    me.contacts.push({value:x.id, artistid: x.artistid, text: x.contact, iduseralta: x.iduseralta,
                         fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
                 });
             }).catch(function(error){
@@ -2138,7 +2009,19 @@
                 schedulesArray=response.data;
                 schedulesArray.map(function(x){
                     me.schedules.push({value:x.id, artistid: x.artistid, startdate: x.startdate, enddate: x.enddate,
-                        reason: x.reason, iduseralta: x.iduseralta, fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
+                        comment: x.comment, iduseralta: x.iduseralta, fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
+                });
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = 'error'
+                me.snackbar = true;
+                console.log(error);
+            });
+            axios.get('api/Notes/Listar',configuracion).then(function(response){
+                notesArray=response.data;
+                notesArray.map(function(x){
+                    me.notes.push({value:x.id, artistid: x.artistid, text: x.note, iduseralta: x.iduseralta,
+                        fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
                 });
             }).catch(function(error){
                 me.snacktext = 'An error was detected. Code: '+ error.response.status;
@@ -2148,32 +2031,22 @@
             });
         },
         editItem (item) {
-            this.id=item.id;
-            this.fullname=item.fullname;
-            this.mainroleid=item.mainroleid;
-            this.projectsworked=item.projectsworked;
-            this.cost=item.cost;
-            this.costingdate=item.costingdate;
-            this.costinguserid=item.costinguserid;
-            this.email=item.email;
-            this.alternativecontact=item.alternativecontact;
-            this.phone=item.phone;
-            this.mobile=item.mobile;
-            this.imgartist=item.imgartist;
-            this.imageUrl=item.imgartist;
-            this.proveedorid=item.proveedorid;
-            this.iduseralta=item.iduseralta;
-            this.fecalta=item.fecalta;
-            this.iduserumod=item.iduserumod;
-            this.fecumod=item.fecumod;
-            this.activo=item.activo;
-
-
+            this.id = item.id;
+            this.fullname = item.fullname;
+            this.mainroleid = item.mainroleid;
+            this.dailyrate = item.dailyrate;
+            this.rating = item.rating;
+            this.imgartist = item.imgartist;
+            this.imageUrl = item.imgartist;
+            this.proveedorid = item.proveedorid;
+            this.iduseralta = item.iduseralta;
+            this.fecalta = item.fecalta;
+            this.iduserumod = item.iduserumod;
+            this.fecumod = item.fecumod;
+            this.activo = item.activo;
             this.colfondo=item.colfondo;
             this.coltexto=item.coltexto;
             this.editedIndex = 1;
-            this.groupdialog = false;
-            this.proydialog = false;
             this.dialog = true;
         },
         deleteItem (item) {
@@ -2221,13 +2094,8 @@
                 this.id = ""
                 this.fullname = ""
                 this.mainroleid = ""
-                this.projectsworked = ""
-                this.cost = ""
-                this.costingdate = ""
-                this.email = ""
-                this.alternativecontact = ""
-                this.phone = ""
-                this.mobile = ""
+                this.dailyrate = ""
+                this.rating = ""
                 this.imgusario = ""
                 this.imageUrl = ""
                 this.proveedorid = ""
@@ -2235,9 +2103,7 @@
                 this.fecalta = ""
                 this.iduserumod = ""
                 this.fecumod = ""
-                this.activo = false       
-
-                this.groupdialog = false
+                this.activo = false
                 this.editedIndex=-1
         },
         guardar () {
@@ -2251,14 +2117,8 @@
                     'id': me.id,
                     'fullname': me.fullname,
                     'mainroleid': me.mainroleid,
-                    'projectsworked': me.projectsworked,
-                    'cost': me.cost,
-                    'costingdate': me.costingdate,
-                    'costinguserid': me.costinguserid,
-                    'email': me.email,
-                    'alternativecontact': me.alternativecontact,
-                    'phone': me.phone,
-                    'mobile':me.mobile,
+                    'dailyrate': me.dailyrate,
+                    'rating': me.rating,
                     'imgartist': me.imgartist,
                     'proveedorid': me.proveedorid,
                     'iduserumod': me.$store.state.usuario.idusuario,
@@ -2280,14 +2140,8 @@
                 axios.post('api/Artists/Crear',{
                     'fullname': me.fullname,
                     'mainroleid': me.mainroleid,
-                    'projectsworked': me.projectsworked,
-                    'cost': me.cost,
-                    'costingdate': me.costingdate,
-                    'costinguserid': me.costinguserid,
-                    'email':me.email,
-                    'alternativecontact': me.alternativecontact,
-                    'phone': me.phone,
-                    'mobile':me.mobile,
+                    'dailyrate': me.dailyrate,
+                    'rating': me.rating,
                     'imgartist':me.imgartist,
                     'proveedorid':me.proveedorid,
                     'iduseralta': me.$store.state.usuario.idusuario                      
@@ -2364,6 +2218,13 @@
             me.portfolioheader = element.fullname;
             me.portfoliodialog=!me.portfoliodialog;
         },
+        tratarContact(element){
+            var me = this;
+            me.contactartists = me.contacts.filter(e => e.artistid === element.id)
+            me.workedartistid = element.id;
+            me.contactheader = element.fullname;
+            me.contactdialog=!me.contactdialog;
+        },
         tratarNote(element){
             var me = this;
             me.noteartists = me.notes.filter(e => e.artistid === element.id)
@@ -2371,35 +2232,12 @@
             me.noteheader = element.fullname;
             me.notedialog=!me.notedialog;
         },
-        tratarRating(element){
-            var me = this;
-            me.ratingartists = me.ratings.filter(e => e.artistid === element.id)
-            me.workedartistid = element.id;
-            me.ratingheader = element.fullname;
-            me.ratingdialog=!me.ratingdialog;
-        },
         tratarSchedule(element){
             var me = this;
             me.scheduleartists = me.schedules.filter(e => e.artistid === element.id)
             me.workedartistid = element.id;
             me.scheduleheader = element.fullname;
             me.scheduledialog=!me.scheduledialog;
-        },
-        tratarGrupos(item){
-            let me=this;
-            let index = 0;
-            for (var l = 0; l < me.grupos.length; l++){
-                me.grupos[l].selected = false;
-            }
-            for (let i = 0; i < me.grupousuarios.length; i++){
-                if (me.grupousuarios[i].usuarioid === item.id){
-                    index = me.grupos.findIndex(element => element.value === me.grupousuarios[i].grupoid );
-                    me.grupos[index].selected = true;
-                }
-            }
-            me.workuserId = item.id;
-            me.groupheader = 'Grupos de ' + item.iniciales + ' ' + item.email;
-            me.groupdialog=!me.groupdialog;
         },
         accionSkill (item) {
             var me = this;
@@ -2412,7 +2250,7 @@
                     'iduseralta': me.$store.state.usuario.idusuario
                 },configuracion)
                 .then(function(response){
-                    me.skillartists.push({selected: true, skillid: response.data.skillid, artistid: response.data.artistid, value: response.data.id});
+                    me.skillartists.push({skillid: response.data.skillid, artistid: response.data.artistid, value: response.data.id});
                     me.fillSnowflake(me.artists)
                     //console.log(response);
                     me.snacktext = 'Created';
@@ -2519,11 +2357,104 @@
                     'iduseralta': me.$store.state.usuario.idusuario                      
                 },configuracion)
                 .then(function(response){
-                    me.portfolios.push({selected: false, value: response.data.id, artistid: response.data.artistid, text: response.data.url,
+                    me.portfolios.push({value: response.data.id, artistid: response.data.artistid, text: response.data.url,
                         iduseralta: response.data.iduseralta, fecalta: response.data.fecalta, iduserumod: response.data.iduserumod, fecumod: response.data.fecumod, activo: response.data.activo});
                     me.portfolioartists = me.portfolios.filter(e => e.artistid === me.workedartistid)
                     me.fillSnowflake(me.artists);
                     me.closePortfolio();
+                    me.snacktext = 'Created';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackcolor = "error";
+                    me.snackbar = true;
+                    console.log(error);
+                });
+            }
+        },
+        editContact(element){
+            this.editedIndex = this.contacts.indexOf(element)
+            this.contact = element.text
+            this.contactCRUDdialog = true
+        },
+        closeContact(){
+            this.editedIndex = -1
+            this.contact = ''
+            this.contactCRUDdialog = false
+        },
+        deleteContact(element){
+            this.editedIndex = this.contacts.indexOf(element)
+            this.contact = element.text
+            this.dialogDeleteContact = true
+        },
+        closeDeleteContact(){
+            this.dialogDeleteContact = false
+            this.contact = ''
+            this.editedIndex = -1
+        },
+        deleteContactConfirm(){
+            let me = this;
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
+            let configuracion= {headers : header};
+            axios.delete('api/Contacts/Eliminar/'+me.contacts[me.editedIndex].value,configuracion).then( () => {
+                me.contacts = me.contacts.filter(x => x.value != me.contacts[me.editedIndex].value);
+                me.contactartists = me.contacts.filter(e => e.artistid === me.workedartistid)
+                me.fillSnowflake(me.artists);
+                me.closeDeleteContact();
+                me.snacktext = 'Eliminated';
+                me.snackcolor = "success";
+                me.snackbar = true;
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = "error";
+                me.snackbar = true;
+                console.log(error);
+            });
+        },
+        saveContact(){
+            let me = this;
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
+            let configuracion= {headers : header};
+            //console.log(me.editedIndex, me.contact)
+            if (me.editedIndex > -1) {
+                //Código para editar
+                //Código para guardar
+                axios.put('api/Contacts/Actualizar',{
+                    'id': me.contacts[me.editedIndex].value,
+                    'contact': me.contact,
+                    'iduserumod': me.$store.state.usuario.idusuario,
+                },configuracion).then( (response) => {
+                    // eslint-disable-next-line
+                    //debugger
+                    me.contacts[me.editedIndex].text = response.data.contact
+                    me.contacts[me.editedIndex].iduserumod = response.data.iduserumod
+                    me.contacts[me.editedIndex].fecumod = response.data.fecumod
+                    me.contactartists = me.contacts.filter(e => e.artistid === me.workedartistid)
+                    me.fillSnowflake(me.artists);
+                    me.closeContact();
+                    me.snacktext = 'Updated';
+                    me.snackcolor = "success";
+                    me.snackbar = true;
+                }).catch(function(error){
+                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                    me.snackcolor = "error";
+                    me.snackbar = true;
+                    console.log(error);
+                });
+            } else {
+                //Código para guardar
+                axios.post('api/Contacts/Crear',{
+                    'artistid': me.workedartistid,
+                    'contact': me.contact,
+                    'iduseralta': me.$store.state.usuario.idusuario                      
+                },configuracion)
+                .then(function(response){
+                    me.contacts.push({value: response.data.id, artistid: response.data.artistid, text: response.data.contact,
+                        iduseralta: response.data.iduseralta, fecalta: response.data.fecalta, iduserumod: response.data.iduserumod, fecumod: response.data.fecumod, activo: response.data.activo});
+                    me.contactartists = me.contacts.filter(e => e.artistid === me.workedartistid)
+                    me.fillSnowflake(me.artists);
+                    me.closeContact();
                     me.snacktext = 'Created';
                     me.snackcolor = "success";
                     me.snackbar = true;
@@ -2624,7 +2555,7 @@
                     'iduseralta': me.$store.state.usuario.idusuario                      
                 },configuracion)
                 .then(function(response){
-                    me.notes.push({selected: false, value: response.data.id, artistid: response.data.artistid, text: response.data.note,
+                    me.notes.push({value: response.data.id, artistid: response.data.artistid, text: response.data.note,
                         iduseralta: response.data.iduseralta, fecalta: response.data.fecalta, iduserumod: response.data.iduserumod, fecumod: response.data.fecumod, activo: response.data.activo});
                     me.noteartists = me.notes.filter(e => e.artistid === me.workedartistid)
                     me.fillSnowflake(me.artists);
@@ -2644,7 +2575,7 @@
             this.editedIndex = this.schedules.indexOf(element)
             this.startdate = element.startdate
             this.enddate = element.enddate
-            this.reason = element.reason
+            this.comment = element.comment
             this.dates = []
             this.dates.push(this.startdate.substr(0,10),this.enddate.substr(0,10))
             this.scheduleCRUDdialog = true
@@ -2653,7 +2584,7 @@
             this.editedIndex = -1
             this.startdate = ''
             this.enddate = ''
-            this.reason = ''
+            this.comment = ''
             this.dates = []
             this.scheduleCRUDdialog = false
         },
@@ -2661,7 +2592,7 @@
             this.editedIndex = this.schedules.indexOf(element)
             this.startdate = element.startdate
             this.enddate = element.enddate
-            this.reason = element.reason
+            this.comment = element.comment
             this.dates = []
             this.dates.push(this.startdate.substr(0,10),this.enddate.substr(0,10))
             this.dialogDeleteSchedule = true
@@ -2670,7 +2601,7 @@
             this.dialogDeleteSchedule = false
             this.startdate = ''
             this.enddate = ''
-            this.reason = ''
+            this.comment = ''
             this.dates = []
             this.editedIndex = -1
         },
@@ -2697,7 +2628,7 @@
             let me = this;
             let header={"Authorization" : "Bearer " + me.$store.state.token};
             let configuracion= {headers : header};
-            //console.log(me.editedIndex, me.reason)
+            //console.log(me.editedIndex, me.comment)
             if (me.editedIndex > -1) {
                 //Código para editar
                 //Código para guardar
@@ -2705,14 +2636,14 @@
                     'id': me.schedules[me.editedIndex].value,
                     'startdate': me.dates[0],
                     'enddate': me.dates[1],
-                    'reason': me.reason,
+                    'comment': me.comment,
                     'iduserumod': me.$store.state.usuario.idusuario,
                 },configuracion).then( (response) => {
                     // eslint-disable-next-line
                     //debugger
                     me.schedules[me.editedIndex].startdate = response.data.startdate
                     me.schedules[me.editedIndex].enddate = response.data.enddate
-                    me.schedules[me.editedIndex].reason = response.data.reason
+                    me.schedules[me.editedIndex].comment = response.data.comment
                     me.schedules[me.editedIndex].iduserumod = response.data.iduserumod
                     me.schedules[me.editedIndex].fecumod = response.data.fecumod
                     me.scheduleartists = me.schedules.filter(e => e.artistid === me.workedartistid)
@@ -2733,118 +2664,16 @@
                     'artistid': me.workedartistid,
                     'startdate': me.dates[0],
                     'enddate': me.dates[1],
-                    'reason': me.reason,
+                    'comment': me.comment,
                     'iduseralta': me.$store.state.usuario.idusuario                      
                 },configuracion)
                 .then(function(response){
-                    me.schedules.push({selected: false, value: response.data.id, artistid: response.data.artistid, 
-                        startdate: response.data.startdate, enddate: response.data.enddate, reason: response.data.reason,
+                    me.schedules.push({value: response.data.id, artistid: response.data.artistid, 
+                        startdate: response.data.startdate, enddate: response.data.enddate, comment: response.data.comment,
                         iduseralta: response.data.iduseralta, fecalta: response.data.fecalta, iduserumod: response.data.iduserumod, fecumod: response.data.fecumod, activo: response.data.activo});
                     me.scheduleartists = me.schedules.filter(e => e.artistid === me.workedartistid)
                     me.fillSnowflake(me.artists);
                     me.closeSchedule();
-                    me.snacktext = 'Created';
-                    me.snackcolor = "success";
-                    me.snackbar = true;
-                }).catch(function(error){
-                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                    me.snackcolor = "error";
-                    me.snackbar = true;
-                    console.log(error);
-                });
-            }
-        },
-
-        editRating(element){
-            this.editedIndex = this.ratings.indexOf(element)
-            this.score = element.score
-            this.projectname = element.projectname
-            this.ratingCRUDdialog = true
-        },
-        closeRating(){
-            this.editedIndex = -1
-            this.score = 0
-            this.projectname= ''
-            this.ratingCRUDdialog = false
-        },
-        deleteRating(element){
-            this.editedIndex = this.ratings.indexOf(element)
-            this.score = element.score
-            this.projectname = element.projectname
-            this.dialogDeleteRating = true
-        },
-        closeDeleteRating(){
-            this.dialogDeleteRating = false
-            this.score = 0
-            this.projectname = ''
-            this.editedIndex = -1
-        },
-        deleteRatingConfirm(){
-            let me = this;
-            let header={"Authorization" : "Bearer " + me.$store.state.token};
-            let configuracion= {headers : header};
-            axios.delete('api/Ratings/Eliminar/'+me.ratings[me.editedIndex].value,configuracion).then( () => {
-                me.ratings = me.ratings.filter(x => x.value != me.ratings[me.editedIndex].value);
-                me.ratingartists = me.ratings.filter(e => e.artistid === me.workedartistid)
-                me.fillSnowflake(me.artists);
-                me.closeDeleteRating();
-                me.snacktext = 'Eliminated';
-                me.snackcolor = "success";
-                me.snackbar = true;
-            }).catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackcolor = "error";
-                me.snackbar = true;
-                console.log(error);
-            });
-        },
-        saveRating(){
-            let me = this;
-            let header={"Authorization" : "Bearer " + me.$store.state.token};
-            let configuracion= {headers : header};
-            //console.log(me.editedIndex, me.projectname, me.score)
-            if (me.editedIndex > -1) {
-                //Código para editar
-                //Código para guardar
-                axios.put('api/Ratings/Actualizar',{
-                    'id': me.ratings[me.editedIndex].value,
-                    'projectname': me.projectname,
-                    'score': me.score,
-                    'iduserumod': me.$store.state.usuario.idusuario,
-                },configuracion).then( (response) => {
-                    // eslint-disable-next-line
-                    //debugger
-                    me.ratings[me.editedIndex].score = response.data.score
-                    me.ratings[me.editedIndex].projectname = response.data.projectname
-                    me.ratings[me.editedIndex].iduserumod = response.data.iduserumod
-                    me.ratings[me.editedIndex].fecumod = response.data.fecumod
-                    me.ratingartists = me.ratings.filter(e => e.artistid === me.workedartistid)
-                    me.fillSnowflake(me.artists);
-                    me.closeRating();
-                    me.snacktext = 'Updated';
-                    me.snackcolor = "success";
-                    me.snackbar = true;
-                }).catch(function(error){
-                    me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                    me.snackcolor = "error";
-                    me.snackbar = true;
-                    console.log(error);
-                });
-            } else {
-                //Código para guardar
-                axios.post('api/Ratings/Crear',{
-                    'artistid': me.workedartistid,
-                    'projectname': me.projectname, 
-                    'score': me.score,
-                    'iduseralta': me.$store.state.usuario.idusuario                      
-                },configuracion)
-                .then(function(response){
-                    me.ratings.push({selected: false, value: response.data.id, artistid: response.data.artistid, score: response.data.score, 
-                        projectname: response.data.projectname, iduseralta: response.data.iduseralta, fecalta: response.data.fecalta, 
-                        iduserumod: response.data.iduserumod, fecumod: response.data.fecumod, activo: response.data.activo});
-                    me.ratingartists = me.ratings.filter(e => e.artistid === me.workedartistid)
-                    me.fillSnowflake(me.artists);
-                    me.closeRating();
                     me.snacktext = 'Created';
                     me.snackcolor = "success";
                     me.snackbar = true;

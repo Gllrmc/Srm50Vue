@@ -37,7 +37,7 @@
             </v-list-item-action>
             <v-list-item-content>
               <v-list-item-title>
-                Check-In sets
+                Pre-selects
               </v-list-item-title>
             </v-list-item-content>
           </v-list-item>
@@ -220,7 +220,7 @@
       col="12">
         <v-card flat tile color="primary">
           <p class="mb-2 white--text font-weight-bold">
-            &copy;2021 Akiel Consultoría en Gestión de Negocios. Todos los Derechos Reservados. Version 1.10 
+            &copy;2021 Akiel Consultoría en Gestión de Negocios. Todos los Derechos Reservados. Version 2.11 
           </p>
         </v-card>
       </v-col>
@@ -270,22 +270,22 @@ export default {
       this.$store.dispatch("salir");
     },
     buscarUserinfo(){
-        let me=this;
-        let header={"Authorization" : "Bearer " + me.$store.state.token};
-        let configuracion= {headers : header};
-        axios.get('api/Usuarios/Traer/'+me.$store.state.usuario.idusuario,configuracion)
-        .then(respuesta => {
-            return respuesta.data
-        })
-        .then(data => {
-            this.$store.dispatch("guardarUserinfo", data)
-        })
-        .catch(function(error){
-            me.snacktext = 'An error was detected. Code: '+ error.response.status;
-            me.snackcolor = 'error'
-            me.snackbar = true;
-            console.log(error);
-        });
+      let me=this;
+      let header={"Authorization" : "Bearer " + me.$store.state.token};
+      let configuracion= {headers : header};
+      axios.get('api/Usuarios/Traer/'+me.$store.state.usuario.idusuario,configuracion)
+      .then(respuesta => {
+          return respuesta.data
+      })
+      .then(data => {
+          this.$store.dispatch("guardarUserinfo", data)
+      })
+      .catch(function(error){
+          me.snacktext = 'An error was detected. Code: '+ error.response.status;
+          me.snackcolor = 'error'
+          me.snackbar = true;
+          console.log(error);
+      });
     }
   }
 };

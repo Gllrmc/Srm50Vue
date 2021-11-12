@@ -3,7 +3,6 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify'
-import i18n from 'vue-i18n'
 import axios from 'axios'
 import excel from 'vue-excel-export'
 
@@ -20,7 +19,6 @@ Vue.config.devtools = true
 Vue.use(excel)
 
 new Vue({
-  i18n,
   router,
   store,
   vuetify,
