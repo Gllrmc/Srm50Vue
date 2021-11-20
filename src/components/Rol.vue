@@ -184,6 +184,9 @@ import 'jspdf-autotable'
                 me.snackbar = true;
                 me.snackcolor = "error"
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
         activarDesactivarMostrar(accion,item){
@@ -221,6 +224,9 @@ import 'jspdf-autotable'
                 me.snackbar = true;
                 me.snackcolor = "error"
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
         desactivar(){
@@ -241,6 +247,9 @@ import 'jspdf-autotable'
                 me.snackbar = true;
                 me.snackcolor = "error"
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         }
     }

@@ -165,6 +165,9 @@ name: 'AkielWorld',
             me.snackbar = true;
             me.snackcolor = 'error'
             console.log(error);
+            if ( error.response.status == 401 ){
+                me.salir();
+            }
         });
       },
       validar(){

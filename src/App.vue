@@ -8,7 +8,7 @@
       v-if="logueado"
     >
       <v-list dense>
-        <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
+        <template v-if="esAdministrador || esowner || esCollaborator || esReader">
           <v-list-item :to="{name:'home'}">
             <v-list-item-action>
               <v-icon color="secondary">mdi-home</v-icon>
@@ -18,7 +18,7 @@
             </v-list-item-title>
           </v-list-item>
         </template>
-        <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
+        <template v-if="esAdministrador || esowner || esCollaborator || esReader">
           <v-list-item :to="{ name: 'artists'}">
             <v-list-item-action>
               <v-icon color="primary">mdi-video-vintage</v-icon>
@@ -30,8 +30,8 @@
             </v-list-item-content>
           </v-list-item>
         </template>
-        <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
-          <v-list-item :to="{ name: 'checkinsets'}">
+        <template v-if="esAdministrador || esowner || esCollaborator || esReader">
+          <v-list-item :to="{ name: 'preselects'}">
             <v-list-item-action>
               <v-icon color="primary">mdi-pin</v-icon>
             </v-list-item-action>
@@ -42,7 +42,7 @@
             </v-list-item-content>
           </v-list-item>
         </template>
-        <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
+        <template v-if="esAdministrador || esowner">
           <v-list-item :to="{ name: 'skills'}">
             <v-list-item-action>
               <v-icon color="primary">mdi-shape-outline</v-icon>
@@ -54,7 +54,7 @@
             </v-list-item-content>
           </v-list-item>
         </template>
-        <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
+        <template v-if="esAdministrador || esowner">
           <v-list-item :to="{ name: 'usuarios'}">
             <v-list-item-action>
               <v-icon color="primary">mdi-account-multiple-outline</v-icon>
@@ -66,7 +66,7 @@
             </v-list-item-content>
           </v-list-item>
         </template>
-        <template v-if="esAdministrador || esJefeAdministracion || esAsistAdministracion || esLiderProyecto || esConsultor || esDataentry">
+        <template v-if="esAdministrador || esowner">
           <v-list-item :to="{ name: 'roles'}">
             <v-list-item-action>
               <v-icon color="primary">mdi-passport</v-icon>
@@ -205,9 +205,7 @@
         fluid
       >
         <v-slide-y-transition mode="out-in">
-          <v-layout>
             <router-view></router-view>
-          </v-layout>
         </v-slide-y-transition>
       </v-container>
     </v-main>
@@ -220,7 +218,7 @@
       col="12">
         <v-card flat tile color="primary">
           <p class="mb-2 white--text font-weight-bold">
-            &copy;2021 Akiel Consultoría en Gestión de Negocios. Todos los Derechos Reservados. Version 2.11 
+            &copy;2021 Akiel Consultoría en Gestión de Negocios. Todos los Derechos Reservados. Version 2.15
           </p>
         </v-card>
       </v-col>
@@ -245,20 +243,14 @@ export default {
     esAdministrador(){
       return this.$store.state.usuario && this.$store.state.usuario.rol =='Administrador';
     },
-    esJefeAdministracion(){
-      return this.$store.state.usuario && this.$store.state.usuario.rol =='JefeAdministracion';
+    esOwner(){
+      return this.$store.state.usuario && this.$store.state.usuario.rol =='Owner';
     },
-    esAsistAdministracion(){
-      return this.$store.state.usuario && this.$store.state.usuario.rol =='AsistAdministracion';
+    esCollaborator(){
+      return this.$store.state.usuario && this.$store.state.usuario.rol =='Collaborator';
     },
-    esLiderProyecto(){
-      return this.$store.state.usuario && this.$store.state.usuario.rol =='LiderProyecto';
-    },
-    esConsultor(){
-      return this.$store.state.usuario && this.$store.state.usuario.rol =='Consultor';
-    },
-    esDataentry(){
-      return this.$store.state.usuario && this.$store.state.usuario.rol =='Dataentry';
+    esReader(){
+      return this.$store.state.usuario && this.$store.state.usuario.rol =='Reader';
     },
   },
   created(){
@@ -285,6 +277,9 @@ export default {
           me.snackcolor = 'error'
           me.snackbar = true;
           console.log(error);
+          if ( error.response.status == 401 ){
+              me.salir();
+          }
       });
     }
   }

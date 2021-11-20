@@ -19,11 +19,9 @@ const routes = [
     component: Home,
     meta: {
       administrador: true,
-      jefeadministracion: true,
-      liderproyecto:true, 
-      consultor: true,
-      asistadministracion: true,
-      dataentry: true
+      owner: true,
+      collaborator:true, 
+      reader: true,
     }
   },
   {
@@ -40,24 +38,20 @@ const routes = [
     component: () => import(/* webpackChunkName: "artists" */ '../components/Artist.vue'),
     meta: {
       administrador: true,
-      jefeadministracion: true,
-      liderproyecto:true, 
-      consultor: true,
-      asistadministracion: true,
-      dataentry: true
+      owner: true,
+      collaborator:true, 
+      reader: true,
     }
   },
   {
-    path: '/checkinsets',
-    name: 'checkinsets',
-    component: () => import(/* webpackChunkName: "preview" */ '../components/Checkinset.vue'),
+    path: '/preselects',
+    name: 'preselects',
+    component: () => import(/* webpackChunkName: "preview" */ '../components/Preselect.vue'),
     meta: {
       administrador: true,
-      jefeadministracion: true,
-      liderproyecto:true, 
-      consultor: true,
-      asistadministracion: true,
-      dataentry: true
+      owner: true,
+      collaborator:true, 
+      reader: true,
     }
   },
   {
@@ -66,11 +60,9 @@ const routes = [
     component: () => import(/* webpackChunkName: "preview" */ '../components/Skill.vue'),
     meta: {
       administrador: true,
-      jefeadministracion: true,
-      liderproyecto:true, 
-      consultor: true,
-      asistadministracion: true,
-      dataentry: true
+      owner: true,
+      collaborator:false, 
+      reader: false,
     }
   },
   {
@@ -79,11 +71,9 @@ const routes = [
     component: () => import(/* webpackChunkName: "admin" */ '../components/Rol.vue'),
     meta: {
       administrador: true,
-      jefeadministracion: true,
-      liderproyecto:true, 
-      consultor: true,
-      asistadministracion: true,
-      dataentry: true
+      owner: true,
+      collaborator:false, 
+      reader: false,
     }
   },
   {
@@ -92,11 +82,9 @@ const routes = [
     component: () => import(/* webpackChunkName: "admin" */ '../components/Usuario.vue'),
     meta: {
       administrador: true,
-      jefeadministracion: true,
-      liderproyecto:true, 
-      consultor: true,
-      asistadministracion: true,
-      dataentry: true
+      owner: true,
+      collaborator:false, 
+      reader: false,
     }
   },
   // {
@@ -122,24 +110,16 @@ router.beforeEach((to, from, next) => {
       if (to.matched.some(record => record.meta.administrador)) {
           next();
       }
-  } else if (store.state.usuario && store.state.usuario.rol == 'JefeAdministracion') {
-      if (to.matched.some(record => record.meta.jefeadministracion)) {
+  } else if (store.state.usuario && store.state.usuario.rol == 'Owner') {
+      if (to.matched.some(record => record.meta.owner)) {
           next();
       }
-  } else if (store.state.usuario && store.state.usuario.rol == 'AsistAdministracion') {
-      if (to.matched.some(record => record.meta.asistadministracion)) {
+  } else if (store.state.usuario && store.state.usuario.rol == 'Collaborator') {
+      if (to.matched.some(record => record.meta.collaborator)) {
           next();
       }
-  } else if (store.state.usuario && store.state.usuario.rol == 'LiderProyecto') {
-      if (to.matched.some(record => record.meta.liderproyecto)) {
-          next();
-      }
-    } else if (store.state.usuario && store.state.usuario.rol == 'Consultor') {
-      if (to.matched.some(record => record.meta.consultor)) {
-          next();
-      }
-  } else if (store.state.usuario && store.state.usuario.rol == 'Dataentry') {
-      if (to.matched.some(record => record.meta.dataentry)) {
+  } else if (store.state.usuario && store.state.usuario.rol == 'Reader') {
+      if (to.matched.some(record => record.meta.reader)) {
           next();
       }
   } else {

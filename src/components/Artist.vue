@@ -81,7 +81,16 @@
                 </template>
                 <template v-slot:top>
                     <v-toolbar flat color="white">
-                        <v-toolbar-title>Artists</v-toolbar-title>
+                        <v-toolbar-title>
+                            Artists
+                            <v-btn 
+                                class="mb-2 ma-1" 
+                                @click="fillSnowflake(artists)">
+                                <v-icon>
+                                    mdi-refresh
+                                </v-icon>
+                            </v-btn>
+                        </v-toolbar-title>
                         <v-divider
                             class="mx-4"
                             inset
@@ -92,7 +101,7 @@
                                 <v-btn 
                                     color="primary" dark 
                                     class="mb-2 ma-1"
-                                    @click="tratarPreview()">
+                                    @click="tratarPreselect()">
                                     PRE-SELECT
                                 </v-btn>
                             </td>
@@ -132,38 +141,38 @@
                             </td> -->
                         </tr>
                         <v-spacer></v-spacer>
-                        <div class="mb-2 ma-1" style="background-color: white; width: 280px">
+                        <div class="mb-0 ma-1" style="background-color: white; width: 280px">
                             <v-select
                                 v-model="skillFilterValues"
+                                dense
                                 :items="skillsfilter"
-                                label="Choose Skills"
+                                label="Get Skill"
                                 append-icon="mdi-magnify-plus-outline"
                                 clearable
                                 chips
                                 deletable-chips
                                 multiple
-                                class="elevation-1"
                                 >
                             </v-select>
                         </div>
-                        <div class="mb-2 ma-1" style="background-color: white; width: 280px">
+                        <div class="mb-0 ma-1" style="background-color: white; width: 280px">
                             <v-select
                                 v-model="skillFilterValues2"
+                                dense
                                 :items="skillsfilter"
-                                label="Choose combined Skills"
+                                label="Together with Skill"
                                 append-icon="mdi-magnify-plus-outline"
                                 clearable
                                 chips
                                 deletable-chips
                                 multiple
-                                class="elevation-1"
                                 >
                             </v-select>
                         </div>
-                        <div class="mb-2 ma-1" style="background-color: white; width: 400px">
+                        <div class="mb-0 ma-1" style="background-color: white; width: 400px">
                             <v-text-field class="mb-2 ma-1" dense label="Search" v-model="searcha" clearable append-icon="mdi-magnify" single-line hide-details></v-text-field>
                         </div>
-                        <div class="mb-2 ma-2" style="background-color: white; width: 280px">
+                        <div class="mb-0 ma-2" style="background-color: white; width: 280px">
                             <!-- <v-text-field class="mb-2 ma-1" dense label="Search" v-model="searcha" clearable append-icon="mdi-calendar" single-line hide-details></v-text-field> -->
                             <v-menu
                             ref="menus"
@@ -225,7 +234,7 @@
                             <v-select
                                 v-model="skillFilterValues"
                                 :items="skillsfilter"
-                                label="Skills"
+                                label="Skill"
                                 append-icon="mdi-magnify-plus-outline"
                                 clearable
                                 chips
@@ -269,7 +278,7 @@
                                                         dense 
                                                         v-model="mainroleid"
                                                         :items="roles" 
-                                                        label="Main Role"
+                                                        label="Occupation"
                                                         />
                                                 </v-col>
                                                 <v-col cols="12" sm="6" md="6">
@@ -291,14 +300,32 @@
                                                 </v-col>
                                                 <v-col cols="12" sm="2" md="2">
                                                     <v-layout column>
-                                                        <v-avatar class="ml-2" size=40>
-                                                            <v-img :src="imageUrl" aspect-ratio="2" contain></v-img>
-                                                        </v-avatar>
-                                                        <input v-show="false" ref="inputUpload1" type="file" @change="onFilePicked" >
+                                                        <div v-if="imageUrl">
+                                                            <v-avatar class="ml-2" size=40>
+                                                                <v-img :src="imageUrl" aspect-ratio="2" contain></v-img>
+                                                            </v-avatar>
+                                                        </div>
+                                                        <div v-else>
+                                                            <v-avatar size=40>
+                                                                <v-img :src="`/files/${imgartist}`" aspect-ratio="2" contain></v-img>
+                                                            </v-avatar>
+                                                        </div>
+                                                        <form enctype="multipart/form-data">
+                                                            <div class="field">
+                                                                <label for="file" class="label"></label>
+                                                                <input 
+                                                                style="display:none" 
+                                                                type="file"
+                                                                accept="image/jpeg"
+                                                                @change="onFileSelected($event.target.files)"
+                                                                ref="fileInput"/>
+                                                            </div>
+                                                        </form> 
+                                                        <input v-show="false" ref="fileinput" type="file" @change="onFileSelected" >
                                                     </v-layout>
                                                 </v-col>
                                                 <v-col cols="12" sm="4" md="4">
-                                                    <v-btn class="mx-2" small fab color="primary" @click="$refs.inputUpload1.click()">
+                                                    <v-btn class="mx-2" small fab color="primary" @click="$refs.fileinput.click()">
                                                         <v-icon >
                                                             mdi-image-frame
                                                         </v-icon>    
@@ -320,52 +347,130 @@
                                 </v-card-actions>
                             </v-card>
                         </v-dialog>
-                        <v-dialog 
-                            v-model="checkindialog" 
-                            max-width="400px"
-                            persistent
-                        >
-                            <v-card>
-                                <v-card-title>
-                                    <span class="headline">Create Pre-select</span>
-                                </v-card-title>
-                                <v-card-text>
-                                    <v-form
-                                        ref="form"
-                                        v-model="validForm"
-                                    >
-                                        <v-container
-                                            class="grey lighten-5"
-                                            grid-list-md>
-                                            <v-row dense>
-                                                <v-col cols="12" sm="12" md="12">
-                                                    <v-text-field 
-                                                        dense 
-                                                        v-model="checkin" 
-                                                        label="Pre-select" 
-                                                        :rules="checkinRules"
-                                                        counter="32"
-                                                    />
-                                                </v-col>
-                                                <!-- <v-col cols="12" sm="12" md="12">
-                                                    <v-text-field
-                                                        dense
-                                                        v-model="detail"
-                                                        label="Detail"
-                                                        :rules="detailRules"
-                                                        counter="256"
-                                                    />
-                                                </v-col> -->
-                                            </v-row>
-                                        </v-container>
-                                    </v-form>
-                                </v-card-text>
-                                <v-card-actions>
-                                    <v-spacer></v-spacer>
-                                    <v-btn color="primary" text @click="checkindialog=false">CANCEL</v-btn>
-                                    <v-btn color="secondary" dark :disabled="!validForm" text @click="guardarCheckin">SAVE</v-btn>
-                                </v-card-actions>
-                            </v-card>
+                        <v-dialog v-model="preselectdialog" max-width="900px" persistent >
+                            <v-data-table
+                                :headers="headerspreselects"
+                                :items="preselects"
+                                sort-by="fecumod"
+                                sort-desc
+                                class="elevation-1"
+                                :items-per-page="10"
+                                :search="searchp"
+                            >
+                                <template v-slot:top>
+                                <v-toolbar
+                                    flat
+                                >
+                                    <v-toolbar-title>Pre-selects</v-toolbar-title>
+                                    <v-divider
+                                    class="mx-4"
+                                    inset
+                                    vertical
+                                    ></v-divider>
+                                    <div class="mb-2 ma-1" style="background-color: white; width: 400px">
+                                        <v-text-field dense label="Search" v-model="searchp" outlined clearable append-icon="mdi-magnify" single-line hide-details></v-text-field>
+                                    </div>
+                                    <v-spacer/>   
+                                    <v-dialog
+                                        v-model="preselectCRUDdialog"
+                                        max-width="600px"
+                                        >
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-btn
+                                            color="primary"
+                                            dark
+                                            class="ma-1"
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            >
+                                            NEW
+                                            </v-btn>
+                                        </template>
+                                        <v-card>
+                                            <v-card-title>
+                                                <p class="text-h5">New Pre-select</p>
+                                            </v-card-title>
+                                            <v-card-text>
+                                                <v-form
+                                                ref="noteform"
+                                                v-model="validpreselectform"
+                                                >
+                                                    <v-container
+                                                    class="grey lighten-5"
+                                                    grid-list-md>
+                                                        <v-row dense>
+                                                            <v-col
+                                                                cols="12"
+                                                                sm="3"
+                                                                md="3"
+                                                            >
+                                                                <v-text-field 
+                                                                    dense 
+                                                                    v-model="code" 
+                                                                    label="Code" 
+                                                                    :rules="codeRules"
+                                                                    counter="4"
+                                                                />
+                                                            </v-col>
+                                                            <v-col
+                                                                cols="12"
+                                                                sm="8"
+                                                                md="8"
+                                                            >
+                                                                <v-text-field 
+                                                                    dense 
+                                                                    v-model="preselect" 
+                                                                    label="Pre-select" 
+                                                                    :rules="preselectRules"
+                                                                    counter="64"
+                                                                />
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-container>
+                                                </v-form>
+                                            </v-card-text>
+                                            <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn
+                                                color="primary"
+                                                text
+                                                @click="closePreselect"
+                                            >
+                                                Cancel
+                                            </v-btn>
+                                            <v-btn
+                                                color="primary"
+                                                text
+                                                :disabled ="!validpreselectform"
+                                                @click="savePreselect"
+                                            >
+                                                Save
+                                            </v-btn>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </v-dialog>
+                                    <v-btn class="ma-1" color="primary" dense dark @click.native="preselectdialog=false">CLOSE</v-btn>
+                                </v-toolbar>
+                                </template>
+                                <template v-slot:[`item.code`]="{ item }">
+                                    {{ item.code}}
+                                </template>
+                                <template v-slot:[`item.preselect`]="{ item }">
+                                    {{ item.preselect}}
+                                </template>
+                                <template v-slot:[`item.fecumod`]="{ item }">
+                                    {{ item.fecumod.substr(0,10) }}
+                                </template>
+                                <template v-slot:[`item.actions`]="{ item }">
+                                <v-icon
+                                    class="mr-2"
+                                    @click="appendPreselect(item)"
+                                >
+                                    mdi-plus-circle
+                                </v-icon>
+                                </template>
+                            </v-data-table>
+
                         </v-dialog>
                         <v-dialog v-model="adModal" max-width="390">
                             <v-card>
@@ -406,7 +511,7 @@
                                 </v-card-text>
                                 <v-card-actions>
                                     <v-spacer/>
-                                    <v-btn small @click="recordInfo=false">Close
+                                    <v-btn small @click="recordInfo=false">CLOSE
                                     <v-icon>mdi-cancel</v-icon>
                                     </v-btn>
                                 </v-card-actions>
@@ -435,7 +540,7 @@
                                                 clearable 
                                                 >
                                             </v-text-field>
-                                            <v-btn color="primary" dense dark class="ma-2" @click.native="skilldialog=false">Close</v-btn>
+                                            <v-btn color="primary" dense dark class="ma-2" @click.native="skilldialog=false">CLOSE</v-btn>
                                         </v-card-actions>
                                     </v-card>
                                 </template>
@@ -527,7 +632,7 @@
                                                 </v-card-actions>
                                             </v-card>
                                         </v-dialog>
-                                        <v-btn class="ma-1" color="primary" dense dark @click.native="portfoliodialog=false">Close</v-btn>
+                                        <v-btn class="ma-1" color="primary" dense dark @click.native="portfoliodialog=false">CLOSE</v-btn>
                                         <v-dialog v-model="dialogDeletePortfolio" max-width="520px">
                                         <v-card>
                                             <v-card-title class="text-h5">Are you sure you want to delete this item?
@@ -649,7 +754,7 @@
                                                 </v-card-actions>
                                             </v-card>
                                         </v-dialog>
-                                        <v-btn class="ma-1" color="primary" dense dark @click.native="contactdialog=false">Close</v-btn>
+                                        <v-btn class="ma-1" color="primary" dense dark @click.native="contactdialog=false">CLOSE</v-btn>
                                         <v-dialog v-model="dialogDeleteContact" max-width="520px">
                                         <v-card>
                                             <v-card-title class="text-h5">Are you sure you want to delete this item?
@@ -772,7 +877,7 @@
                                             </v-card-actions>
                                         </v-card>
                                     </v-dialog>
-                                    <v-btn class="ma-1" color="primary" dense dark @click.native="notedialog=false">Close</v-btn>
+                                    <v-btn class="ma-1" color="primary" dense dark @click.native="notedialog=false">CLOSE</v-btn>
                                     <v-dialog v-model="dialogDeleteNote" max-width="520px">
                                     <v-card>
                                         <v-card-title class="text-h5">Are you sure you want to delete this note?
@@ -824,7 +929,7 @@
                                 <v-toolbar
                                     flat
                                 >
-                                    <v-toolbar-title>Schedule of {{ scheduleheader }}</v-toolbar-title>
+                                    <v-toolbar-title>Commitments of {{ scheduleheader }}</v-toolbar-title>
                                     <v-divider
                                     class="mx-4"
                                     inset
@@ -941,7 +1046,7 @@
                                             </v-card-actions>
                                         </v-card>
                                     </v-dialog>
-                                    <v-btn class="ma-1" color="primary" dense dark @click.native="scheduledialog=false">Close</v-btn>
+                                    <v-btn class="ma-1" color="primary" dense dark @click.native="scheduledialog=false">CLOSE</v-btn>
                                     <v-dialog v-model="dialogDeleteSchedule" max-width="570px">
                                     <v-card>
                                         <v-card-title class="text-h5">Are you sure you want to delete this schedule?
@@ -1187,15 +1292,14 @@
                         </v-tooltip>
                     </td>
                     <td>
-                        <a v-if="item._contacts && item._contacts.split(' ').length">
-                            <a v-for="(elem, i) in item._contacts.split(' ')"
+                        <span v-if="item._contacts && item._contacts.split(',').length">
+                            <span v-for="(elem, i) in item._contacts.split(',')"
                             :key="i"
-                            @click="openTab(elem)"
                             >
-                                {{ elem }}
-                            </a>
-                        </a>
-                        <p v-else>No contact info found</p>
+                                {{ elem }} <br/>
+                            </span>
+                        </span>
+                        <span v-else>No contact info found</span>
                     </td>
                 </template>
                 <template v-slot:[`item._schedules`]="{ item }">
@@ -1223,12 +1327,16 @@
                             min-width="auto"
                         >
                             <template v-slot:activator="{ on, attrs }">
-                                <p
+                                <span
                                     v-bind="attrs"
                                     v-on="on"
                                 >
-                                    {{item._schedules}}
-                                </p>
+                                    <span v-for="(elem, i) in item._schedules.split(',')"
+                                    :key="i"
+                                    >
+                                        {{ elem }} <br/>
+                                    </span>
+                                </span>
                             </template>
                             <v-date-picker
                             v-model="item.busydates"
@@ -1336,7 +1444,7 @@
                     <td>
                         <div v-if="item.imgartist">
                             <v-avatar size=40>
-                                <v-img :src="item.imgartist" aspect-ratio="2" contain></v-img>
+                                <v-img :src="`/files/${item.imgartist}`" aspect-ratio="2" contain></v-img>
                             </v-avatar>
                         </div>
                         <div v-else>
@@ -1366,6 +1474,7 @@
 
   export default {
       data: () => ({
+        monthNames: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
         json_fields: {},
         json_data: [],
         json_meta: [
@@ -1375,7 +1484,8 @@
                     'value': 'utf-8'
                 }
             ]
-        ],                    
+        ],
+        validpreselectform: false,
         validForm: false,
         validportfolioform: false,
         validcontactform: false,
@@ -1408,16 +1518,14 @@
             v => !!v || 'Contact info is required',
             v => ( !!v.length == 0 || v.length <= 128) || 'Exceeds 128 characters',
         ],
-        ratingRules: [
-            v => (v && v.length > 0 && v.length <= 1) || 'Exceeds 1 digit',
-            v => (v && v > 0 && v < 6) || 'Valid range 1 to 5',
+        codeRules: [
+            v => !!v || 'Code is required',
+            v => (v && v.length > 0 && v.length <= 4) || 'Exceed 4 digit',
+            v => (v && v > 0 && v < 9999) || 'Exceed valid range',
         ],
-        checkinRules: [
-            v => !!v || 'Checkin text is required',
-            v => ( !!v.length == 0 || v.length <= 32) || 'Exceeds 32 characters',
-        ],
-        detailRules: [
-            v => ( !!v.length == 0 || v.length <= 256) || 'Exceeds 32 characters',
+        preselectRules: [
+            v => !!v || 'Preselect is required',
+            v => ( !!v.length == 0 || v.length <= 64) || 'Exceeds 64 characters',
         ],
         colores: [
             {value: '#F44336', text: 'Rojo'},
@@ -1449,6 +1557,7 @@
         dependentWindow: '',
         searcha: '',
         searchs: '',
+        searchp: '',
         snackbar: false,
         snackcolor: '',
         snacktext: '',
@@ -1477,6 +1586,7 @@
         notes: [],
         _notes: '',
         noteartists: [],
+        preselects: [],
         selections: [],
         selectedartists: [],
         usuarios: [],
@@ -1484,7 +1594,7 @@
         fullname: '',
         mainroleid: '',
         dailyrate: '',
-        rating: '',
+        rating: 0,
         imgartist: '',
         proveeodrid: '',
         iduseralta:'',
@@ -1492,7 +1602,12 @@
         iduserumod:'',
         fecumod:'',
         activo:false,
+        file: '',
+        guid: '',
         imageUrl:'',
+        imageFile:'',
+        imageName: '',
+        imageExt: '',
         editedIndex: -1,
         dialog: false,
         workedartistid: '',
@@ -1500,9 +1615,10 @@
         roleheader: '',
         skilldialog: false,
         skillheader: '',
-        checkin: '',
-        checkindialog: false,
-        detail: '',
+        code: '',
+        preselect: '',
+        preselectdialog: false,
+        preselectCRUDdialog: false,
         portfoliodialog: false,
         portfolioCRUDdialog: false,
         dialogDeletePortfolio: false,
@@ -1557,12 +1673,12 @@
                 { text: 'Skills', value: '_skillartisttxs', align: 'start', sortable: true, width: 250, filter: this.skillFilter },
                 { text: 'Portfolio', value: '_portfolios', align: 'start', sortable: true },
                 { text: 'Notes', value: '_notes', align: 'start', sortable: true, width: 350 },
-                { text: 'Commitments', value: '_schedules', align: 'start', sortable: true, width: 300 },
+                { text: 'Availability', value: '_schedules', align: 'start', sortable: true, width: 300 },
                 // { text: 'Events', value: 'events', align: 'start', sortable: true, width: 300 },
-                { text: 'Availabitilty', value: 'availability', align: 'start', sortable: true },
+                { text: '%', value: 'availability', align: 'start', sortable: true },
                 { text: 'Daily rate', value: 'dailyrate', align: 'start', sortable: true, width: 250 },
                 { text: 'Rating', value: 'rating', align: 'center', sortable: true },
-                { text: 'Contact info', value: '_contacts', align: 'start', sortable: true, width: 200 },
+                { text: 'Contact info', value: '_contacts', align: 'start', sortable: true, width: 250 },
                 { text: 'Status', value: 'activo', align: 'start', sortable: true  },
                 { text: '[Options]', value: 'actions', align: 'center', sortable: false, width: 200 },
             ]
@@ -1600,6 +1716,14 @@
                 { text: '[Options]', value: 'actions', align: 'center', sortable: false, width: 100 },
             ]
         },
+        headerspreselects(){
+            return [
+                { text: 'Code', value: 'code', align: 'start', sortable: true },
+                { text: 'Description', value: 'preselect', align: 'start', sortable: true },
+                { text: 'Updated', value: 'fecumod', align: 'start', sortable: true },
+                { text: '[Options]', value: 'actions', align: 'center', sortable: false, width: 100 },
+            ]
+        },
         formTitle () {
             return this.editedIndex === -1 ? 'New Artist' : 'Update Artist'
         },
@@ -1623,7 +1747,7 @@
         },
     },
 
-    async mounted () {
+    async created () {
         this.artists = []
         await this.select()
         await this.listar()
@@ -1716,6 +1840,9 @@
                     me.snacktext = 'An error was detected. Code: '+ error.response.status;
                     me.snackcolor = "error";
                     me.snackbar = true;
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             } else {
             this.snacktext = 'Dormant'
@@ -1732,48 +1859,20 @@
         },
         close () {
         },
-        pickFile () {
-            this.$refs.image.click ()
-        },
-        onFilePicked (e) {
-            const files = e.target.files
-            if (files[0] !== undefined) {
-                this.imageName = files[0].name
-                if (this.imageName.lastIndexOf('.') <= 0) {
-                return
-                }
-                const fr = new FileReader ()
-                fr.readAsDataURL(files[0])
-                fr.addEventListener('load', () => {
-                    this.imageUrl = fr.result
-                    this.imageFile = files[0] // this is an image file that can be sent to server...
-                    this.imgartist = this.imageUrl;
-                })
-            } else {
-                this.imageName = ''
-                this.imageFile = ''
-                this.imageUrl = ''
-            }
-        },
         clearImagen(){
             this.imageUrl = ''
             this.imgartist = ''
         },
         crearXLS(){
             this.json_fields = {
-                'Full Name': 'fullname',
                 'Occupation': 'mainrole',
+                'Full Name': 'fullname',
                 'Skills': '_skillartisttxs',
                 'Portfolio': '_portfolios',
                 'Notes' : '_notes',
-                'Commitments' : '_schedules',
-                'Availability' : 'availability',
-                'Daily rate': 'dailyrate',
-                'Rating': 'rating',
+                'Availability' : '_schedules',
+                '%' : 'availability',
                 'Contact info': '_contacts',
-                'Last update': {field: 'fecumod',
-                    callback: (value) => {return value.substr(0,10) + ' ' + value.substr(11,5)}
-                },
                 //'Active': 'activo',
             },
             this.json_data = this.selected.length===0?(this.$refs.maintable.$children[0].filteredItems.filter(e => e.activo === true )):(this.selected.filter(e => e.activo === true ));
@@ -1816,23 +1915,17 @@
             axios.get('api/Artists/Listar',configuracion).then(function(response){
                 //console.log(response);
                 me.artists=response.data
-                me.$nextTick(() => {
+                setTimeout(() => {
                     me.fillSnowflake(me.artists)
-                })                
-                me.$nextTick(() => {
-                    let trick = me.artists[0]
-                    me.artists.splice( 0, 1, trick)
-                })                
-                // setTimeout(() => {
-                //     me.fillSnowflake(me.artists)
-                //     let trick = me.artists[0]
-                //     me.artists.splice( 0, 1, trick)
-                // }, 1000)
+                },300)
             }).catch(function(error){
                 me.snacktext = 'An error was detected. Code: '+ error.response.status;
                 me.snackcolor = "error";
                 me.snackbar = true;
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
         fillSnowflake(items){
@@ -1841,19 +1934,6 @@
             // eslint-disable-next-line
             //debugger
             for ( var i = 0; i < items.length ; i++) {
-                //busca Skills
-                filtered = me.skillartists.filter( function(e) {
-                    return e.artistid === items[i].id
-                })
-                for (var ms = 0 ; ms < filtered.length; ms++ ){
-                    los += filtered[ms].skillid.toString()+', '
-                    index = me.skills.findIndex(x => x.value === filtered[ms].skillid)
-                    sos += me.skills[index].text+', '
-                }
-                items[i]._skillartistids= los.substring(0, los.length - 2)
-                items[i]._skillartisttxs= sos.substring(0, sos.length - 2)
-                los = ''
-                sos = ''
                 //busca Notas
                 filtered = me.notes.filter( function(e) {
                     return e.artistid === items[i].id
@@ -1863,15 +1943,6 @@
                 }
                 items[i]._notes = nots.length>512?nots.substr(0,512):nots.substring(0, nots.length - 2)
                 nots = ''
-                //busca Portfolios
-                filtered = me.portfolios.filter( function(e) {
-                    return e.artistid === items[i].id
-                })
-                for (var po = 0 ; po < filtered.length; po++ ){
-                    pors += filtered[po].text+' '
-                }
-                items[i]._portfolios = pors.length>128?pors.substr(0,128):pors.substring(0, pors.length - 1)
-                pors = ''
                 //busca Contacts
                 filtered = me.contacts.filter( function(e) {
                     return e.artistid === items[i].id
@@ -1900,6 +1971,33 @@
                     items[i].availability = ''
                 }
                 busy = []
+                //busca Portfolios
+                filtered = me.portfolios.filter( function(e) {
+                    return e.artistid === items[i].id
+                })
+                for (var po = 0 ; po < filtered.length; po++ ){
+                    pors += filtered[po].text+' '
+                }
+                items[i]._portfolios = pors.length>128?pors.substr(0,128):pors.substring(0, pors.length - 1)
+                pors = ''
+                //busca Skills
+                filtered = me.skillartists.filter( function(e) {
+                    return e.artistid === items[i].id
+                })
+                //console.log(filtered)
+                for (var ms = 0 ; ms < filtered.length; ms++ ){
+                    los += filtered[ms].skillid.toString()+', '
+                    index = me.skills.findIndex(x => x.value === filtered[ms].skillid)
+                    sos += me.skills[index].text+', '
+                }
+                items[i]._skillartistids= los.substring(0, los.length - 2)
+                items[i]._skillartisttxs= sos.substring(0, sos.length - 2)
+                los = ''
+                sos = ''
+            }
+            if (me.artists.length){
+                let trick = me.artists[0]
+                me.artists.splice( 0, 1, trick)
             }
         },
         fillAvailability(daterange){
@@ -1938,6 +2036,7 @@
             let portfoliosArray = []
             let contactsArray = []
             let schedulesArray = []
+            let preselectsArray = []
             let header={"Authorization" : "Bearer " + me.$store.state.token};
             let configuracion= {headers : header};
             axios.get('api/Usuarios/Listar',configuracion).then(function(response){
@@ -1984,8 +2083,7 @@
             axios.get('api/Skillartists/Listar',configuracion).then(function(response){
                 skillartistsArray=response.data;
                 skillartistsArray.map(function(x){
-                    me.skillartists.push({value: x.id, skillid: x.skillid, artistid: x.artistid, iduseralta: x.iduseralta,
-                        fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
+                    me.skillartists.push({value: x.id, skillid: x.skillid, artistid: x.artistid });
                 });
             }).catch(function(error){
                 me.snacktext = 'An error was detected. Code: '+ error.response.status;
@@ -2029,6 +2127,18 @@
                 me.snackbar = true;
                 console.log(error);
             });
+            axios.get('api/Preselects/Listar',configuracion).then(function(response){
+                preselectsArray=response.data;
+                preselectsArray.map(function(x){
+                    me.preselects.push({id:x.id, code: x.code, preselect: x.preselect, iduseralta: x.iduseralta,
+                        fecalta: x.fecalta, iduserumod: x.iduserumod, fecumod: x.fecumod, activo: x.activo });
+                });
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = 'error'
+                me.snackbar = true;
+                console.log(error);
+            });
         },
         editItem (item) {
             this.id = item.id;
@@ -2037,7 +2147,8 @@
             this.dailyrate = item.dailyrate;
             this.rating = item.rating;
             this.imgartist = item.imgartist;
-            this.imageUrl = item.imgartist;
+            this.imgoriginal = item.imgartist;
+            this.imageUrl = '';
             this.proveedorid = item.proveedorid;
             this.iduseralta = item.iduseralta;
             this.fecalta = item.fecalta;
@@ -2051,7 +2162,7 @@
         },
         deleteItem (item) {
             var me = this;
-            var resulta = confirm('Esta seguro de querer borrar el registro?');
+            var resulta = confirm('Are you Shure to delete Artist?');
             if (resulta) {
                 let header={"Authorization" : "Bearer " + me.$store.state.token};
                 let configuracion= {headers : header};
@@ -2066,6 +2177,9 @@
                     me.snackcolor = "error";
                     me.snackbar = true;
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             }
         },
@@ -2095,7 +2209,7 @@
                 this.fullname = ""
                 this.mainroleid = ""
                 this.dailyrate = ""
-                this.rating = ""
+                this.rating = 0
                 this.imgusario = ""
                 this.imageUrl = ""
                 this.proveedorid = ""
@@ -2108,9 +2222,14 @@
         },
         guardar () {
             let me = this;
-            let header={"Authorization" : "Bearer " + this.$store.state.token};
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
             let configuracion= {headers : header};
-            if (this.editedIndex > -1) {
+            if (me.editedIndex > -1) {
+                if (me.imgartist && me.imgoriginal != me.imgartist ) {
+                    me.onDelete(me.imgoriginal)
+                    me.imgoriginal = ''
+                    me.onUpload()
+                }
                 //Código para editar
                 //Código para guardar
                 axios.put('api/Artists/Actualizar',{
@@ -2134,9 +2253,13 @@
                     me.snackcolor = "error";
                     me.snackbar = true;
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             } else {
                 //Código para guardar
+                this.onUpload();
                 axios.post('api/Artists/Crear',{
                     'fullname': me.fullname,
                     'mainroleid': me.mainroleid,
@@ -2159,37 +2282,23 @@
                     me.snackcolor = "error";
                     me.snackbar = true;
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             }
         },
-        tratarPreview(){
-            this.checkin = ""
-            this.detail = ""
-            this.checkindialog = !this.checkindialog
-        },
-        guardarCheckin(){
-            let me=this;
-            var idpks = [];
-            idpks = me.selected.map( function (eachobj) {return eachobj.id});
-            let header={"Authorization" : "Bearer " + me.$store.state.token};
-            let configuracion= {headers : header};
-            axios.post('api/Checkinartists/Crearcheckinset',{
-                'checkin': me.checkin,
-                'detail': me.detail,
-                'artistid':idpks,
-                'iduseralta': me.$store.state.usuario.idusuario,
-            },configuracion).then(function(){
-                me.selected = [];
-                me.checkindialog = false;
-                me.snacktext = 'Created';
-                me.snackcolor = "success";
-                me.snackbar = true;
-            }).catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackcolor = "error";
-                me.snackbar = true;
-                console.log(error);
-            });
+        tratarPreselect(){
+            if (this.selected.length > 0) {
+                this.code = ""
+                this.preselect = ""
+                this.preselectdialog = !this.preselectdialog
+            } else {
+                    this.snacktext = 'No selection';
+                    this.snackcolor = "error";
+                    this.snackbar = true;
+            }
+
         },
         tratarSkill(element){
             var me = this;
@@ -2261,6 +2370,9 @@
                     me.snackbar = true;
                     me.snackcolor = 'error'
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             } else {
                 var indice = me.skillartists.find(x => item.value === x.skillid && me.workedartistid === x.artistid).value;
@@ -2277,6 +2389,9 @@
                     me.snackcolor = "error";
                     me.snackbar = true;
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             }
         },
@@ -2317,6 +2432,9 @@
                 me.snackcolor = "error";
                 me.snackbar = true;
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
         savePortfolio(){
@@ -2348,6 +2466,9 @@
                     me.snackcolor = "error";
                     me.snackbar = true;
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             } else {
                 //Código para guardar
@@ -2370,6 +2491,9 @@
                     me.snackcolor = "error";
                     me.snackbar = true;
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             }
         },
@@ -2410,6 +2534,9 @@
                 me.snackcolor = "error";
                 me.snackbar = true;
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
         saveContact(){
@@ -2441,6 +2568,9 @@
                     me.snackcolor = "error";
                     me.snackbar = true;
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             } else {
                 //Código para guardar
@@ -2463,6 +2593,9 @@
                     me.snackcolor = "error";
                     me.snackbar = true;
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             }
         },
@@ -2477,6 +2610,66 @@
         },
         closeTab: function () {
             this.dependentWindow.close()
+        },
+        closePreselect(){
+            this.code = ''
+            this.preselect = ''
+            this.preselectCRUDdialog = false
+        },
+        savePreselect(){
+            let me=this;
+            var idpks = [];
+            idpks = me.selected.map( function (eachobj) {return eachobj.id});
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
+            let configuracion= {headers : header};
+            axios.post('api/Preselectartists/Crearpreselectset',{
+                'code': me.code,
+                'preselect': me.preselect,
+                'artistid':idpks,
+                'iduseralta': me.$store.state.usuario.idusuario,
+            },configuracion).then(function(){
+                me.select()
+                me.fillSnowflake(me.artists)
+                me.selected = [];
+                me.preselectdialog = false;
+                me.snacktext = 'Created';
+                me.snackcolor = "success";
+                me.snackbar = true;
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = "error";
+                me.snackbar = true;
+                console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
+            });
+        },
+        appendPreselect(element){
+            let me=this;
+            var idpks = [];
+            idpks = me.selected.map( function (eachobj) {return eachobj.id});
+            let header={"Authorization" : "Bearer " + me.$store.state.token};
+            let configuracion= {headers : header};
+            axios.put('api/Preselectartists/Actualizarpreselectset',{
+                'preselectid': element.id,
+                'artistid':idpks,
+                'iduseralta': me.$store.state.usuario.idusuario,
+            },configuracion).then(function(){
+                me.selected = [];
+                me.preselectdialog = false;
+                me.snacktext = 'Appended';
+                me.snackcolor = "success";
+                me.snackbar = true;
+            }).catch(function(error){
+                me.snacktext = 'An error was detected. Code: '+ error.response.status;
+                me.snackcolor = "error";
+                me.snackbar = true;
+                console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
+            });
         },
         editNote(element){
             this.editedIndex = this.notes.indexOf(element)
@@ -2515,6 +2708,9 @@
                 me.snackcolor = "error";
                 me.snackbar = true;
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
         saveNote(){
@@ -2546,6 +2742,9 @@
                     me.snackcolor = "error";
                     me.snackbar = true;
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             } else {
                 //Código para guardar
@@ -2568,6 +2767,9 @@
                     me.snackcolor = "error";
                     me.snackbar = true;
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             }
         },
@@ -2622,6 +2824,9 @@
                 me.snackcolor = "error";
                 me.snackbar = true;
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
         saveSchedule(){
@@ -2657,6 +2862,9 @@
                     me.snackcolor = "error";
                     me.snackbar = true;
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             } else {
                 //Código para guardar
@@ -2682,6 +2890,9 @@
                     me.snackcolor = "error";
                     me.snackbar = true;
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             }
         },
@@ -2720,6 +2931,9 @@
                 me.snackcolor = "error";
                 me.snackbar = true;
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
         desactivar(){
@@ -2741,8 +2955,71 @@
                 me.snackcolor = "error";
                 me.snackbar = true;
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
+        onFileSelected (e) {
+            const files = e.target.files
+            if (files[0] !== undefined) {
+                this.imageName = files[0].name
+                this.imageExt = files[0].name.slice((files[0].name.lastIndexOf(".") - 1 >>> 0) + 2)
+                this.file = files[0]
+                if (this.imageName.lastIndexOf('.') <= 0) {
+                return
+                }
+                const fr = new FileReader ()
+                fr.readAsDataURL(files[0])
+                fr.addEventListener('load', () => {
+                    this.imageUrl = fr.result
+                    this.imageFile = files[0] // this is an image file that can be sent to server...
+                    let u = Date.now().toString(16) + Math.random().toString(16) + '0'.repeat(16);
+                    this.guid = [u.substr(0,8), u.substr(8,4), u.substr(13,3), u.substr(16,12)].join('') + "." + this.imageExt;
+                    this.imgartist = this.guid;
+                })
+            } else {
+                this.imageName = ''
+                this.imageExt = ''
+                this.imageFile = ''
+                this.imageUrl = ''
+                this.file = ''
+            }
+        },
+
+        async onUpload(){
+            const fd = new FormData();
+            fd.append("image", this.file, this.imgartist)
+            let configuracion= {headers : {"Authorization" : "Bearer " + this.$store.state.token,  'Content-Type': 'image/jpeg'} };
+            await axios.post('api/Express/UploadFiles',fd,configuracion)
+                .then(res => {
+                this.file = ''
+                console.log(res.data);
+            }).catch(error => {
+                this.dialog = false;
+                this.guid = '';
+                this.imgartist = '';
+                this.snacktext = 'Se detectó un error. Código: '+ error.response.status;
+                this.snackbar = true;
+                console.log(error);
+                if ( error.response.status == 401 ){
+                    this.salir();
+                }
+            });
+        },
+        onDelete(file){
+            let header={"Authorization" : "Bearer " + this.$store.state.token};
+            let configuracion= {headers : header};        
+            axios.delete('api/Express/DeleteFile/'+file,configuracion)
+            .then(res => {
+                console.log(res.data);
+            }).catch(error => {
+                console.log(error);
+                if ( error.response.status == 401 ){
+                    this.salir();
+            }
+            });
+        }                
     },
   }
 </script>

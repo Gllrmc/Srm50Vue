@@ -497,6 +497,9 @@
                 me.snackcolor = "error";
                 me.snackbar = true;
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
         select(){
@@ -514,6 +517,9 @@
                 me.snackcolor = "error";
                 me.snackbar = true;
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
         editItem (item) {
@@ -559,6 +565,9 @@
                     me.snackcolor = "error";
                     me.snackbar = true;
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             }
         },
@@ -652,6 +661,9 @@
                     me.snackcolor = "error";
                     me.snackbar = true;
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             } else {
                 //Código para guardar
@@ -685,6 +697,9 @@
                     me.snackcolor = "error";
                     me.snackbar = true;
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             }
         },
@@ -704,6 +719,9 @@
                 me.snackcolor = 'error'
                 me.snackbar = true;
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
         validar(){
@@ -774,6 +792,9 @@
                 me.snackcolor = "error";
                 me.snackbar = true;
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
         desactivar(){
@@ -795,6 +816,9 @@
                 me.snackcolor = "error";
                 me.snackbar = true;
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
     },

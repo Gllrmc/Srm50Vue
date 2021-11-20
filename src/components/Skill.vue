@@ -78,7 +78,7 @@
                                                     dense 
                                                     v-model="ismainrole"
                                                     class="mx-2"
-                                                    label="Main Role?"
+                                                    label="Occupation?"
                                                 />
                                             </v-col>
                                         </v-row>
@@ -295,7 +295,7 @@
         proydialog: false,
         headersskills: [
             { text: 'Skill Name', value: 'skill', align: 'start', sortable: true },
-            { text: 'Main Role?', value: 'ismainrole', align: 'start', sortable: true },
+            { text: 'Occupation?', value: 'ismainrole', align: 'start', sortable: true },
             { text: 'Status', value: 'activo', align: 'start', sortable: true  },
             { text: '[Options]', value: 'actions', align: 'center', sortable: false },
             //{ text: 'Creador Id', value: 'iduseralta', align: 'center', sortable: true },
@@ -427,6 +427,9 @@
                 me.snackbar = true;
                 me.snackcolor = 'error'
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
         select(){
@@ -481,6 +484,9 @@
                     me.snackbar = true;
                     me.snackcolor = 'error'
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             }
         },
@@ -504,36 +510,6 @@
             this.limpiar();
         },
         accionProyecto(){
-        },
-        editProyecto(item){
-            var me=this;
-            let index=0;
-            index = me.proyectogrupos.findIndex(elemento => elemento.value === item.relid );
-            let header={"Authorization" : "Bearer " + this.$store.state.token};
-            let configuracion= {headers : header};
-
-            axios.put('api/Proyectogrupos/Actualizar',{
-                'Id':item.relid,
-                'grupoid':this.workuserId,
-                'proyectoid':item.value,
-                'tarifaproyectogrupo':item.tarifaproyectogrupo,
-                'costoproyectogrupo':item.costoproyectogrupo,
-                'notas':item.notas,
-                'iduseralta': me.$store.state.usuario.idusuario                      
-            },configuracion).then( () => {
-                me.proyectogrupos[index].tarifaproyectogrupo = (Number(item.tarifaproyectogrupo)).toFixed(2);
-                me.proyectogrupos[index].costoproyectogrupo = Number(item.costoproyectogrupo);
-                me.proyectogrupos[index].notas          = item.notas;
-                //me.proyectos[me.proyectos.findIndex(elemento => elemento.value === me.proyectogrupos[index].proyectoid )].estimadotarifa = me.proyectotareas[index].estimadotarifa;
-                me.snacktext = 'Updated';
-                me.snackcolor = "success";
-                me.snackbar = true;
-            }).catch(function(error){
-                me.snacktext = 'An error was detected. Code: '+ error.response.status;
-                me.snackbar = true;
-                me.snackcolor = 'error'
-                console.log(error);
-            });
         },
         limpiar(){
                 this.id="";
@@ -572,6 +548,9 @@
                     me.snackbar = true;
                     me.snackcolor = 'error'
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             } else {
                 //Código para guardar
@@ -594,6 +573,9 @@
                     me.snackbar = true;
                     me.snackcolor = 'error'
                     console.log(error);
+                    if ( error.response.status == 401 ){
+                        me.salir();
+                    }
                 });
             }
         },
@@ -632,6 +614,9 @@
                 me.snackcolor = 'error'
                 me.snackbar = true;
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
         desactivar(){
@@ -652,6 +637,9 @@
                 me.snackcolor = 'error'
                 me.snackbar = true;
                 console.log(error);
+                if ( error.response.status == 401 ){
+                    me.salir();
+                }
             });
         },
     },
